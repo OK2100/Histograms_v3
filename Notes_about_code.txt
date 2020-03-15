@@ -1,0 +1,50 @@
+
+	HOW IT WORKS
+
+							[	Setup channel window	]
+	
+	It is created inside ChannelHistWidget's constructor.
+	It has such inner values as "nBins_charge", "binWidth_time", etc.. 
+	as QString.
+
+	When "Setup channel XX" button is clicked ChannelHistWidget	sets all
+	setupWindow's inner values in accordance with current values of 
+	corresponding variables.
+	
+	When some values are changed and "Apply" or "Ok" buttons are clicked
+	SetupWindow sends a signal to its ChannelHistWidget. Slots inside 
+	ChannelHistWidget handle and apply new settings.
+
+
+									[	HistData	]
+	
+	Borders of the histogram are constant, them couldn't be changed after creating 
+	histo. They are setted in constructor of HistData class.
+
+
+										Сделать:
+
+	Сделать чтобы после обновления экрана сохранялся текущий диапазон
+	В окне настроек сделать отображение всего диапазона и отображаемого,
+	последний брать с канваса.
+
+	Сделать стек из добавленных каналов
+
+	Сделать соответствие отображений осей гистограм и графика
+
+	Возможно считать среднее и дисперсию нужно онлайн
+	
+	Отображение среднего и дисперсии на гистограмме
+	
+	Возможно сделать выбор диапазона двойным щелчком мыши по оси (если получится)
+
+	Добавить статус строку
+
+	
+
+
+								Какие нужны настройки:
+	
+	1) Диапазон данных по x (в GUI не будет возможности менять его, только в настройках)
+	2) ADC ID
+	3) Ширина бина ?

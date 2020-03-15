@@ -1,0 +1,26 @@
+
+	You just need to do a few steps
+
+	1)	Include in your project qcustomplot.h and qcustomplot.cpp
+		from the oficial pack
+
+	2)	#include "qcustomplot.h" where you need it
+
+	3)	Add "printsupport" module in .pro file: 
+		"QT += widgets"	-----> "QT += widgets printsupport"
+
+	4)	- Add to .ui form an empty widget 
+		- Click right mouse button on it
+		- Select "promote to...`" and fill "Promoted class name" field 
+		  by "QCustomPlot" 
+
+	After compiling you should see an area with grid and axes on your window.
+
+
+
+	Terminology:
+
+	Key and Value are independent and dependent variables on the plot
+
+
+

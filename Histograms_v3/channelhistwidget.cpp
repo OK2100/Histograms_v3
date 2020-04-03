@@ -52,6 +52,9 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
     connect(chargeHist,&QCustomPlot::afterReplot,this,&ChannelHistWidget::replot_chargeTimeHist);
     connect(timeHist,&QCustomPlot::afterReplot,this,&ChannelHistWidget::replot_chargeTimeHist);
 
+    connect(ui->rb_0,&QRadioButton::clicked,this,&ChannelHistWidget::ADC0_choosed);
+    connect(ui->rb_1,&QRadioButton::clicked,this,&ChannelHistWidget::ADC1_choosed);
+    connect(ui->rb_01,&QRadioButton::clicked,this,&ChannelHistWidget::ADC01_choosed);
 }
 
 ChannelHistWidget::~ChannelHistWidget()
@@ -179,9 +182,8 @@ void ChannelHistWidget::LoadSettings(QString file_ini)
 
 }
 
-void ChannelHistWidget::AddEvent(qint16 charge,quint8 ADCnum, qint16 time)
+void ChannelHistWidget::AddEvent(qint16 charge, qint16 time)
 {
-    if(ADCnum)
     quint16 ich = chargeData->addEvent(charge);
     quint16 it = timeData->addEvent(time);
     if(ich<chargeData->getnBins()) chargeValue[ich]++;
@@ -191,7 +193,7 @@ void ChannelHistWidget::AddEvent(qint16 charge,quint8 ADCnum, qint16 time)
 void ChannelHistWidget::Update()
 {
     ClearScreen();
-    InitKeysAndValues();
+//    InitKeysAndValues();
     PlotHistograms();
 }
 
@@ -215,13 +217,13 @@ void ChannelHistWidget::PlotHistograms()
         chargeBars->setData(chargeKey,chargeValue);
         chargeHist->yAxis->rescale();
         chargeBars->setWidth(chargeData->getbinWidth());
-        chargeHist->xAxis->setRange(chargeData->getLeftLimit(),chargeData->getRightLimit());
+//        chargeHist->xAxis->setRange(chargeData->getLeftLimit(),chargeData->getRightLimit());
 
 //----------------------- TIME --------------------------
         timeBars->setData(timeKey,timeValue);
         timeHist->yAxis->rescale();
         timeBars->setWidth(timeData->getbinWidth());
-        timeHist->xAxis->setRange(timeData->getLeftLimit(),timeData->getRightLimit());
+//        timeHist->xAxis->setRange(timeData->getLeftLimit(),timeData->getRightLimit());
 
 //-------------------- CHARGE-TIME ----------------------
     chargeTimeHist->addGraph();
@@ -232,30 +234,11 @@ void ChannelHistWidget::PlotHistograms()
 
     chargeTimeHist->rescaleAxes();
 
-
-//    QCPColorMap *colorMap = new QCPColorMap(chargeTimeHist->xAxis, chargeTimeHist->yAxis);
-
-
-//    colorMap->data()->setSize(4196,4096);
-//    colorMap->data()->setRange(QCPRange(-100, 4095), QCPRange(-2048, 2047));
-//    colorMap->data()->fill(0);
-//    for(int i=0;i<chargeData->getTotalEvents();i++){
-
-//        colorMap->data()->setData(chargeData->inputs[i],timeData->inputs[i],
-//                                  colorMap->data()->data(chargeData->inputs[i],timeData->inputs[i])+1);
-//    }
-////    for (int x=0; x<4196; ++x)
-////      for (int y=0; y<4096; ++y)
-////        colorMap->data()->setCell(x, y, qCos(x/10.0)+qSin(y/10.0));
-//    colorMap->setGradient(QCPColorGradient::gpPolar);
-//    colorMap->rescaleDataRange(true);
-//    chargeTimeHist->rescaleAxes();
-//    chargeTimeHist->replot();
 //=======================================================
 
-    if(!chargeData->inputs.isEmpty()&&!timeData->inputs.isEmpty()) {
-        if(doHideZeroBars) HideZeroBars();
-    }
+//    if(!chargeData->inputs.isEmpty()&&!timeData->inputs.isEmpty()) {
+//        if(doHideZeroBars) HideZeroBars();
+//    }
 
     chargeHist->replot();
     timeHist->replot();
@@ -293,11 +276,16 @@ void ChannelHistWidget::channelIDButton_clicked()
 {
 //    qDebug()<<"Clicked";
     if(setupWindow->isHidden()){
+        setupWindow->set_charge_hist_range(QString::number(chargeHist->xAxis->range().lower),
+                                           QString::number(chargeHist->xAxis->range().upper));
+        setupWindow->set_time_hist_range(QString::number(timeHist->xAxis->range().lower),
+                                           QString::number(timeHist->xAxis->range().upper));
         setupWindow->set_chID(chID);
         setupWindow->set_binWidth_charge(QString::number(chargeData->getbinWidth()));
         setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
         setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
         setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
+
         setupWindow->show();
     }
     else {
@@ -324,6 +312,7 @@ void ChannelHistWidget::HideZeroBars()
         rightBorder-=binWidth;
     }
     chargeHist->xAxis->setRange(leftBorder,rightBorder);
+    chargeHist->replot();
 
     i=0;
     leftBorder = timeData->getLeftLimit();
@@ -341,7 +330,18 @@ void ChannelHistWidget::HideZeroBars()
         rightBorder-=binWidth;
     }
     timeHist->xAxis->setRange(leftBorder,rightBorder);
+    timeHist->replot();
+
+    doHideZeroBars = 1;
 }
+
+void ChannelHistWidget::ShowFullRange(){
+    chargeHist->xAxis->setRange(chargeData->getLeftLimit(),chargeData->getRightLimit());
+    chargeHist->replot();
+    timeHist->xAxis->setRange(timeData->getLeftLimit(),timeData->getRightLimit());
+    timeHist->replot();
+}
+
 
 void ChannelHistWidget::binWidth_charge_was_changed(const QString& _binWidth)
 {

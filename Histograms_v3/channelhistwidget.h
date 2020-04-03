@@ -23,17 +23,21 @@ class ChannelHistWidget : public QWidget
     Q_OBJECT
 
 public:
+
     explicit ChannelHistWidget(QWidget *parent = nullptr,QString _chID = "");
     ~ChannelHistWidget();
 
+    quint8 ADC_ID = 2;              // 0 -> ADC0; 1->ADC1; 2->ADC0+ADC1
     bool doHideZeroBars=0;          // Flag
     void PlotHistograms();
     void Clear();
     void ClearScreen();
     void Update();
-    void AddEvent(qint16 charge, quint8 ADCnum, qint16 time);
+    void AddEvent(qint16 charge, qint16 time);
     void PrintInfo(bool onlyStat = false);
     QString GetStatInfo();
+    void HideZeroBars();
+    void ShowFullRange();
 
 private slots:
     void channelIDButton_clicked();
@@ -46,12 +50,15 @@ private slots:
     void hist_double_clicked( QMouseEvent* event);
     void replot_chargeTimeHist(){ chargeTimeHist->replot(); }
 
+    void ADC0_choosed(){ ADC_ID = 0;}
+    void ADC1_choosed(){ ADC_ID = 1;}
+    void ADC01_choosed(){ADC_ID = 2;}
+
 private:
+
     Ui::ChannelHistWidget *ui;
 
     HistData* chargeData;
-//    HistData* chargeData0;
-//    HistData* chargeData1;
     HistData* timeData;
 
     SetupChannelWindow* setupWindow;
@@ -62,8 +69,6 @@ private:
     QCPBars* chargeBars;
     QVector<double> chargeKey;          // ADC channel -> x axis
     QVector<double> chargeValue;
-//    QVector<double> chargeValue0;       // ADC0 counts -> y axis (depends on radioButton)
-//    QVector<double> chargeValue1;       // ADC1 counts -> y axis (depends on radioButton)
 
     QCustomPlot* timeHist;              // Second hist
     QCPBars* timeBars;
@@ -82,7 +87,6 @@ private:
     void LoadSettings(QString file_ini);
 
 
-    void HideZeroBars();
     void InitKeysAndValues();
 };
 

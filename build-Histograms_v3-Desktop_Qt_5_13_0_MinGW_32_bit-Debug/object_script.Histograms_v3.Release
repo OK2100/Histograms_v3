@@ -1,0 +1,10 @@
+release/qcustomplot.o
+release/channelhistwidget.o
+release/histdata.o
+release/main.o
+release/handlerwindow.o
+release/setupchannelwindow.o
+release/moc_qcustomplot.o
+release/moc_channelhistwidget.o
+release/moc_handlerwindow.o
+release/moc_setupchannelwindow.o

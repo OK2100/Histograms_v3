@@ -36,25 +36,31 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QLabel *label;
     QGridLayout *gridLayout_8;
-    QRadioButton *rb_binW_charge;
-    QRadioButton *rb_nBins_charge;
-    QLabel *label_5;
+    QLineEdit *le_nBins_charge;
     QLineEdit *le_chargeRange_left;
+    QLineEdit *le_full_chargeRange_left;
+    QLabel *label_6;
+    QRadioButton *rb_nBins_charge;
+    QLineEdit *le_full_chargeRange_right;
     QLineEdit *le_chargeRange_right;
     QLineEdit *le_binWidth_charge;
-    QLineEdit *le_nBins_charge;
+    QRadioButton *rb_binW_charge;
+    QLabel *label_5;
     QFrame *frame_3;
     QHBoxLayout *horizontalLayout_6;
     QHBoxLayout *horizontalLayout_3;
     QLabel *label_2;
     QGridLayout *gridLayout_5;
-    QRadioButton *rb_binW_time;
-    QLineEdit *le_binWidth_time;
-    QLabel *label_4;
     QRadioButton *rb_nBins_time;
-    QLineEdit *le_timeRange_left;
     QLineEdit *le_nBins_time;
+    QRadioButton *rb_binW_time;
+    QLabel *label_4;
+    QLineEdit *le_timeRange_left;
     QLineEdit *le_timeRange_right;
+    QLineEdit *le_binWidth_time;
+    QLabel *label_7;
+    QLineEdit *le_full_timeRange_left;
+    QLineEdit *le_full_timeRange_right;
     QFrame *frame;
     QHBoxLayout *horizontalLayout_5;
     QHBoxLayout *horizontalLayout_4;
@@ -115,47 +121,70 @@ public:
 
         gridLayout_8 = new QGridLayout();
         gridLayout_8->setObjectName(QString::fromUtf8("gridLayout_8"));
-        rb_binW_charge = new QRadioButton(frame_2);
-        rb_binW_charge->setObjectName(QString::fromUtf8("rb_binW_charge"));
-        rb_binW_charge->setEnabled(true);
-        rb_binW_charge->setChecked(true);
+        le_nBins_charge = new QLineEdit(frame_2);
+        le_nBins_charge->setObjectName(QString::fromUtf8("le_nBins_charge"));
 
-        gridLayout_8->addWidget(rb_binW_charge, 1, 0, 1, 1);
-
-        rb_nBins_charge = new QRadioButton(frame_2);
-        rb_nBins_charge->setObjectName(QString::fromUtf8("rb_nBins_charge"));
-
-        gridLayout_8->addWidget(rb_nBins_charge, 2, 0, 1, 1);
-
-        label_5 = new QLabel(frame_2);
-        label_5->setObjectName(QString::fromUtf8("label_5"));
-
-        gridLayout_8->addWidget(label_5, 0, 0, 1, 1);
+        gridLayout_8->addWidget(le_nBins_charge, 3, 1, 1, 2);
 
         le_chargeRange_left = new QLineEdit(frame_2);
         le_chargeRange_left->setObjectName(QString::fromUtf8("le_chargeRange_left"));
         le_chargeRange_left->setDragEnabled(true);
-        le_chargeRange_left->setReadOnly(true);
+        le_chargeRange_left->setReadOnly(false);
 
-        gridLayout_8->addWidget(le_chargeRange_left, 0, 1, 1, 1);
+        gridLayout_8->addWidget(le_chargeRange_left, 1, 1, 1, 1);
+
+        le_full_chargeRange_left = new QLineEdit(frame_2);
+        le_full_chargeRange_left->setObjectName(QString::fromUtf8("le_full_chargeRange_left"));
+        le_full_chargeRange_left->setEnabled(false);
+        le_full_chargeRange_left->setDragEnabled(false);
+        le_full_chargeRange_left->setReadOnly(true);
+
+        gridLayout_8->addWidget(le_full_chargeRange_left, 0, 1, 1, 1);
+
+        label_6 = new QLabel(frame_2);
+        label_6->setObjectName(QString::fromUtf8("label_6"));
+
+        gridLayout_8->addWidget(label_6, 0, 0, 1, 1);
+
+        rb_nBins_charge = new QRadioButton(frame_2);
+        rb_nBins_charge->setObjectName(QString::fromUtf8("rb_nBins_charge"));
+
+        gridLayout_8->addWidget(rb_nBins_charge, 3, 0, 1, 1);
+
+        le_full_chargeRange_right = new QLineEdit(frame_2);
+        le_full_chargeRange_right->setObjectName(QString::fromUtf8("le_full_chargeRange_right"));
+        le_full_chargeRange_right->setEnabled(false);
+        le_full_chargeRange_right->setMouseTracking(true);
+        le_full_chargeRange_right->setEchoMode(QLineEdit::Normal);
+        le_full_chargeRange_right->setDragEnabled(false);
+        le_full_chargeRange_right->setReadOnly(true);
+
+        gridLayout_8->addWidget(le_full_chargeRange_right, 0, 2, 1, 1);
 
         le_chargeRange_right = new QLineEdit(frame_2);
         le_chargeRange_right->setObjectName(QString::fromUtf8("le_chargeRange_right"));
         le_chargeRange_right->setMouseTracking(true);
         le_chargeRange_right->setEchoMode(QLineEdit::Normal);
-        le_chargeRange_right->setReadOnly(true);
+        le_chargeRange_right->setReadOnly(false);
 
-        gridLayout_8->addWidget(le_chargeRange_right, 0, 2, 1, 1);
+        gridLayout_8->addWidget(le_chargeRange_right, 1, 2, 1, 1);
 
         le_binWidth_charge = new QLineEdit(frame_2);
         le_binWidth_charge->setObjectName(QString::fromUtf8("le_binWidth_charge"));
 
-        gridLayout_8->addWidget(le_binWidth_charge, 1, 1, 1, 2);
+        gridLayout_8->addWidget(le_binWidth_charge, 2, 1, 1, 2);
 
-        le_nBins_charge = new QLineEdit(frame_2);
-        le_nBins_charge->setObjectName(QString::fromUtf8("le_nBins_charge"));
+        rb_binW_charge = new QRadioButton(frame_2);
+        rb_binW_charge->setObjectName(QString::fromUtf8("rb_binW_charge"));
+        rb_binW_charge->setEnabled(true);
+        rb_binW_charge->setChecked(true);
 
-        gridLayout_8->addWidget(le_nBins_charge, 2, 1, 1, 2);
+        gridLayout_8->addWidget(rb_binW_charge, 2, 0, 1, 1);
+
+        label_5 = new QLabel(frame_2);
+        label_5->setObjectName(QString::fromUtf8("label_5"));
+
+        gridLayout_8->addWidget(label_5, 1, 0, 1, 1);
 
 
         horizontalLayout_2->addLayout(gridLayout_8);
@@ -185,44 +214,64 @@ public:
 
         gridLayout_5 = new QGridLayout();
         gridLayout_5->setObjectName(QString::fromUtf8("gridLayout_5"));
-        rb_binW_time = new QRadioButton(frame_3);
-        rb_binW_time->setObjectName(QString::fromUtf8("rb_binW_time"));
-        rb_binW_time->setChecked(true);
-
-        gridLayout_5->addWidget(rb_binW_time, 1, 0, 1, 1);
-
-        le_binWidth_time = new QLineEdit(frame_3);
-        le_binWidth_time->setObjectName(QString::fromUtf8("le_binWidth_time"));
-
-        gridLayout_5->addWidget(le_binWidth_time, 1, 1, 1, 2);
-
-        label_4 = new QLabel(frame_3);
-        label_4->setObjectName(QString::fromUtf8("label_4"));
-
-        gridLayout_5->addWidget(label_4, 0, 0, 1, 1);
-
         rb_nBins_time = new QRadioButton(frame_3);
         rb_nBins_time->setObjectName(QString::fromUtf8("rb_nBins_time"));
 
-        gridLayout_5->addWidget(rb_nBins_time, 2, 0, 1, 1);
-
-        le_timeRange_left = new QLineEdit(frame_3);
-        le_timeRange_left->setObjectName(QString::fromUtf8("le_timeRange_left"));
-        le_timeRange_left->setReadOnly(true);
-
-        gridLayout_5->addWidget(le_timeRange_left, 0, 1, 1, 1);
+        gridLayout_5->addWidget(rb_nBins_time, 3, 0, 1, 1);
 
         le_nBins_time = new QLineEdit(frame_3);
         le_nBins_time->setObjectName(QString::fromUtf8("le_nBins_time"));
 
-        gridLayout_5->addWidget(le_nBins_time, 2, 1, 1, 2);
+        gridLayout_5->addWidget(le_nBins_time, 3, 1, 1, 2);
+
+        rb_binW_time = new QRadioButton(frame_3);
+        rb_binW_time->setObjectName(QString::fromUtf8("rb_binW_time"));
+        rb_binW_time->setChecked(true);
+
+        gridLayout_5->addWidget(rb_binW_time, 2, 0, 1, 1);
+
+        label_4 = new QLabel(frame_3);
+        label_4->setObjectName(QString::fromUtf8("label_4"));
+
+        gridLayout_5->addWidget(label_4, 1, 0, 1, 1);
+
+        le_timeRange_left = new QLineEdit(frame_3);
+        le_timeRange_left->setObjectName(QString::fromUtf8("le_timeRange_left"));
+        le_timeRange_left->setReadOnly(false);
+
+        gridLayout_5->addWidget(le_timeRange_left, 1, 1, 1, 1);
 
         le_timeRange_right = new QLineEdit(frame_3);
         le_timeRange_right->setObjectName(QString::fromUtf8("le_timeRange_right"));
         le_timeRange_right->setDragEnabled(false);
-        le_timeRange_right->setReadOnly(true);
+        le_timeRange_right->setReadOnly(false);
 
-        gridLayout_5->addWidget(le_timeRange_right, 0, 2, 1, 1);
+        gridLayout_5->addWidget(le_timeRange_right, 1, 2, 1, 1);
+
+        le_binWidth_time = new QLineEdit(frame_3);
+        le_binWidth_time->setObjectName(QString::fromUtf8("le_binWidth_time"));
+
+        gridLayout_5->addWidget(le_binWidth_time, 2, 1, 1, 2);
+
+        label_7 = new QLabel(frame_3);
+        label_7->setObjectName(QString::fromUtf8("label_7"));
+
+        gridLayout_5->addWidget(label_7, 0, 0, 1, 1);
+
+        le_full_timeRange_left = new QLineEdit(frame_3);
+        le_full_timeRange_left->setObjectName(QString::fromUtf8("le_full_timeRange_left"));
+        le_full_timeRange_left->setEnabled(false);
+        le_full_timeRange_left->setReadOnly(true);
+
+        gridLayout_5->addWidget(le_full_timeRange_left, 0, 1, 1, 1);
+
+        le_full_timeRange_right = new QLineEdit(frame_3);
+        le_full_timeRange_right->setObjectName(QString::fromUtf8("le_full_timeRange_right"));
+        le_full_timeRange_right->setEnabled(false);
+        le_full_timeRange_right->setDragEnabled(false);
+        le_full_timeRange_right->setReadOnly(true);
+
+        gridLayout_5->addWidget(le_full_timeRange_right, 0, 2, 1, 1);
 
 
         horizontalLayout_3->addLayout(gridLayout_5);
@@ -235,6 +284,7 @@ public:
 
         frame = new QFrame(SetupChannelWindow);
         frame->setObjectName(QString::fromUtf8("frame"));
+        frame->setEnabled(false);
         frame->setFrameShape(QFrame::StyledPanel);
         frame->setFrameShadow(QFrame::Raised);
         horizontalLayout_5 = new QHBoxLayout(frame);
@@ -342,18 +392,25 @@ public:
         SetupChannelWindow->setWindowTitle(QCoreApplication::translate("SetupChannelWindow", "Dialog", nullptr));
         lbl_channelID->setText(QString());
         label->setText(QCoreApplication::translate("SetupChannelWindow", "Charge histogram:", nullptr));
-        rb_binW_charge->setText(QCoreApplication::translate("SetupChannelWindow", "Bin width", nullptr));
-        rb_nBins_charge->setText(QCoreApplication::translate("SetupChannelWindow", "Number of bins", nullptr));
-        label_5->setText(QCoreApplication::translate("SetupChannelWindow", "Data range:", nullptr));
         le_chargeRange_left->setText(QString());
+        le_full_chargeRange_left->setText(QString());
+        label_6->setText(QCoreApplication::translate("SetupChannelWindow", "Full data range:", nullptr));
+        rb_nBins_charge->setText(QCoreApplication::translate("SetupChannelWindow", "Number of bins", nullptr));
+        le_full_chargeRange_right->setText(QString());
+        le_full_chargeRange_right->setPlaceholderText(QString());
         le_chargeRange_right->setText(QString());
         le_chargeRange_right->setPlaceholderText(QString());
+        rb_binW_charge->setText(QCoreApplication::translate("SetupChannelWindow", "Bin width", nullptr));
+        label_5->setText(QCoreApplication::translate("SetupChannelWindow", "Seen data range:", nullptr));
         label_2->setText(QCoreApplication::translate("SetupChannelWindow", "Time histogram:", nullptr));
-        rb_binW_time->setText(QCoreApplication::translate("SetupChannelWindow", "Bin width", nullptr));
-        label_4->setText(QCoreApplication::translate("SetupChannelWindow", "Data range:", nullptr));
         rb_nBins_time->setText(QCoreApplication::translate("SetupChannelWindow", "Number of bins", nullptr));
+        rb_binW_time->setText(QCoreApplication::translate("SetupChannelWindow", "Bin width", nullptr));
+        label_4->setText(QCoreApplication::translate("SetupChannelWindow", "Seen data range:", nullptr));
         le_timeRange_left->setText(QString());
         le_timeRange_right->setText(QString());
+        label_7->setText(QCoreApplication::translate("SetupChannelWindow", "Full data range:", nullptr));
+        le_full_timeRange_left->setText(QString());
+        le_full_timeRange_right->setText(QString());
         label_3->setText(QCoreApplication::translate("SetupChannelWindow", "Charge/time graph:", nullptr));
         label_12->setText(QCoreApplication::translate("SetupChannelWindow", "Range time axis:", nullptr));
         label_10->setText(QCoreApplication::translate("SetupChannelWindow", "Range charge axis:", nullptr));

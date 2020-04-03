@@ -227,19 +227,21 @@ void HandlerWindow::ReadTxtFile()
     if(file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QTextStream readStream(&file);
-//        while(!file.atEnd()) {
-        for (quint8 j=0;j<10;j++){
+        while(!file.atEnd()) {
+//        for (quint8 j=0;j<10;j++){
             gbtword = readStream.readLine();
 //            qDebug() << gbtword;
 
-            if(gbtword.left(10) == "E000000000"){continue;}
-            if(gbtword.left(3) == "DAF"){continue;}
+            if (gbtword.left(1) == "E")    {continue;} //trigger
+            if (gbtword.left(4) == "FFFF") {continue;} //trailer
+            if (gbtword.left(1) == "0")    {continue;} //leftover
+            if (gbtword.left(3) == "DAF")  {continue;}
 
             if(gbtword.left(1)=="F"){
                 nWords = gbtword.mid(1,1).toUShort(&ok,16);
                 for(quint16 i=0;i<nWords;i++) {
                     gbtword = readStream.readLine();
-                    qDebug() << gbtword;
+//                    qDebug() << gbtword;
 
                     // divide GBT word to 2 channels
                     firstch_gbt = gbtword.left(10);
@@ -249,7 +251,16 @@ void HandlerWindow::ReadTxtFile()
                     firstch_gbt = HexStrtoBinStr(firstch_gbt);
                     secondch_gbt = HexStrtoBinStr(secondch_gbt);
 
-                    qDebug() << firstch_gbt;
+//                qDebug() << firstch_gbt;
+
+                    if(firstch_gbt.mid(13,1).toUShort()){ goto second;}          // double event
+                    if(firstch_gbt.mid(12,1).toUShort()){ goto second;}          // event 1 time lost
+                    if(firstch_gbt.mid(11,1).toUShort()){ goto second;}          // event 2 time lost
+                    if(!firstch_gbt.mid(10,1).toUShort()){ goto second;}         // ADC in gate
+                    if(firstch_gbt.mid( 9,1).toUShort()){ goto second;}          // time information too late
+                    if(firstch_gbt.mid( 8,1).toUShort()){ goto second;}          // amplitude too high
+//                    if(firstch_gbt.mid( 7,1).toUShort()){ goto second;}          // event included in TVDC trigger
+                    if(firstch_gbt.mid( 6,1).toUShort()){ goto second;}          // time information lost
 
                     // get time, charge and channelID for first channel in gbt word
                     convertor.dataBlocks.time = firstch_gbt.right(12).toULongLong(&ok,2);
@@ -257,25 +268,33 @@ void HandlerWindow::ReadTxtFile()
                     channelID = firstch_gbt.left(4).toUShort(&ok,2);
                     tADCNum = firstch_gbt.mid(14,1).toUShort();
 
-                    qDebug() << convertor.dataReal.time
-                             << convertor.dataReal.charge
-                             << tADCNum
-                             << channelID;
+//                    qDebug() << convertor.dataReal.time
+//                             << convertor.dataReal.charge
+//                             << tADCNum
+//                             << channelID;
 
-                    if(ADCNumber ==2){
-                        if((channelID >= 1) && (channelID<=12)) {
-                            if(channel[channelID-1]!=nullptr) channel[channelID-1]->
-                                                AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
-                        }
-                    }
-                    else{
-                        if((channelID >= 1) && (channelID<=12) && (tADCNum == ADCNumber)) {
-                            if(channel[channelID-1]!=nullptr) channel[channelID-1]->
-                                                AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
+                    if((channelID >= 1) && (channelID<=12)) {
+                        if(channel[channelID-1]!=nullptr) {
+                            if(channel[channelID-1]->ADC_ID == 2) channel[channelID-1]->
+                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
+                            else if(tADCNum == channel[channelID-1]->ADC_ID) channel[channelID-1]->
+                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
                         }
                     }
 
-                    qDebug() << secondch_gbt;
+                    second:
+
+//                qDebug() << secondch_gbt;
+
+                if(firstch_gbt.mid(13,1).toUShort()){ continue;}          // double event
+                if(firstch_gbt.mid(12,1).toUShort()){ continue;}          // event 1 time lost
+                if(firstch_gbt.mid(11,1).toUShort()){ continue;}          // event 2 time lost
+                if(!firstch_gbt.mid(10,1).toUShort()){ continue;}         // ADC in gate
+                if(firstch_gbt.mid( 9,1).toUShort()){ continue;}          // time information too late
+                if(firstch_gbt.mid( 8,1).toUShort()){ continue;}          // amplitude too high
+//                    if(firstch_gbt.mid( 7,1).toUShort()){ continue;}          // event included in TVDC trigger
+                if(firstch_gbt.mid( 6,1).toUShort()){ continue;}          // time information lost
+
 
                     // get time, charge and channelID for second channel in gbt word
                     convertor.dataBlocks.time = secondch_gbt.right(12).toULongLong(&ok,2);
@@ -283,22 +302,19 @@ void HandlerWindow::ReadTxtFile()
                     channelID = secondch_gbt.left(4).toUShort(&ok,2);
                     tADCNum = secondch_gbt.mid(14,1).toUShort();
 
-                    qDebug() << convertor.dataReal.time
-                             << convertor.dataReal.charge
-                             << tADCNum
-                             << channelID
-                             << endl;
+//                    qDebug() << convertor.dataReal.time
+//                             << convertor.dataReal.charge
+//                             << tADCNum
+//                             << channelID
+//                             << endl;
 
-                    if(ADCNumber ==2){
-                        if(channelID >= 1 && channelID<=12) {
-                            if(channel[channelID-1]!=nullptr) channel[channelID-1]->
-                                                AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
-                        }
-                    }
-                    else{
-                        if((channelID >= 1) && (channelID<=12) && (tADCNum == ADCNumber)) {
-                            if(channel[channelID-1]!=nullptr) channel[channelID-1]->
-                                                AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
+
+                    if((channelID >= 1) && (channelID<=12)) {
+                        if(channel[channelID-1]!=nullptr) {
+                            if(channel[channelID-1]->ADC_ID == 2) channel[channelID-1]->
+                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
+                            else if(tADCNum == channel[channelID-1]->ADC_ID) channel[channelID-1]->
+                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
                         }
                     }
 
@@ -510,8 +526,11 @@ void HandlerWindow::hideZeroBars()
 {
     for(quint16 i=0;i<12;i++) {
         if(channel[i]!=nullptr){
-            channel[i]->doHideZeroBars = !channel[i]->doHideZeroBars;
-            channel[i]->Update();
+            if(!channel[i]->doHideZeroBars) channel[i]->HideZeroBars();
+            else {
+                channel[i]->ShowFullRange();
+                channel[i]->doHideZeroBars = 0;
+            }
         }
     }
 

@@ -68,7 +68,100 @@
           </item>
           <item>
            <layout class="QGridLayout" name="gridLayout_8">
-            <item row="1" column="0">
+            <item row="3" column="1" colspan="2">
+             <widget class="QLineEdit" name="le_nBins_charge"/>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="le_chargeRange_left">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="dragEnabled">
+               <bool>true</bool>
+              </property>
+              <property name="readOnly">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="le_full_chargeRange_left">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="dragEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Full data range:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QRadioButton" name="rb_nBins_charge">
+              <property name="text">
+               <string>Number of bins</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLineEdit" name="le_full_chargeRange_right">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="mouseTracking">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="echoMode">
+               <enum>QLineEdit::Normal</enum>
+              </property>
+              <property name="dragEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+              <property name="placeholderText">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLineEdit" name="le_chargeRange_right">
+              <property name="mouseTracking">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="echoMode">
+               <enum>QLineEdit::Normal</enum>
+              </property>
+              <property name="readOnly">
+               <bool>false</bool>
+              </property>
+              <property name="placeholderText">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="2">
+             <widget class="QLineEdit" name="le_binWidth_charge"/>
+            </item>
+            <item row="2" column="0">
              <widget class="QRadioButton" name="rb_binW_charge">
               <property name="enabled">
                <bool>true</bool>
@@ -81,57 +174,12 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QRadioButton" name="rb_nBins_charge">
-              <property name="text">
-               <string>Number of bins</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
+            <item row="1" column="0">
              <widget class="QLabel" name="label_5">
               <property name="text">
-               <string>Data range:</string>
+               <string>Seen data range:</string>
               </property>
              </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="le_chargeRange_left">
-              <property name="text">
-               <string/>
-              </property>
-              <property name="dragEnabled">
-               <bool>true</bool>
-              </property>
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QLineEdit" name="le_chargeRange_right">
-              <property name="mouseTracking">
-               <bool>true</bool>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="echoMode">
-               <enum>QLineEdit::Normal</enum>
-              </property>
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-              <property name="placeholderText">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1" colspan="2">
-             <widget class="QLineEdit" name="le_binWidth_charge"/>
-            </item>
-            <item row="2" column="1" colspan="2">
-             <widget class="QLineEdit" name="le_nBins_charge"/>
             </item>
            </layout>
           </item>
@@ -178,7 +226,17 @@
           </item>
           <item>
            <layout class="QGridLayout" name="gridLayout_5">
-            <item row="1" column="0">
+            <item row="3" column="0">
+             <widget class="QRadioButton" name="rb_nBins_time">
+              <property name="text">
+               <string>Number of bins</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" colspan="2">
+             <widget class="QLineEdit" name="le_nBins_time"/>
+            </item>
+            <item row="2" column="0">
              <widget class="QRadioButton" name="rb_binW_time">
               <property name="text">
                <string>Bin width</string>
@@ -188,25 +246,51 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1" colspan="2">
-             <widget class="QLineEdit" name="le_binWidth_time"/>
-            </item>
-            <item row="0" column="0">
+            <item row="1" column="0">
              <widget class="QLabel" name="label_4">
               <property name="text">
-               <string>Data range:</string>
+               <string>Seen data range:</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QRadioButton" name="rb_nBins_time">
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="le_timeRange_left">
               <property name="text">
-               <string>Number of bins</string>
+               <string/>
+              </property>
+              <property name="readOnly">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLineEdit" name="le_timeRange_right">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="dragEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="readOnly">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="2">
+             <widget class="QLineEdit" name="le_binWidth_time"/>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Full data range:</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLineEdit" name="le_timeRange_left">
+             <widget class="QLineEdit" name="le_full_timeRange_left">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -215,11 +299,11 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1" colspan="2">
-             <widget class="QLineEdit" name="le_nBins_time"/>
-            </item>
             <item row="0" column="2">
-             <widget class="QLineEdit" name="le_timeRange_right">
+             <widget class="QLineEdit" name="le_full_timeRange_right">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -240,6 +324,9 @@
      </item>
      <item>
       <widget class="QFrame" name="frame">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>

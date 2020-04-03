@@ -7,11 +7,13 @@ SetupChannelWindow::SetupChannelWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->le_chargeRange_left->setText("-100");
-    ui->le_chargeRange_right->setText("4095");
+    ui->frame->setVisible(0);
 
-    ui->le_timeRange_left->setText("-2048");
-    ui->le_timeRange_right->setText("2047");
+    ui->le_full_chargeRange_left->setText("-100");
+    ui->le_full_chargeRange_right->setText("4095");
+
+    ui->le_full_timeRange_left->setText("-2048");
+    ui->le_full_timeRange_right->setText("2047");
 
     connect( ui->ApplyButton, SIGNAL( clicked() ), SLOT( apply_clicked() ) );
     connect( ui->CancelButton, SIGNAL( clicked() ), SLOT( reject() ) );
@@ -44,6 +46,16 @@ void SetupChannelWindow::set_nBins_time(QString _nBins)
 {
     ui->le_nBins_time->setText(_nBins);
     nBins_time = _nBins;
+}
+
+void SetupChannelWindow::set_charge_hist_range(QString left, QString right){
+    ui->le_chargeRange_left->setText(left);
+    ui->le_chargeRange_right->setText(right);
+}
+
+void SetupChannelWindow::set_time_hist_range(QString left, QString right){
+    ui->le_timeRange_left->setText(left);
+    ui->le_timeRange_right->setText(right);
 }
 
 void SetupChannelWindow::apply_clicked()

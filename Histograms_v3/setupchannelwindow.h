@@ -22,6 +22,8 @@ public:
     void set_binWidth_time(QString);
     void set_nBins_charge(QString);
     void set_nBins_time(QString);
+    void set_charge_hist_range(QString left,QString right);
+    void set_time_hist_range(QString left,QString right);
 
 
 private:

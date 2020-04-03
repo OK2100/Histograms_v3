@@ -1,0 +1,10 @@
+debug/qcustomplot.o
+debug/channelhistwidget.o
+debug/histdata.o
+debug/main.o
+debug/handlerwindow.o
+debug/setupchannelwindow.o
+debug/moc_qcustomplot.o
+debug/moc_channelhistwidget.o
+debug/moc_handlerwindow.o
+debug/moc_setupchannelwindow.o

@@ -33,7 +33,7 @@ public:
     void Clear();
     void ClearScreen();
     void Update();
-    void AddEvent(qint16 charge, qint16 time);
+    void AddEvent(quint8 adc_id,qint16 charge, qint16 time);
     void PrintInfo(bool onlyStat = false);
     QString GetStatInfo();
     void HideZeroBars();
@@ -56,10 +56,21 @@ private slots:
 
 private:
 
+    QCPColorMap *colorMap;
+    void Experements();
+
+    void setData(QCPBars*);
+
     Ui::ChannelHistWidget *ui;
 
     HistData* chargeData;
+    HistData* chargeData1;
     HistData* timeData;
+    HistData* timeData1;
+
+    Hist2Data* hist0;
+    Hist2Data* hist1;
+
 
     SetupChannelWindow* setupWindow;
     QString chID;
@@ -67,13 +78,9 @@ private:
 
     QCustomPlot* chargeHist;            // First hist
     QCPBars* chargeBars;
-    QVector<double> chargeKey;          // ADC channel -> x axis
-    QVector<double> chargeValue;
 
     QCustomPlot* timeHist;              // Second hist
     QCPBars* timeBars;
-    QVector<double> timeKey;
-    QVector<double> timeValue;
 
     QCustomPlot* chargeTimeHist;        // Graph
     QCPGraph* chargeTimeGraph;
@@ -86,8 +93,6 @@ private:
     void SetupView();
     void LoadSettings(QString file_ini);
 
-
-    void InitKeysAndValues();
 };
 
 #endif // CHANNELHISTWIDGET_H

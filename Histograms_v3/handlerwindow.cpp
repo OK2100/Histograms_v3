@@ -275,10 +275,13 @@ void HandlerWindow::ReadTxtFile()
 
                     if((channelID >= 1) && (channelID<=12)) {
                         if(channel[channelID-1]!=nullptr) {
-                            if(channel[channelID-1]->ADC_ID == 2) channel[channelID-1]->
-                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
-                            else if(tADCNum == channel[channelID-1]->ADC_ID) channel[channelID-1]->
-                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
+//                            if(channel[channelID-1]->ADC_ID == 2) channel[channelID-1]->
+//                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
+//                            else if(tADCNum == channel[channelID-1]->ADC_ID) channel[channelID-1]->
+//                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
+
+                            channel[channelID-1]->AddEvent(tADCNum,convertor.dataReal.charge,convertor.dataReal.time);
+
                         }
                     }
 
@@ -311,10 +314,12 @@ void HandlerWindow::ReadTxtFile()
 
                     if((channelID >= 1) && (channelID<=12)) {
                         if(channel[channelID-1]!=nullptr) {
-                            if(channel[channelID-1]->ADC_ID == 2) channel[channelID-1]->
-                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
-                            else if(tADCNum == channel[channelID-1]->ADC_ID) channel[channelID-1]->
-                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
+//                            if(channel[channelID-1]->ADC_ID == 2) channel[channelID-1]->
+//                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
+//                            else if(tADCNum == channel[channelID-1]->ADC_ID) channel[channelID-1]->
+//                                    AddEvent(convertor.dataReal.charge,convertor.dataReal.time);
+
+                            channel[channelID-1]->AddEvent(tADCNum,convertor.dataReal.charge,convertor.dataReal.time);
                         }
                     }
 
@@ -331,11 +336,11 @@ void HandlerWindow::ReadTxtFile()
 
 //      Slots
 
-void HandlerWindow::addEvent(quint8 chID,qint16 charge,qint16 time)
+void HandlerWindow::addEvent(quint8 chID,quint8 adc_id,qint16 charge,qint16 time)
 {
     if((chID<=12)&&(chID>=1)){
         if(channel[chID-1]!=nullptr){
-            channel[chID-1]->AddEvent(charge,time);
+            channel[chID-1]->AddEvent(adc_id,charge,time);
         }
     }
 }

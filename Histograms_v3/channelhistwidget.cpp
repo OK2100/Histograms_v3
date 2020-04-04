@@ -2,6 +2,43 @@
 #include "ui_channelhistwidget.h"
 #include <QtGlobal>
 
+void ChannelHistWidget::Experements()
+{
+    colorMap->data()->setSize(50, 50);
+    colorMap->data()->setRange(QCPRange(0, 2), QCPRange(0, 2));
+    
+    for (int x=0; x<50; ++x)
+      for (int y=0; y<50; ++y)
+        colorMap->data()->setCell(x, y, qCos(x/10.0)+qSin(y/10.0));
+    
+    colorMap->setGradient(QCPColorGradient::gpCold);
+    colorMap->setInterpolate(false);
+    colorMap->rescaleDataRange(true);
+    chargeTimeHist->rescaleAxes();
+    chargeTimeHist->replot();
+}
+
+void ChannelHistWidget::setData(QCPBars* bars)
+{
+    HistData* data = nullptr;
+
+    if(ADC_ID == 0) {
+        if(bars == chargeBars) data = chargeData;
+        else if(bars == timeBars) data = timeData;
+        else   { qDebug() << "ERROR: setData empty pointer"; return;}
+    }
+    else if(ADC_ID == 1) {
+        if(bars == chargeBars) data = chargeData1;
+        else if(bars == timeBars) data = timeData1;
+        else   { qDebug() << "ERROR: setData empty pointer"; return;}
+    }
+    else if(ADC_ID == 2) return;
+
+    for(quint16 i=0;i<data->getnBins();i++){
+        bars->addData(data->getLeftLimit() + (i*data->getbinWidth()),(*data)[i]) ;
+    }
+}
+
 ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
     QWidget(parent),
     ui(new Ui::ChannelHistWidget)
@@ -22,9 +59,10 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
 
     InitHistograms();
 
+
     SetupView();
 
-    InitKeysAndValues();
+    Experements();
 
     setupWindow = new SetupChannelWindow;
 
@@ -90,6 +128,8 @@ void ChannelHistWidget::hist_double_clicked( QMouseEvent * event )
 
 void ChannelHistWidget::InitHistograms()
 {
+    colorMap = new QCPColorMap(chargeTimeHist->xAxis, chargeTimeHist->yAxis);
+
     chargeData = new HistData(-100,4095,4196);
     chargeData->name = "Channel "+chID+" charge";
     timeData = new HistData(-2048,2047,4096);
@@ -97,6 +137,14 @@ void ChannelHistWidget::InitHistograms()
     chargeBars = new QCPBars(chargeHist->xAxis,chargeHist->yAxis);
     timeBars = new QCPBars(timeHist->xAxis,timeHist->yAxis);
     chargeTimeGraph = new QCPGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);
+
+    chargeData1 = new HistData(-100,4095,4196);
+    chargeData1->name = "Channel "+chID+" charge _ ADC1";
+    timeData1 = new HistData(-2048,2047,4096);
+    timeData1->name = "Channel "+chID+" time _ ADC1";
+
+    hist0 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
+    hist1 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
 }
 
 void ChannelHistWidget::SetupView(){
@@ -139,28 +187,6 @@ void ChannelHistWidget::SetupView(){
 }
 
 
-void ChannelHistWidget::InitKeysAndValues()
-{
-    chargeKey.clear();
-    chargeValue.clear();
-    chargeValue.resize(chargeData->getnBins());
-
-    for (quint16 i=0;i<chargeData->getnBins();i++) {
-//        chargeKey << chargeData->getLeftLimit() + (i*chargeData->getbinWidth()) + (chargeData->getbinWidth()/2);
-        chargeKey << chargeData->getLeftLimit() + (i*chargeData->getbinWidth());
-        chargeValue[i] = (*chargeData)[i];
-    }
-
-    timeKey.clear();
-    timeValue.clear();
-    timeValue.resize(timeData->getnBins());
-    for (quint16 i=0;i<timeData->getnBins();i++) {
-//        timeKey << timeData->getLeftLimit() + (i*timeData->getbinWidth()) + (timeData->getbinWidth()/2);
-        timeKey << timeData->getLeftLimit() + (i*timeData->getbinWidth());
-        timeValue[i] = (*timeData)[i];
-    }
-}
-
 void ChannelHistWidget::LoadSettings(QString file_ini)
 {
     QSettings sett(file_ini, QSettings::IniFormat);
@@ -182,18 +208,15 @@ void ChannelHistWidget::LoadSettings(QString file_ini)
 
 }
 
-void ChannelHistWidget::AddEvent(qint16 charge, qint16 time)
+void ChannelHistWidget::AddEvent(quint8 adc_id, qint16 charge, qint16 time)
 {
-    quint16 ich = chargeData->addEvent(charge);
-    quint16 it = timeData->addEvent(time);
-    if(ich<chargeData->getnBins()) chargeValue[ich]++;
-    if(it<timeData->getnBins()) timeValue[it]++;
+    if(adc_id == 0) { chargeData->addEvent(charge);     timeData->addEvent(time); }
+    if(adc_id == 1) { chargeData1->addEvent(charge);    timeData1->addEvent(time); }
 }
 
 void ChannelHistWidget::Update()
 {
     ClearScreen();
-//    InitKeysAndValues();
     PlotHistograms();
 }
 
@@ -214,16 +237,16 @@ void ChannelHistWidget::PlotHistograms()
 
 
 //---------------------- CHARGE ------------------------
-        chargeBars->setData(chargeKey,chargeValue);
-        chargeHist->yAxis->rescale();
+        setData(chargeBars);
+        if(chargeData->isEmpty() && chargeData1->isEmpty() )   { chargeHist->yAxis->setRange(0,5); }
+        else                        { chargeHist->yAxis->rescale(); }
         chargeBars->setWidth(chargeData->getbinWidth());
-//        chargeHist->xAxis->setRange(chargeData->getLeftLimit(),chargeData->getRightLimit());
 
 //----------------------- TIME --------------------------
-        timeBars->setData(timeKey,timeValue);
-        timeHist->yAxis->rescale();
+        setData(timeBars);
+        if(timeData->isEmpty() && timeData1->isEmpty() )     { timeHist->yAxis->setRange(0,5); }
+        else                        { timeHist->yAxis->rescale(); }
         timeBars->setWidth(timeData->getbinWidth());
-//        timeHist->xAxis->setRange(timeData->getLeftLimit(),timeData->getRightLimit());
 
 //-------------------- CHARGE-TIME ----------------------
     chargeTimeHist->addGraph();
@@ -249,14 +272,22 @@ void ChannelHistWidget::Clear()
 {
     chargeData->clear();
     timeData->clear();
+
+    chargeData1->clear();
+    timeData1->clear();
+
+    chargeBars->data().data()->clear();
+    timeBars->data().data()->clear();
     chargeTimeHist->clearGraphs();
-    InitKeysAndValues();
 }
 
 void ChannelHistWidget::PrintInfo(bool onlyStat)
 {
         chargeData->printInfo(0,0,onlyStat);
         timeData->printInfo(0,0,onlyStat);
+
+        chargeData1->printInfo(0,0,onlyStat);
+        timeData1->printInfo(0,0,onlyStat);
 }
 
 QString ChannelHistWidget::GetStatInfo()
@@ -298,16 +329,21 @@ void ChannelHistWidget::HideZeroBars()
     double leftBorder,rightBorder,binWidth;
     quint16 i,nBins;
     i=0;
-    leftBorder = chargeData->getLeftLimit();
-    binWidth = chargeData->getbinWidth();
-    while((*chargeData)[i]==0){
+    HistData* cdata;
+    HistData* tdata;
+    if(ADC_ID ==0)          { cdata = chargeData;   tdata = timeData; }
+    else if(ADC_ID ==1)     { cdata = chargeData1;  tdata = timeData1; }
+
+    leftBorder = cdata->getLeftLimit();
+    binWidth = cdata->getbinWidth();
+    while((*cdata)[i]==0){
         i++;
         leftBorder+=binWidth;
     }
     i=0;
-    rightBorder = chargeData->getRightLimit();
-    nBins = chargeData->getnBins();
-    while((*chargeData)[nBins-1-i]==0){
+    rightBorder = cdata->getRightLimit();
+    nBins = cdata->getnBins();
+    while((*cdata)[nBins-1-i]==0){
         i++;
         rightBorder-=binWidth;
     }
@@ -315,17 +351,17 @@ void ChannelHistWidget::HideZeroBars()
     chargeHist->replot();
 
     i=0;
-    leftBorder = timeData->getLeftLimit();
-    binWidth = timeData->getbinWidth();
-    while((*timeData)[i]==0){
+    leftBorder = tdata->getLeftLimit();
+    binWidth = tdata->getbinWidth();
+    while((*tdata)[i]==0){
         i++;
         leftBorder+=binWidth;
     }
 
     i=0;
-    rightBorder = timeData->getRightLimit();
-    nBins = timeData->getnBins();
-    while((*timeData)[nBins-1-i]==0){
+    rightBorder = tdata->getRightLimit();
+    nBins = tdata->getnBins();
+    while((*tdata)[nBins-1-i]==0){
         i++;
         rightBorder-=binWidth;
     }
@@ -346,6 +382,7 @@ void ChannelHistWidget::ShowFullRange(){
 void ChannelHistWidget::binWidth_charge_was_changed(const QString& _binWidth)
 {
     chargeData->setbinWidth(_binWidth.toDouble());
+    chargeData1->setbinWidth(_binWidth.toDouble());
     setupWindow->set_binWidth_charge(QString::number(chargeData->getbinWidth()));
 //    setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
     setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
@@ -357,6 +394,7 @@ void ChannelHistWidget::binWidth_charge_was_changed(const QString& _binWidth)
 void ChannelHistWidget::binWidth_time_was_changed(const QString& _binWidth)
 {
     timeData->setbinWidth(_binWidth.toDouble());
+    timeData1->setbinWidth(_binWidth.toDouble());
 //    setupWindow->set_binWidth_charge(QString::number(chargeData->getbinWidth()));
     setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
 //    setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
@@ -368,6 +406,7 @@ void ChannelHistWidget::binWidth_time_was_changed(const QString& _binWidth)
 void ChannelHistWidget::nBins_charge_was_changed(const QString& _nBins)
 {
     chargeData->setnBins(_nBins.toUInt());
+    chargeData1->setnBins(_nBins.toUInt());
     setupWindow->set_binWidth_charge(QString::number(chargeData->getbinWidth()));
     setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
     setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
@@ -379,6 +418,7 @@ void ChannelHistWidget::nBins_charge_was_changed(const QString& _nBins)
 void ChannelHistWidget::nBins_time_was_changed(const QString& _nBins)
 {
     timeData->setnBins(_nBins.toUInt());
+    timeData1->setnBins(_nBins.toUInt());
     setupWindow->set_binWidth_charge(QString::number(chargeData->getbinWidth()));
     setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
     setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));

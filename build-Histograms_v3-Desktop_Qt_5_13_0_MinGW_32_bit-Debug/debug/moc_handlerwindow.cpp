@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_HandlerWindow_t {
-    QByteArrayData data[20];
-    char stringdata0[217];
+    QByteArrayData data[21];
+    char stringdata0[224];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -39,27 +39,28 @@ QT_MOC_LITERAL(3, 29, 14), // "firstChannelID"
 QT_MOC_LITERAL(4, 44, 12), // "updateScreen"
 QT_MOC_LITERAL(5, 57, 8), // "addEvent"
 QT_MOC_LITERAL(6, 66, 4), // "chID"
-QT_MOC_LITERAL(7, 71, 6), // "charge"
-QT_MOC_LITERAL(8, 78, 4), // "time"
-QT_MOC_LITERAL(9, 83, 9), // "chooseADC"
-QT_MOC_LITERAL(10, 93, 14), // "startNewWindow"
-QT_MOC_LITERAL(11, 108, 14), // "openSourceFile"
-QT_MOC_LITERAL(12, 123, 8), // "readFile"
-QT_MOC_LITERAL(13, 132, 10), // "addChannel"
-QT_MOC_LITERAL(14, 143, 13), // "removeChannel"
-QT_MOC_LITERAL(15, 157, 16), // "removeAllChannel"
-QT_MOC_LITERAL(16, 174, 5), // "reset"
-QT_MOC_LITERAL(17, 180, 8), // "resetAll"
-QT_MOC_LITERAL(18, 189, 12), // "hideZeroBars"
-QT_MOC_LITERAL(19, 202, 14) // "showStatWindow"
+QT_MOC_LITERAL(7, 71, 6), // "adc_id"
+QT_MOC_LITERAL(8, 78, 6), // "charge"
+QT_MOC_LITERAL(9, 85, 4), // "time"
+QT_MOC_LITERAL(10, 90, 9), // "chooseADC"
+QT_MOC_LITERAL(11, 100, 14), // "startNewWindow"
+QT_MOC_LITERAL(12, 115, 14), // "openSourceFile"
+QT_MOC_LITERAL(13, 130, 8), // "readFile"
+QT_MOC_LITERAL(14, 139, 10), // "addChannel"
+QT_MOC_LITERAL(15, 150, 13), // "removeChannel"
+QT_MOC_LITERAL(16, 164, 16), // "removeAllChannel"
+QT_MOC_LITERAL(17, 181, 5), // "reset"
+QT_MOC_LITERAL(18, 187, 8), // "resetAll"
+QT_MOC_LITERAL(19, 196, 12), // "hideZeroBars"
+QT_MOC_LITERAL(20, 209, 14) // "showStatWindow"
 
     },
     "HandlerWindow\0showNewWindow\0\0"
     "firstChannelID\0updateScreen\0addEvent\0"
-    "chID\0charge\0time\0chooseADC\0startNewWindow\0"
-    "openSourceFile\0readFile\0addChannel\0"
-    "removeChannel\0removeAllChannel\0reset\0"
-    "resetAll\0hideZeroBars\0showStatWindow"
+    "chID\0adc_id\0charge\0time\0chooseADC\0"
+    "startNewWindow\0openSourceFile\0readFile\0"
+    "addChannel\0removeChannel\0removeAllChannel\0"
+    "reset\0resetAll\0hideZeroBars\0showStatWindow"
 };
 #undef QT_MOC_LITERAL
 
@@ -81,25 +82,25 @@ static const uint qt_meta_data_HandlerWindow[] = {
 
  // slots: name, argc, parameters, tag, flags
        4,    0,   87,    2, 0x0a /* Public */,
-       5,    3,   88,    2, 0x0a /* Public */,
-       9,    0,   95,    2, 0x0a /* Public */,
-      10,    1,   96,    2, 0x08 /* Private */,
-      11,    0,   99,    2, 0x08 /* Private */,
-      12,    0,  100,    2, 0x08 /* Private */,
-      13,    0,  101,    2, 0x08 /* Private */,
-      14,    0,  102,    2, 0x08 /* Private */,
-      15,    0,  103,    2, 0x08 /* Private */,
-      16,    0,  104,    2, 0x08 /* Private */,
-      17,    0,  105,    2, 0x08 /* Private */,
-      18,    0,  106,    2, 0x08 /* Private */,
-      19,    0,  107,    2, 0x08 /* Private */,
+       5,    4,   88,    2, 0x0a /* Public */,
+      10,    0,   97,    2, 0x0a /* Public */,
+      11,    1,   98,    2, 0x08 /* Private */,
+      12,    0,  101,    2, 0x08 /* Private */,
+      13,    0,  102,    2, 0x08 /* Private */,
+      14,    0,  103,    2, 0x08 /* Private */,
+      15,    0,  104,    2, 0x08 /* Private */,
+      16,    0,  105,    2, 0x08 /* Private */,
+      17,    0,  106,    2, 0x08 /* Private */,
+      18,    0,  107,    2, 0x08 /* Private */,
+      19,    0,  108,    2, 0x08 /* Private */,
+      20,    0,  109,    2, 0x08 /* Private */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::UChar,    3,
 
  // slots: parameters
     QMetaType::Void,
-    QMetaType::Void, QMetaType::UChar, QMetaType::Short, QMetaType::Short,    6,    7,    8,
+    QMetaType::Void, QMetaType::UChar, QMetaType::UChar, QMetaType::Short, QMetaType::Short,    6,    7,    8,    9,
     QMetaType::Void,
     QMetaType::Void, QMetaType::UChar,    3,
     QMetaType::Bool,
@@ -123,7 +124,7 @@ void HandlerWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         switch (_id) {
         case 0: _t->showNewWindow((*reinterpret_cast< quint8(*)>(_a[1]))); break;
         case 1: _t->updateScreen(); break;
-        case 2: _t->addEvent((*reinterpret_cast< quint8(*)>(_a[1])),(*reinterpret_cast< qint16(*)>(_a[2])),(*reinterpret_cast< qint16(*)>(_a[3]))); break;
+        case 2: _t->addEvent((*reinterpret_cast< quint8(*)>(_a[1])),(*reinterpret_cast< quint8(*)>(_a[2])),(*reinterpret_cast< qint16(*)>(_a[3])),(*reinterpret_cast< qint16(*)>(_a[4]))); break;
         case 3: _t->chooseADC(); break;
         case 4: _t->startNewWindow((*reinterpret_cast< quint8(*)>(_a[1]))); break;
         case 5: { bool _r = _t->openSourceFile();

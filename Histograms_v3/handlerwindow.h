@@ -73,7 +73,7 @@ private:
 
 public slots:                       //  Slots for connecting with other progs
     void updateScreen();
-    void addEvent(quint8 chID,qint16 charge,qint16 time);
+    void addEvent(quint8 chID,quint8 adc_id,qint16 charge,qint16 time);
     void chooseADC();
 
 signals:

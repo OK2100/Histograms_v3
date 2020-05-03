@@ -61,12 +61,16 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
 //    channelIDButton->setFixedWidth(150);
 
     connect(channelIDButton,SIGNAL(clicked()),this,SLOT(channelIDButton_clicked()));
+
+    connect(this,SIGNAL(channelAdded()),parent,SLOT(readFile()));
+
     //---------------------------------------------
 
     InitHistograms();
 
-
     SetupView();
+
+//    HideZeroBars();
 
 //    Experements();
 
@@ -99,10 +103,46 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
     connect(ui->rb_0,&QRadioButton::clicked,this,&ChannelHistWidget::ADC0_choosed);
     connect(ui->rb_1,&QRadioButton::clicked,this,&ChannelHistWidget::ADC1_choosed);
     connect(ui->rb_01,&QRadioButton::clicked,this,&ChannelHistWidget::ADC01_choosed);
+
+    connect(chargeHist->xAxis,
+            static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged),
+            this,&ChannelHistWidget::auto_rescale);
+
+    connect(timeHist->xAxis,
+            static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged),
+            this,&ChannelHistWidget::auto_rescale);
 }
+
+void ChannelHistWidget::auto_rescale(const QCPRange &newRange){
+    bool fr=false;
+    quint16 upper = 0;
+    if(sender() == chargeHist->xAxis){
+        upper=chargeBars->data().data()->valueRange(fr,QCP::sdBoth,newRange).upper;
+        chargeHist->yAxis->setRange(0,upper*1.1);
+    }
+    else if(sender() == timeHist->xAxis){
+        upper=timeBars->data().data()->valueRange(fr,QCP::sdBoth,newRange).upper;
+        timeHist->yAxis->setRange(0,upper*1.1);
+    }
+}
+
+
 
 ChannelHistWidget::~ChannelHistWidget()
 {
+    delete chargeData;
+    delete chargeData1;
+    delete timeData;
+    delete timeData1;
+
+    chargeHist->clearPlottables();
+    timeHist->clearPlottables();
+    chargeTimeHist->clearPlottables();
+
+    delete chargeHist;
+    delete timeHist;
+    delete chargeTimeHist;
+
     delete ui;
 }
 
@@ -134,7 +174,6 @@ void ChannelHistWidget::hist_double_clicked( QMouseEvent * event )
 
 void ChannelHistWidget::InitHistograms()
 {
-//    colorMap = new QCPColorMap(chargeTimeHist->xAxis, chargeTimeHist->yAxis);
 
     chargeData = new HistData(-100,4095,4196);
     chargeData->name = "Channel "+chID+" charge";
@@ -149,8 +188,8 @@ void ChannelHistWidget::InitHistograms()
     timeData1 = new HistData(-2048,2047,4096);
     timeData1->name = "Channel "+chID+" time _ ADC1";
 
-    hist0 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
-    hist1 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
+//    hist0 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
+//    hist1 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
 }
 
 void ChannelHistWidget::SetupView(){
@@ -266,7 +305,7 @@ void ChannelHistWidget::PlotHistograms()
 //=======================================================
 
 //    if(!chargeData->inputs.isEmpty()&&!timeData->inputs.isEmpty()) {
-//        if(doHideZeroBars) HideZeroBars();
+        if(doHideZeroBars) HideZeroBars();
 //    }
 
     chargeHist->replot();

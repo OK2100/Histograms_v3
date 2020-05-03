@@ -1,7 +1,0 @@
-
-	[1]
-	
-	Can't set bin width equal 1 from SetupWindow.
-	After clicking "Apply" 1 turn into 1.xxxxxxx .
-	The problem should be inside HistData class
-

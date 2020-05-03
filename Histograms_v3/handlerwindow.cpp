@@ -227,8 +227,8 @@ void HandlerWindow::ReadTxtFile()
     if(file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QTextStream readStream(&file);
-//        while(!file.atEnd()) {
-        for (quint8 j=0;j<10;j++){
+        while(!file.atEnd()) {
+//        for (quint8 j=0;j<10;j++){
             gbtword = readStream.readLine();
 //            qDebug() << gbtword;
 
@@ -241,7 +241,7 @@ void HandlerWindow::ReadTxtFile()
                 nWords = gbtword.mid(1,1).toUShort(&ok,16);
                 for(quint16 i=0;i<nWords;i++) {
                     gbtword = readStream.readLine();
-                    qDebug() << gbtword;
+//                    qDebug() << gbtword;
 
                     // divide GBT word to 2 channels
                     firstch_gbt = gbtword.left(10);
@@ -251,7 +251,7 @@ void HandlerWindow::ReadTxtFile()
                     firstch_gbt = HexStrtoBinStr(firstch_gbt);
                     secondch_gbt = HexStrtoBinStr(secondch_gbt);
 
-                qDebug() << firstch_gbt;
+//                qDebug() << firstch_gbt;
 
                     if(firstch_gbt.mid(13,1).toUShort()){ goto second;}          // double event
                     if(firstch_gbt.mid(12,1).toUShort()){ goto second;}          // event 1 time lost
@@ -268,10 +268,10 @@ void HandlerWindow::ReadTxtFile()
                     channelID = firstch_gbt.left(4).toUShort(&ok,2);
                     tADCNum = firstch_gbt.mid(14,1).toUShort();
 
-                    qDebug() << convertor.dataReal.time
-                             << convertor.dataReal.charge
-                             << tADCNum
-                             << channelID;
+//                    qDebug() << convertor.dataReal.time
+//                             << convertor.dataReal.charge
+//                             << tADCNum
+//                             << channelID;
 
                     if((channelID >= 1) && (channelID<=12)) {
                         if(channel[channelID-1]!=nullptr) {
@@ -287,7 +287,7 @@ void HandlerWindow::ReadTxtFile()
 
                     second:
 
-                qDebug() << secondch_gbt;
+//                qDebug() << secondch_gbt;
 
                 if(firstch_gbt.mid(13,1).toUShort()){ continue;}          // double event
                 if(firstch_gbt.mid(12,1).toUShort()){ continue;}          // event 1 time lost
@@ -305,11 +305,11 @@ void HandlerWindow::ReadTxtFile()
                     channelID = secondch_gbt.left(4).toUShort(&ok,2);
                     tADCNum = secondch_gbt.mid(14,1).toUShort();
 
-                    qDebug() << convertor.dataReal.time
-                             << convertor.dataReal.charge
-                             << tADCNum
-                             << channelID
-                             << endl;
+//                    qDebug() << convertor.dataReal.time
+//                             << convertor.dataReal.charge
+//                             << tADCNum
+//                             << channelID
+//                             << endl;
 
 
                     if((channelID >= 1) && (channelID<=12)) {
@@ -406,11 +406,14 @@ void HandlerWindow::addChannel()
 
     if(channel[chID.toInt()-1]==nullptr) {
         channel[chID.toInt()-1] = new ChannelHistWidget(this,chID);
+        if(!filePath.isEmpty()){ readFile(); }
         lbl.hide();
         grid->addWidget(channel[chID.toInt()-1]);
         this->resize(Width+Width*nAddedChannels,Height);
         nAddedChannels++;
         nextChannelID++;
+
+//        connect(channel[chID.toInt()-1],&ChannelHistWidget::channelAdded,this,&HandlerWindow::readFile);
     }
 
 
@@ -421,16 +424,6 @@ void HandlerWindow::addChannel()
 //        ui->b_5->setVisible(true);
         ui->b_6->setVisible(true);
     }
-
-//    addEvent(1,0,2);
-//    addEvent(1,0,2);
-//    addEvent(1,0,2);
-
-//    addEvent(1,3,0);
-//    addEvent(1,3,0);
-//    addEvent(1,3,0);
-
-//    updateScreen();
 }
 
 void HandlerWindow::removeChannel()
@@ -445,6 +438,7 @@ void HandlerWindow::removeChannel()
     }
 
     if(channel[chID.toInt()-1] != nullptr){
+        grid->removeWidget(channel[chID.toInt()-1]);
         delete channel[chID.toInt()-1];
         channel[chID.toInt()-1] = nullptr;
         this->resize(this->width() - Width,Height);

@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     HandlerWindow w1;
 //    HandlerWindow w2(&w1);
 //    HandlerWindow w3(&w2);
-//    w1.show();
+    w1.show();
 
 
 //  ##  TEST of HistData class  ##

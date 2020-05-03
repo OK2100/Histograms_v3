@@ -4,23 +4,24 @@
 
 void ChannelHistWidget::Experements()
 {
-    colorMap->data()->setSize(50, 50);
-    colorMap->data()->setRange(QCPRange(0, 2), QCPRange(0, 2));
+//    colorMap->data()->setSize(50, 50);
+//    colorMap->data()->setRange(QCPRange(0, 2), QCPRange(0, 2));
     
-    for (int x=0; x<50; ++x)
-      for (int y=0; y<50; ++y)
-        colorMap->data()->setCell(x, y, qCos(x/10.0)+qSin(y/10.0));
+//    for (int x=0; x<50; ++x)
+//      for (int y=0; y<50; ++y)
+//        colorMap->data()->setCell(x, y, qCos(x/10.0)+qSin(y/10.0));
     
-    colorMap->setGradient(QCPColorGradient::gpCold);
-    colorMap->setInterpolate(false);
-    colorMap->rescaleDataRange(true);
-    chargeTimeHist->rescaleAxes();
-    chargeTimeHist->replot();
+//    colorMap->setGradient(QCPColorGradient::gpCold);
+//    colorMap->setInterpolate(false);
+//    colorMap->rescaleDataRange(true);
+//    chargeTimeHist->rescaleAxes();
+//    chargeTimeHist->replot();
 }
 
 void ChannelHistWidget::setData(QCPBars* bars)
 {
     HistData* data = nullptr;
+    HistData* extra_data = nullptr;
 
     if(ADC_ID == 0) {
         if(bars == chargeBars) data = chargeData;
@@ -32,10 +33,15 @@ void ChannelHistWidget::setData(QCPBars* bars)
         else if(bars == timeBars) data = timeData1;
         else   { qDebug() << "ERROR: setData empty pointer"; return;}
     }
-    else if(ADC_ID == 2) return;
+    else if(ADC_ID == 2) {
+        if(bars == chargeBars){ data = chargeData;   extra_data = chargeData1;}
+        else if(bars == timeBars){ data = timeData;   extra_data = timeData1;}
+        else   { qDebug() << "ERROR: setData empty pointer"; return;}
+    }
 
     for(quint16 i=0;i<data->getnBins();i++){
-        bars->addData(data->getLeftLimit() + (i*data->getbinWidth()),(*data)[i]) ;
+        if(extra_data==nullptr) bars->addData(data->getLeftLimit() + (i*data->getbinWidth()),(*data)[i]) ;
+        else bars->addData(data->getLeftLimit() + (i*data->getbinWidth()),(*data)[i]+(*extra_data)[i]) ;
     }
 }
 
@@ -62,7 +68,7 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
 
     SetupView();
 
-    Experements();
+//    Experements();
 
     setupWindow = new SetupChannelWindow;
 
@@ -128,7 +134,7 @@ void ChannelHistWidget::hist_double_clicked( QMouseEvent * event )
 
 void ChannelHistWidget::InitHistograms()
 {
-    colorMap = new QCPColorMap(chargeTimeHist->xAxis, chargeTimeHist->yAxis);
+//    colorMap = new QCPColorMap(chargeTimeHist->xAxis, chargeTimeHist->yAxis);
 
     chargeData = new HistData(-100,4095,4196);
     chargeData->name = "Channel "+chID+" charge";
@@ -329,44 +335,88 @@ void ChannelHistWidget::HideZeroBars()
     double leftBorder,rightBorder,binWidth;
     quint16 i,nBins;
     i=0;
-    HistData* cdata;
-    HistData* tdata;
+    HistData* cdata = nullptr;
+    HistData* ex_cdata = nullptr;
+    HistData* ex_tdata = nullptr;
+    HistData* tdata = nullptr;
+
     if(ADC_ID ==0)          { cdata = chargeData;   tdata = timeData; }
     else if(ADC_ID ==1)     { cdata = chargeData1;  tdata = timeData1; }
+    else if(ADC_ID ==2)     { cdata = chargeData;  ex_cdata = chargeData1;
+                              tdata = timeData;   ex_tdata = timeData1; }
 
-    leftBorder = cdata->getLeftLimit();
-    binWidth = cdata->getbinWidth();
-    while((*cdata)[i]==0){
-        i++;
-        leftBorder+=binWidth;
-    }
-    i=0;
-    rightBorder = cdata->getRightLimit();
-    nBins = cdata->getnBins();
-    while((*cdata)[nBins-1-i]==0){
-        i++;
-        rightBorder-=binWidth;
-    }
-    chargeHist->xAxis->setRange(leftBorder,rightBorder);
-    chargeHist->replot();
+    if(ex_cdata==nullptr && ex_tdata==nullptr) {
+        leftBorder = cdata->getLeftLimit();
+        binWidth = cdata->getbinWidth();
+        while((*cdata)[i]==0){
+            i++;
+            leftBorder+=binWidth;
+        }
+        i=0;
+        rightBorder = cdata->getRightLimit();
+        nBins = cdata->getnBins();
+        while((*cdata)[nBins-1-i]==0){
+            i++;
+            rightBorder-=binWidth;
+        }
+        chargeHist->xAxis->setRange(leftBorder,rightBorder);
+        chargeHist->replot();
 
-    i=0;
-    leftBorder = tdata->getLeftLimit();
-    binWidth = tdata->getbinWidth();
-    while((*tdata)[i]==0){
-        i++;
-        leftBorder+=binWidth;
+        i=0;
+        leftBorder = tdata->getLeftLimit();
+        binWidth = tdata->getbinWidth();
+        while((*tdata)[i]==0){
+            i++;
+            leftBorder+=binWidth;
+        }
+
+        i=0;
+        rightBorder = tdata->getRightLimit();
+        nBins = tdata->getnBins();
+        while((*tdata)[nBins-1-i]==0){
+            i++;
+            rightBorder-=binWidth;
+        }
+        timeHist->xAxis->setRange(leftBorder,rightBorder);
+        timeHist->replot();
+    }
+    else{
+        leftBorder = cdata->getLeftLimit();
+        binWidth = cdata->getbinWidth();
+        while((*cdata)[i]==0 && (*ex_cdata)[i]==0){
+            i++;
+            leftBorder+=binWidth;
+        }
+        i=0;
+        rightBorder = cdata->getRightLimit();
+        nBins = cdata->getnBins();
+        while((*cdata)[nBins-1-i]==0 && (*ex_cdata)[nBins-1-i]==0){
+            i++;
+            rightBorder-=binWidth;
+        }
+        chargeHist->xAxis->setRange(leftBorder,rightBorder);
+        chargeHist->replot();
+
+        i=0;
+        leftBorder = tdata->getLeftLimit();
+        binWidth = tdata->getbinWidth();
+        while((*tdata)[i]==0 && (*ex_tdata)[i]==0){
+            i++;
+            leftBorder+=binWidth;
+        }
+
+        i=0;
+        rightBorder = tdata->getRightLimit();
+        nBins = tdata->getnBins();
+        while((*tdata)[nBins-1-i]==0 && (*ex_tdata)[nBins-1-i]==0){
+            i++;
+            rightBorder-=binWidth;
+        }
+        timeHist->xAxis->setRange(leftBorder,rightBorder);
+        timeHist->replot();
     }
 
-    i=0;
-    rightBorder = tdata->getRightLimit();
-    nBins = tdata->getnBins();
-    while((*tdata)[nBins-1-i]==0){
-        i++;
-        rightBorder-=binWidth;
-    }
-    timeHist->xAxis->setRange(leftBorder,rightBorder);
-    timeHist->replot();
+
 
     doHideZeroBars = 1;
 }

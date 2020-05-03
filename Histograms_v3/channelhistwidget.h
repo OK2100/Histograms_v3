@@ -71,7 +71,6 @@ private:
     Hist2Data* hist0;
     Hist2Data* hist1;
 
-
     SetupChannelWindow* setupWindow;
     QString chID;
     QPushButton* channelIDButton;

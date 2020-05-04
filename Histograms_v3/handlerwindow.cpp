@@ -253,14 +253,14 @@ void HandlerWindow::ReadTxtFile()
 
 //                qDebug() << firstch_gbt;
 
-                    if(firstch_gbt.mid(13,1).toUShort()){ goto second;}          // double event
-                    if(firstch_gbt.mid(12,1).toUShort()){ goto second;}          // event 1 time lost
-                    if(firstch_gbt.mid(11,1).toUShort()){ goto second;}          // event 2 time lost
-                    if(!firstch_gbt.mid(10,1).toUShort()){ goto second;}         // ADC in gate
-                    if(firstch_gbt.mid( 9,1).toUShort()){ goto second;}          // time information too late
-                    if(firstch_gbt.mid( 8,1).toUShort()){ goto second;}          // amplitude too high
-//                    if(firstch_gbt.mid( 7,1).toUShort()){ goto second;}          // event included in TVDC trigger
-                    if(firstch_gbt.mid( 6,1).toUShort()){ goto second;}          // time information lost
+//                    if(firstch_gbt.mid(13,1).toUShort()){ goto second;}          // double event
+//                    if(firstch_gbt.mid(12,1).toUShort()){ goto second;}          // event 1 time lost
+//                    if(firstch_gbt.mid(11,1).toUShort()){ goto second;}          // event 2 time lost
+//                    if(!firstch_gbt.mid(10,1).toUShort()){ goto second;}         // ADC in gate
+//                    if(firstch_gbt.mid( 9,1).toUShort()){ goto second;}          // time information too late
+//                    if(firstch_gbt.mid( 8,1).toUShort()){ goto second;}          // amplitude too high
+////                    if(firstch_gbt.mid( 7,1).toUShort()){ goto second;}          // event included in TVDC trigger
+//                    if(firstch_gbt.mid( 6,1).toUShort()){ goto second;}          // time information lost
 
                     // get time, charge and channelID for first channel in gbt word
                     convertor.dataBlocks.time = firstch_gbt.right(12).toULongLong(&ok,2);

@@ -414,7 +414,12 @@ bool HandlerWindow::openSourceFile()
     filePath = enteredFilePath;
 
     this->statusBar()->clearMessage();
+    label.setText("Reading File...");
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+
+//    if(fileType == "Binary files (*.bin)"){ ReadBinaryFile();}
+    if(fileType == "GBT files (*.GBT *.gbt)"){ ReadTxtFile();}
+    label.clear();
 
     if(filePath.isEmpty()) { return 0; }
     else { return 1; }
@@ -424,16 +429,12 @@ void HandlerWindow::readFile()
 {
     label.setText("Reading File...");
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    if(filePath.isEmpty()) {
-        if(!openSourceFile()) return;       // File is not choosen
-    }
-
-
+    if(filePath.isEmpty()){ openSourceFile(); }
 //    if(fileType == "Binary files (*.bin)"){ ReadBinaryFile();}
-    if(fileType == "GBT files (*.GBT *.gbt)"){ ReadTxtFile();}
 
-    label.clear();
+    if(fileType == "GBT files (*.GBT *.gbt)"){ ReadTxtFile();}
+        label.clear();
+
 }
 
 void HandlerWindow::addChannel()

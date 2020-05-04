@@ -192,36 +192,61 @@ void ChannelHistWidget::setLabels()
     if(ADC_ID==0){
         ui->lbl_Nev->setText("Nev:"+QString::number(chargeData->getTotalEvents()));
         ui->lbl_Mean->setText("Mean:"+QString::number(chargeData->getSampleMean(),'g',5));
-        ui->lbl_StdDev->setText("StdDev:"+QString::number( sqrt(chargeData->getSampleVariance()) ));
+        ui->lbl_StdDev->setText("StdDev:"+QString::number( sqrt(chargeData->getSampleVariance()),'g',4 ));
         ui->lbl_Nev1->setText("Nev:"+QString::number(timeData->getTotalEvents()));
         ui->lbl_Mean1->setText("Mean:"+QString::number(timeData->getSampleMean(),'g',5));
-        ui->lbl_StdDev1->setText("StdDev:"+QString::number( sqrt(timeData->getSampleVariance()) ));
+        ui->lbl_StdDev1->setText("StdDev:"+QString::number( sqrt(timeData->getSampleVariance()),'g',4 ));
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
     if(ADC_ID==1){
         ui->lbl_Nev->setText("Nev:"+QString::number(chargeData1->getTotalEvents()));
         ui->lbl_Mean->setText("Mean:"+QString::number(chargeData1->getSampleMean(),'g',5));
-        ui->lbl_StdDev->setText("StdDev:"+QString::number( sqrt(chargeData1->getSampleVariance()) ));
+        ui->lbl_StdDev->setText("StdDev:"+QString::number( sqrt(chargeData1->getSampleVariance()),'g',4 ));
         ui->lbl_Nev1->setText("Nev:"+QString::number(timeData1->getTotalEvents()));
         ui->lbl_Mean1->setText("Mean:"+QString::number(timeData1->getSampleMean(),'g',5));
-        ui->lbl_StdDev1->setText("StdDev:"+QString::number( sqrt(timeData1->getSampleVariance()) ));
+        ui->lbl_StdDev1->setText("StdDev:"+QString::number( sqrt(timeData1->getSampleVariance()),'g',4 ));
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
     if(ADC_ID==2){
         ui->lbl_Nev->setText("Nev:"+QString::number(chargeData->getTotalEvents()+chargeData1->getTotalEvents()));
-        ui->lbl_Mean->setText("Mean:"+QString::number( (chargeData->getSampleMean()+chargeData1->getSampleMean())/2,'g',5 ));
-        ui->lbl_StdDev->setText("StdDev:"+QString::number(sqrt(1000*(chargeData->getSumSquares()+chargeData1->getSumSquares())/(chargeData->getTotalEvents()+chargeData1->getTotalEvents())
+        if(chargeData->getTotalEvents()!=0 && chargeData1->getTotalEvents()!=0){
+            ui->lbl_StdDev->setText("StdDev:"+QString::number(sqrt(1000*(chargeData->getSumSquares()+chargeData1->getSumSquares())/(chargeData->getTotalEvents()+chargeData1->getTotalEvents())
                                                                - pow((chargeData->getSampleMean()+chargeData1->getSampleMean())/2,2)),'g',4));
+            ui->lbl_Mean->setText("Mean:"+QString::number( (chargeData->getSampleMean()+chargeData1->getSampleMean())/2,'g',5 ));
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
+        else if(chargeData->getTotalEvents()==0){
+            ui->lbl_StdDev->setText("StdDev:"+QString::number(sqrt(chargeData1->getSampleVariance()),'g',4));
+            ui->lbl_Mean->setText("Mean:"+QString::number(chargeData1->getSampleMean(),'g',5));
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
+        else{
+            ui->lbl_StdDev->setText("StdDev:"+QString::number(sqrt(chargeData->getSampleVariance()),'g',4));
+            ui->lbl_Mean->setText("Mean:"+QString::number(chargeData->getSampleMean(),'g',5));
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
+
         ui->lbl_Nev1->setText("Nev:"+QString::number(timeData->getTotalEvents()+timeData1->getTotalEvents()));
-        ui->lbl_Mean1->setText("Mean:"+QString::number( (timeData->getSampleMean()+timeData1->getSampleMean())/2,'g',5 ));
-        ui->lbl_StdDev1->setText("StdDev:"+QString::number(sqrt(1000*(timeData->getSumSquares()+timeData1->getSumSquares())/(timeData->getTotalEvents()+timeData1->getTotalEvents())
+        if(timeData->getTotalEvents()!=0 && timeData1->getTotalEvents()!=0){
+            ui->lbl_StdDev1->setText("StdDev:"+QString::number(sqrt(1000*(timeData->getSumSquares()+timeData1->getSumSquares())/(timeData->getTotalEvents()+timeData1->getTotalEvents())
                                                                - pow((timeData->getSampleMean()+timeData1->getSampleMean())/2,2)),'g',4));
+            ui->lbl_Mean1->setText("Mean:"+QString::number( (timeData->getSampleMean()+timeData1->getSampleMean())/2,'g',5 ));
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
+        else if(timeData->getTotalEvents()==0){
+            ui->lbl_StdDev1->setText("StdDev:"+QString::number(sqrt(timeData1->getSampleVariance()),'g',4));
+            ui->lbl_Mean1->setText("Mean:"+QString::number(timeData1->getSampleMean(),'g',5));
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
+        else{
+            ui->lbl_StdDev1->setText("StdDev:"+QString::number(sqrt(timeData->getSampleVariance()),'g',4));
+            ui->lbl_Mean1->setText("Mean:"+QString::number(timeData->getSampleMean(),'g',5));
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
 
     }
-
-
-    qDebug() << sqrt(chargeData->getSampleVariance());
-
 }
 
 void ChannelHistWidget::SetupView(){

@@ -196,27 +196,91 @@ void ChannelHistWidget::SetupView(){
     QPen pen;
     pen.setColor(QColor(Qt::darkBlue));
 
-    chargeHist->xAxis->setLabel("Charge");
+
+    QCPItemText *chargeLabel = new QCPItemText(chargeHist);
+    chargeLabel->setLayer("axes");
+    chargeLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    chargeLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
+    chargeLabel->position->setCoords(1,1); // place position at center/top of axis rect
+    chargeLabel->setRotation(270);
+    chargeLabel->setClipToAxisRect(0);
+    chargeLabel->setText("Charge");
+    chargeLabel->setFont(QFont(font().family(),10)); // make font a bit larger
+    chargeLabel->setBrush(Qt::white);
+
+    QCPItemText *timeLabel = new QCPItemText(timeHist);
+    timeLabel->setLayer("axes");
+    timeLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    timeLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
+    timeLabel->position->setCoords(1,1); // place position at center/top of axis rect
+    timeLabel->setRotation(270);
+    timeLabel->setClipToAxisRect(0);
+    timeLabel->setText("Time");
+    timeLabel->setFont(QFont(font().family(),10)); // make font a bit larger
+    timeLabel->setBrush(Qt::white);
+
+    QCPItemText *chCountsLabel = new QCPItemText(chargeHist);
+    chCountsLabel->setLayer("axes");
+    chCountsLabel->setPositionAlignment(Qt::AlignBottom|Qt::AlignLeft);
+    chCountsLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
+    chCountsLabel->position->setCoords(0,0); // place position at center/top of axis rect
+    chCountsLabel->setRotation(0);
+    chCountsLabel->setClipToAxisRect(0);
+    chCountsLabel->setText("Counts");
+    chCountsLabel->setFont(QFont(font().family(),10)); // make font a bit larger
+    chCountsLabel->setBrush(Qt::white);
+
+    QCPItemText *tCountsLabel = new QCPItemText(timeHist);
+    tCountsLabel->setLayer("axes");
+    tCountsLabel->setPositionAlignment(Qt::AlignBottom|Qt::AlignLeft);
+    tCountsLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
+    tCountsLabel->position->setCoords(0,0); // place position at center/top of axis rect
+    tCountsLabel->setRotation(0);
+    tCountsLabel->setClipToAxisRect(0);
+    tCountsLabel->setText("Counts");
+    tCountsLabel->setFont(QFont(font().family(),10)); // make font a bit larger
+    tCountsLabel->setBrush(Qt::white);
+
+
     chargeHist->xAxis->setTicker(fixedTicker);
     chargeHist->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     chargeHist->axisRect()->setRangeDrag(Qt::Horizontal);
     chargeHist->axisRect()->setRangeZoom(Qt::Horizontal);
     chargeHist->axisRect()->setBackgroundScaled(false);
-    chargeHist->yAxis->setLabel("N_inputs");
     chargeBars->setPen(pen);
     chargeBars->setBrush(QColor(Qt::darkBlue));
 
-    timeHist->xAxis->setLabel("Time");
     timeHist->xAxis->setTicker(fixedTicker);
     timeHist->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     timeHist->axisRect()->setRangeDrag(Qt::Horizontal);
     timeHist->axisRect()->setRangeZoom(Qt::Horizontal);
-    timeHist->yAxis->setLabel("N_inputs");
     timeBars->setPen(pen);
     timeBars->setBrush(QColor(Qt::darkBlue));
 
-    chargeTimeHist->xAxis->setLabel("Charge");
-    chargeTimeHist->yAxis->setLabel("Time");
+    QCPItemText *chargeLabel1 = new QCPItemText(chargeTimeHist);
+    chargeLabel1->setLayer("axes");
+    chargeLabel1->setPositionAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    chargeLabel1->position->setType(QCPItemPosition::ptAxisRectRatio);
+    chargeLabel1->position->setCoords(1,1); // place position at center/top of axis rect
+    chargeLabel1->setRotation(270);
+    chargeLabel1->setClipToAxisRect(0);
+    chargeLabel1->setText("Charge");
+    chargeLabel1->setFont(QFont(font().family(),10)); // make font a bit larger
+    chargeLabel1->setBrush(Qt::white);
+
+    QCPItemText *timeLabel1 = new QCPItemText(chargeTimeHist);
+    timeLabel1->setLayer("axes");
+    timeLabel1->setPositionAlignment(Qt::AlignBottom|Qt::AlignLeft);
+    timeLabel1->position->setType(QCPItemPosition::ptAxisRectRatio);
+    timeLabel1->position->setCoords(0,0); // place position at center/top of axis rect
+    timeLabel1->setRotation(0);
+    timeLabel1->setClipToAxisRect(0);
+    timeLabel1->setText("Time");
+    timeLabel1->setFont(QFont(font().family(),10)); // make font a bit larger
+    timeLabel1->setBrush(Qt::white);
+
+//    chargeTimeHist->xAxis->setLabel("Charge");
+//    chargeTimeHist->yAxis->setLabel("Time");
     chargeTimeHist->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
 
     chargeHist->xAxis->setRange(chargeData->getLeftLimit(),chargeData->getRightLimit());

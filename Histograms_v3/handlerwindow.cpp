@@ -341,23 +341,28 @@ void HandlerWindow::addEvent(quint8 channelID, quint32 bitset, bool doPrintDecod
 
 void HandlerWindow::addEvent(quint8 channelID, quint8 flags, qint16 charge, qint16 time)
 {
-    //  Checking flags
-    //  Add later
-
     QBitArray ar=QBitArray::fromBits(reinterpret_cast<const char*>(&flags),8);
 
     if(doCheckFlags){
         ////  ADC ID bit here
-        if(ar[6]){ return;}          // double event
-        if(ar[5]){ return;}          // time info not valid
-        if(!ar[4]){ return;}         // ADC in gate
-        if(ar[3]){ return;}          // time information too late
-        if(ar[2]){ return;}          // amplitude too high
-        ////////if(ar[1]){ return;}          // event included in TVDC trigger
-        if(ar[0]){ return;}           // time info lost
+        if(ar[1]){ return;}          // double event
+        if(ar[2]){ return;}          // time info not valid
+        if(!ar[3]){ return;}         // ADC in gate
+        if(ar[4]){ return;}          // time information too late
+        if(ar[5]){ return;}          // amplitude too high
+        ////////if(ar[6]){ return;}          // event included in TVDC trigger
+        if(ar[7]){ return;}           // time info lost
     }
 
-    sendEventToChannel(channelID,ar[7],charge,time);
+//    qDebug() << "\t" <<ar << "[inversed]";
+//    qDebug() << "\tChannel ID:" << channelID
+//             << "\tADC ID:" << (quint8)ar[0]
+//             << "\tTime:" << time
+//             << "\tCharge:"<< charge;
+//    qDebug() << endl;
+
+
+    sendEventToChannel(channelID,ar[0],charge,time);
 }
 
 

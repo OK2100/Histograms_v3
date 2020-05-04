@@ -14,9 +14,8 @@ int main(int argc, char *argv[])
     w1.show();
 
     w1.addEvent("A0923BA05B90923C103E",1);
-    w1.addEvent(1,quint32(142304415740),1);
-
-
+    w1.addEvent(9,quint32(0x923C103E),1);       // part of right half 90923C103E
+    w1.addEvent(9,quint8(0x49),961,62);    // flags are 01001001 -> 0x49
 
 //  ##  TEST of HistData class  ##
 //  ##  uncomment "CONFIG += console" in .pro file  ##

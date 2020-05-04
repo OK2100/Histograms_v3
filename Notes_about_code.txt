@@ -1,6 +1,20 @@
 
 	HOW IT WORKS
 
+#####	ABOUT	#####	
+	
+	###	void addEvent(quint8 chID, quint32 bitset, bool doPrintDecoded=false);
+
+	bitset format:
+		[flags 8 bit][charge 13 bit][time 12 bit] - this is 33 bits
+		therefore higher bit is thrown out - "time info lost" bit	
+
+		[flags 7 bit][charge 13 bit][time 12 bit] - this is 32 bits
+
+
+
+
+
 							[	Setup channel window	]
 	
 	It is created inside ChannelHistWidget's constructor.

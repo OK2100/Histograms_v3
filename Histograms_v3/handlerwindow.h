@@ -73,7 +73,12 @@ private:
 
 public slots:                       //  Slots for connecting with other progs
     void updateScreen();
-    void addEvent(quint8 chID,quint8 adc_id,qint16 charge,qint16 time);
+    void sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qint16 time);
+
+    void addEvent(quint8 chID, quint8 flags, qint16 charge, qint16 time);
+    void addEvent(QString gbtword,bool doPrintDecoded=false);
+    void addEvent(quint8 chID, quint32 bitset, bool doPrintDecoded=false); // without "time info lost"
+
     void chooseADC();
 
 signals:
@@ -82,6 +87,8 @@ signals:
 private:
     int Height;
     int Width;
+    bool doHide=1;
+    bool doCheckFlags=0;
 
 
 //    QWidget* centralWidget = new QWidget;

@@ -93,8 +93,6 @@ private:
     void SetupView();
     void LoadSettings(QString file_ini);
 
-signals:
-    void channelAdded();
 
 };
 

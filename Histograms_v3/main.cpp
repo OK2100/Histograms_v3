@@ -13,6 +13,10 @@ int main(int argc, char *argv[])
 //    HandlerWindow w3(&w2);
     w1.show();
 
+    w1.addEvent("A0923BA05B90923C103E",1);
+    w1.addEvent(1,quint32(142304415740),1);
+
+
 
 //  ##  TEST of HistData class  ##
 //  ##  uncomment "CONFIG += console" in .pro file  ##

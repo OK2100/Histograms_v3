@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QWidget>
 #include <QThread>
+#include <QLabel>
 #include <QtGui>
 
 #include "channelhistwidget.h"
@@ -70,6 +71,8 @@ public:
 
 private:
     Ui::HandlerWindow *ui;
+    QLabel label;
+
 
 public slots:                       //  Slots for connecting with other progs
     void updateScreen();

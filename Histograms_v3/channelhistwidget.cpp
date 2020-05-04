@@ -402,7 +402,7 @@ void ChannelHistWidget::HideZeroBars()
                      i++;
                      leftBorder+=binWidth;
                  }
-                 qDebug() << "Charge" << j << "left" << leftBorder;
+//                 qDebug() << "Charge" << j << "left" << leftBorder;
 
                  i=0;
                  rightBorder = cdata[j]->getRightLimit();
@@ -411,7 +411,7 @@ void ChannelHistWidget::HideZeroBars()
                      i++;
                      rightBorder-=binWidth;
                  }
-                 qDebug() << "Charge" << j << "right" << rightBorder;
+//                 qDebug() << "Charge" << j << "right" << rightBorder;
 
                  chMinBorder[j]=leftBorder-binWidth; chMaxBorder[j]=rightBorder+binWidth;
 
@@ -422,7 +422,7 @@ void ChannelHistWidget::HideZeroBars()
                      i++;
                      leftBorder+=binWidth;
                  }
-                 qDebug() << "Time" << j << "left" << leftBorder;
+//                 qDebug() << "Time" << j << "left" << leftBorder;
 
                  i=0;
                  rightBorder = tdata[j]->getRightLimit();
@@ -431,7 +431,7 @@ void ChannelHistWidget::HideZeroBars()
                      i++;
                      rightBorder-=binWidth;
                  }
-                 qDebug() << "Time" << j << "right" << rightBorder;
+//                 qDebug() << "Time" << j << "right" << rightBorder;
 
                  tMinBorder[j]=leftBorder-binWidth; tMaxBorder[j]=rightBorder+binWidth;
              }

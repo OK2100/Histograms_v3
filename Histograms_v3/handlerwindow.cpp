@@ -31,7 +31,6 @@ HandlerWindow::HandlerWindow(HandlerWindow* prevWindow,QWidget *parent)
 
 
 
-
     SetUp();
 }
 
@@ -48,6 +47,7 @@ void HandlerWindow::SetUp()
     Height = rec.height() - rec.height() / 8;
     Width = rec.width() / 4;
 
+    this->statusBar()->addWidget(&label);
 
     this->setMinimumSize(Width,Height);
     this->setGeometry(rec.x(),rec.y(),Width,Height);
@@ -213,6 +213,7 @@ void HandlerWindow::ReadBinaryFile()
 
 void HandlerWindow::ReadTxtFile()
 {
+
     for(quint16 i=0;i<12;i++) {
         if(channel[i]!=nullptr){
             channel[i]->Clear();
@@ -241,7 +242,7 @@ void HandlerWindow::ReadTxtFile()
                 nWords = gbtword.mid(1,1).toUShort(&ok,16);
                 for(quint16 i=0;i<nWords;i++) {
                     gbtword = readStream.readLine();
-                    addEvent(gbtword,1);
+                    addEvent(gbtword);
 
                 } // end of for
             }
@@ -254,6 +255,7 @@ void HandlerWindow::ReadTxtFile()
     file.close();
 
     PlotHistograms();
+
 }
 
 
@@ -382,6 +384,10 @@ void HandlerWindow::sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qin
 
 void HandlerWindow::updateScreen()
 {
+    this->statusBar()->showMessage("Updating screen...",500);
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+
+
     for(quint16 i=0;i<12;i++) {
         if(channel[i]!=nullptr){
             channel[i]->Update();
@@ -398,38 +404,48 @@ void HandlerWindow::startNewWindow(quint8 firstChannelID)
 
 bool HandlerWindow::openSourceFile()
 {
+    this->statusBar()->showMessage("Opening file...");
+
     QString enteredFilePath = QFileDialog::getOpenFileName(this,
                                                     QString::fromUtf8("Open file"),
                                                     QDir::currentPath(),
                                                     "GBT files (*.GBT *.gbt);;/*Binary files (*.bin);;*/All files (*.*)",
                                                     &fileType);
     filePath = enteredFilePath;
-//    filePathSave = enteredFilePath;
-//    filePath = filePathSave.toUtf8().data();
-//    if(filePathSave.isEmpty()) { return 0; }
+
+    this->statusBar()->clearMessage();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+
     if(filePath.isEmpty()) { return 0; }
     else { return 1; }
 }
 
 void HandlerWindow::readFile()
 {
-//    if(filePathSave.isEmpty()) {
+    label.setText("Reading File...");
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+
     if(filePath.isEmpty()) {
         if(!openSourceFile()) return;       // File is not choosen
     }
 
+
 //    if(fileType == "Binary files (*.bin)"){ ReadBinaryFile();}
     if(fileType == "GBT files (*.GBT *.gbt)"){ ReadTxtFile();}
+
+    label.clear();
 }
 
 void HandlerWindow::addChannel()
 {
+    this->statusBar()->showMessage("Adding channel...");
+
     if(nAddedChannels == 4){
 //        qDebug() <<"start new window" ;
         emit showNewWindow(nextChannelID);
+        this->statusBar()->clearMessage();
         return;
     }
-
 
     bool bOk;
     QStringList listID = {"1","2","3","4","5","6","7","8","9","10","11","12"};
@@ -439,16 +455,21 @@ void HandlerWindow::addChannel()
         return;
     }
 
+    this->statusBar()->clearMessage();
+
+
     if(channel[chID.toInt()-1]==nullptr) {
         channel[chID.toInt()-1] = new ChannelHistWidget(this,chID);
-        if(!filePath.isEmpty()){ readFile(); }
         lbl.hide();
+//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         grid->addWidget(channel[chID.toInt()-1]);
+//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         this->resize(Width+Width*nAddedChannels,Height);
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         nAddedChannels++;
         nextChannelID++;
+        if(!filePath.isEmpty()){ readFile(); }
 
-//        connect(channel[chID.toInt()-1],&ChannelHistWidget::channelAdded,this,&HandlerWindow::readFile);
     }
 
 
@@ -523,6 +544,8 @@ void HandlerWindow::removeAllChannel()
 
 void HandlerWindow::reset()
 {
+    this->statusBar()->showMessage("Channel resetting...");
+
     bool bOk;
     QStringList listID = {"1","2","3","4","5","6","7","8","9","10","11","12"};
     QString chID=QInputDialog::getItem(this,"Reset","Reset channel:",listID,0,0,&bOk);
@@ -532,10 +555,14 @@ void HandlerWindow::reset()
         return;
     }
 
+    this->statusBar()->showMessage("Clearing data...");
+
     if(channel[chID.toInt()-1]!=nullptr){
         channel[chID.toInt()-1]->Clear();
         channel[chID.toInt()-1]->PlotHistograms();
     }
+
+    this->statusBar()->clearMessage();
 }
 
 void HandlerWindow::resetAll()
@@ -564,9 +591,11 @@ void HandlerWindow::hideZeroBars()
     for(quint16 i=0;i<12;i++) {
         if(channel[i]!=nullptr){
             if(doHide) {
+                this->statusBar()->showMessage("Hiding emty bars...",500);
                 channel[i]->HideZeroBars();
             }
             else {
+                this->statusBar()->showMessage("Unhiding emty bars...",500);
                 channel[i]->ShowFullRange();
             }
         }

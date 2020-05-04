@@ -190,7 +190,7 @@ void ChannelHistWidget::InitHistograms()
 void ChannelHistWidget::SetupView(){
 
     QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);
-    fixedTicker->setTickStep(2.0);
+    fixedTicker->setTickStep(1.0);
     fixedTicker->setScaleStrategy(QCPAxisTickerFixed::ssMultiples);
 
     QPen pen;
@@ -241,7 +241,7 @@ void ChannelHistWidget::SetupView(){
     tCountsLabel->setFont(QFont(font().family(),10)); // make font a bit larger
     tCountsLabel->setBrush(Qt::white);
 
-
+    chargeHist->yAxis->setTicker(fixedTicker);
     chargeHist->xAxis->setTicker(fixedTicker);
     chargeHist->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     chargeHist->axisRect()->setRangeDrag(Qt::Horizontal);
@@ -250,12 +250,16 @@ void ChannelHistWidget::SetupView(){
     chargeBars->setPen(pen);
     chargeBars->setBrush(QColor(Qt::darkBlue));
 
+    timeHist->yAxis->setTicker(fixedTicker);
     timeHist->xAxis->setTicker(fixedTicker);
     timeHist->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     timeHist->axisRect()->setRangeDrag(Qt::Horizontal);
     timeHist->axisRect()->setRangeZoom(Qt::Horizontal);
     timeBars->setPen(pen);
     timeBars->setBrush(QColor(Qt::darkBlue));
+
+    chargeTimeHist->xAxis->setTicker(fixedTicker);
+    chargeTimeHist->yAxis->setTicker(fixedTicker);
 
     QCPItemText *chargeLabel1 = new QCPItemText(chargeTimeHist);
     chargeLabel1->setLayer("axes");

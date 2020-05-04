@@ -17,20 +17,16 @@ quint16 HistData::addEvent(qint16 _event)
     qreal rightborder=leftborder+binWidth;
 
     for(quint16 i=0;i<nBins;i++) {
-        if((leftborder<=_event)&&(_event<=rightborder)) {           // left bin<-border value; exept leftLimit;
+        if((leftborder<=_event)&&(_event<=rightborder)) {
             nEvents[i]++;
             bEmpty = 0;
+            sampleMean+=_event;
+            sampleVariance+=(_event*_event*1.0)/1000;
             return i;
         }
         leftborder+=binWidth;
         rightborder+=binWidth;
     }
-//    if((rightborder-binWidth<=_event)&&(_event<=rightLimit)) {
-//        qDebug() << "You need me!!!" << _event;
-//        nEvents.back()++;
-//        bEmpty = 0;
-//        return nBins-1;
-//    }
     nLosts++;
     return nBins;
 }
@@ -63,6 +59,8 @@ void HistData::clear()
     nEvents.resize(nBins);
     nEvents.fill(0);
     bEmpty = 1;
+    sampleMean=0;
+    sampleVariance=0;
 }
 
 void HistData::setnBins(quint16 _nBins)
@@ -122,23 +120,24 @@ quint32& HistData::operator[] (const quint16 index)
 
 double HistData::getSampleMean()
 {
-    double sum_elems(0);
-    foreach(double _elem,inputs){
-        sum_elems += _elem;
-    }
-    sampleMean = sum_elems/(getTotalEvents());
-
-    return sampleMean;
+//    double sum_elems(0);
+//    foreach(double _elem,inputs){
+//        sum_elems += _elem;
+//    }
+//    sampleMean = sum_elems/(getTotalEvents());
+    if(getTotalEvents()!=0) return sampleMean*1.0/getTotalEvents();
+    else return 0;
 }
 
 double HistData::getSampleVariance()
 {
-    double sum_sqs(0);
-    foreach(double _elem,inputs){
-        sum_sqs += (_elem-getSampleMean())*(_elem-getSampleMean());
-    }
-    sampleVariance = sum_sqs/(getTotalEvents()-1);
-    return sampleVariance;
+//    double sum_sqs(0);
+//    foreach(double _elem,inputs){
+//        sum_sqs += (_elem-getSampleMean())*(_elem-getSampleMean());
+//    }
+//    sampleVariance = sum_sqs/(getTotalEvents()-1);
+    if(getTotalEvents()!=0) {return (1000*sampleVariance)/getTotalEvents()-pow(getSampleMean(),2);}
+    else {return 0;}
 }
 
 double HistData::getSigma()

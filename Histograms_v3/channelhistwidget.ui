@@ -76,7 +76,34 @@
              <property name="spacing">
               <number>0</number>
              </property>
-             <item row="2" column="1">
+             <item row="0" column="1">
+              <widget class="QLabel" name="lbl_Nev">
+               <property name="font">
+                <font>
+                 <pointsize>8</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Nev:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="lbl_Mean">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>8</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Mean:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
               <spacer name="verticalSpacer_6">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -89,31 +116,7 @@
                </property>
               </spacer>
              </item>
-             <item row="1" column="1">
-              <widget class="QLabel" name="label_3">
-               <property name="font">
-                <font>
-                 <pointsize>8</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>N ev:10101541</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLabel" name="label_2">
-               <property name="font">
-                <font>
-                 <pointsize>8</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>Bin w: 1</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
+             <item row="1" column="0">
               <spacer name="horizontalSpacer_2">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -126,15 +129,116 @@
                </property>
               </spacer>
              </item>
+             <item row="2" column="1">
+              <widget class="QLabel" name="lbl_StdDev">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>8</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>StdDev:</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
          </layout>
         </item>
         <item row="2" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="10">
+         <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0">
           <item>
-           <widget class="QCustomPlot" name="timeHist" native="true"/>
+           <widget class="QCustomPlot" name="timeHist" native="true">
+            <layout class="QGridLayout" name="gridLayout_5">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="rightMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <item row="0" column="0">
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>121</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="3" column="1">
+              <spacer name="verticalSpacer_7">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>82</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="lbl_Nev1">
+               <property name="font">
+                <font>
+                 <pointsize>8</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Nev:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="lbl_Mean1">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>8</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Mean:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLabel" name="lbl_StdDev1">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>8</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>StdDev:</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </item>

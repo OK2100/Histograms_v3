@@ -35,6 +35,7 @@ public:
     double getSampleVariance();
     double getSigma();
     double getFWHM();
+    double getSumSquares(){ return sampleVariance; }
 
     quint32& operator[] (const quint16 index);      //  return nEvents per bin
 
@@ -45,8 +46,8 @@ private:
     qint16 rightLimit;
     quint16 nBins;
     qreal binWidth;
-    double sampleMean;
-    double sampleVariance;
+    qint32 sampleMean=0;
+    double sampleVariance=0;
     quint32 nLosts=0;
 
     bool bEmpty = 1;

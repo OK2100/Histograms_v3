@@ -61,6 +61,7 @@ private:
     void Experements();
 
     void setData(QCPBars*);
+    void setLabels();
 
     Ui::ChannelHistWidget *ui;
 

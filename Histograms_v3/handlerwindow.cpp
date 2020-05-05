@@ -2,6 +2,34 @@
 #include "ui_handlerwindow.h"
 
 
+void DecodeChsRegExp(QString chIDs, QVector<quint8> &vec)
+{
+    QRegExp expr("([0-9]{1,2})-([0-9]{1,2})");
+//    qDebug() << ( chIDs.contains(expr) ? "Contain" : "Don't contain" ) << ":" << chIDs;
+    QRegExp expr2("[0-9]{1,2}");
+//    qDebug() << ( chIDs.contains(expr2) ? "Contain" : "Don't contain" ) << ":" << chIDs;
+
+    int lastPos = 0;
+    while( ( lastPos = expr.indexIn( chIDs, lastPos ) ) != -1 ) {
+        lastPos += expr.matchedLength();
+//        qDebug() << expr.cap( 0 ) << ":" << expr.cap( 1 ) << expr.cap(2);
+        quint8 first,last;
+        first = expr.cap(1).toUShort(); last = expr.cap(2).toUShort();
+        for(quint8 j=first;last>=j && j<=12;j++) {
+            if(j==0) continue;
+            if(!vec.contains(j)) vec.append(j);
+        }
+    }
+    lastPos = 0;
+    while( ( lastPos = expr2.indexIn( chIDs, lastPos ) ) != -1 ) {
+        lastPos += expr2.matchedLength();
+//        qDebug() << expr2.cap( 0 );
+        quint8 num = expr2.cap(0).toUShort();
+        if(!vec.contains(num) && num<=12 && num!=0) { vec.append(num); }
+    }
+    std::sort(vec.begin(),vec.end());
+
+}
 
 QString HexStrtoBinStr(QString inp){
     QString result;
@@ -19,8 +47,9 @@ HandlerWindow::HandlerWindow(HandlerWindow* prevWindow,QWidget *parent)
 {
     ui->setupUi(this);
     grid = ui->grid;
+    prevWin=prevWindow;
     if(prevWindow!=nullptr) {
-    connect(prevWindow,SIGNAL(showNewWindow(quint8)),this,SLOT(startNewWindow(quint8)));
+        connect(prevWindow,SIGNAL(showNewWindow(quint8)),this,SLOT(startNewWindow(quint8)));
     }
 
     connect(ui->b_1,&QPushButton::clicked,this,&HandlerWindow::addChannel);
@@ -28,7 +57,6 @@ HandlerWindow::HandlerWindow(HandlerWindow* prevWindow,QWidget *parent)
     connect(ui->b_3,&QPushButton::clicked,this,&HandlerWindow::reset);
     connect(ui->b_4,&QPushButton::clicked,this,&HandlerWindow::hideZeroBars);
     connect(ui->b_6,&QPushButton::clicked,this,&HandlerWindow::readFile);
-
 
 
     SetUp();
@@ -74,17 +102,17 @@ void HandlerWindow::SetUp()
 
     dataBar=menuBar()->addMenu("&Data");
 
-    showStatWindowAction=new QAction("&Show statistics (to console)",this);
-    showStatWindowAction->setShortcut(tr("Ctrl+t"));
-    dataBar->addAction(showStatWindowAction);
-    connect(showStatWindowAction, SIGNAL(triggered()),this,SLOT(showStatWindow()));
-
     optionsBar=menuBar()->addMenu("&Options");              //  #Options field
 
     addChannelAction=new QAction("&Add channel...",this);
     addChannelAction->setShortcut(tr("Ctrl+a"));
     optionsBar->addAction(addChannelAction);
     connect(addChannelAction, SIGNAL(triggered()),this,SLOT(addChannel()));
+
+    addChannelRangeAction=new QAction("&Add range of channels...",this);
+    addChannelRangeAction->setShortcut(tr("Ctrl+Shift+a"));
+    optionsBar->addAction(addChannelRangeAction);
+    connect(addChannelRangeAction, SIGNAL(triggered()),this,SLOT(doAddChannelRange()));
 
     removeChannelAction=new QAction("&Remove channel...",this);
     removeChannelAction->setShortcut(tr("Ctrl+r"));
@@ -120,11 +148,6 @@ void HandlerWindow::SetUp()
     updateAction->setShortcut(tr("Ctrl+u"));
     optionsBar->addAction(updateAction);
     connect(updateAction, SIGNAL(triggered()),this,SLOT(updateScreen()));
-
-    chooseADCAction=new QAction("&Choose ADC number",this);
-    chooseADCAction->setShortcut(tr("Ctrl+d"));
-    optionsBar->addAction(chooseADCAction);
-    connect(chooseADCAction, SIGNAL(triggered()),this,SLOT(chooseADC()));
 
 
     lbl.setText("\n"
@@ -399,7 +422,63 @@ void HandlerWindow::startNewWindow(quint8 firstChannelID)
 {
     this->show();
     nextChannelID = firstChannelID;
+    filePath=prevWin->getFilePath();
+    doHide=prevWin->isEmptyBarsHidden();
     addChannel();
+}
+
+void HandlerWindow::doAddChannelRange()
+{
+    bool ok;
+    QString chIDs = QInputDialog::getText(this,
+                                 QString::fromUtf8("Input"),
+                                 QString::fromUtf8("Input range of channels \n(f.e. \"2,3,10\" or \"1-12\" ):"),
+                                 QLineEdit::Normal,
+                                 "", &ok);
+    if (!ok || chIDs.isEmpty()){ return; }
+
+    addChannelRange(chIDs);
+
+}
+
+void HandlerWindow::addChannelRange(QString chIDs)
+{
+    QVector<quint8> vec;
+    DecodeChsRegExp(chIDs,vec);
+//    qDebug() << vec;
+
+    quint8 j=0;
+    do{
+        addSingleChannel(vec.at(j));
+        j++;
+    }while(j<=4 && j<vec.size() );
+}
+
+void HandlerWindow::addSingleChannel(quint8 chID)
+{
+    if(channel[chID-1]==nullptr) {
+        channel[chID-1] = new ChannelHistWidget(this,QString::number(chID));
+        lbl.hide();
+//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        grid->addWidget(channel[chID-1]);
+//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        this->resize(Width+Width*nAddedChannels,Height);
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        nAddedChannels++;
+        nextChannelID++;
+        if(!filePath.isEmpty()){ readFile(); }
+
+    }
+
+
+    if(nAddedChannels == 1){
+        ui->b_2->setVisible(true);
+        ui->b_3->setVisible(true);
+        ui->b_4->setVisible(true);
+//        ui->b_5->setVisible(true);
+        ui->b_6->setVisible(true);
+    }
+
 }
 
 bool HandlerWindow::openSourceFile()
@@ -429,12 +508,10 @@ void HandlerWindow::readFile()
 {
     label.setText("Reading File...");
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-    if(filePath.isEmpty()){ openSourceFile(); }
+    if(filePath.isEmpty()){ openSourceFile(); label.clear(); return; }
 //    if(fileType == "Binary files (*.bin)"){ ReadBinaryFile();}
-
     if(fileType == "GBT files (*.GBT *.gbt)"){ ReadTxtFile();}
         label.clear();
-
 }
 
 void HandlerWindow::addChannel()
@@ -458,29 +535,7 @@ void HandlerWindow::addChannel()
 
     this->statusBar()->clearMessage();
 
-
-    if(channel[chID.toInt()-1]==nullptr) {
-        channel[chID.toInt()-1] = new ChannelHistWidget(this,chID);
-        lbl.hide();
-//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        grid->addWidget(channel[chID.toInt()-1]);
-//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        this->resize(Width+Width*nAddedChannels,Height);
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        nAddedChannels++;
-        nextChannelID++;
-        if(!filePath.isEmpty()){ readFile(); }
-
-    }
-
-
-    if(nAddedChannels == 1){
-        ui->b_2->setVisible(true);
-        ui->b_3->setVisible(true);
-        ui->b_4->setVisible(true);
-//        ui->b_5->setVisible(true);
-        ui->b_6->setVisible(true);
-    }
+    addSingleChannel(chID.toUShort());
 }
 
 void HandlerWindow::removeChannel()
@@ -493,11 +548,15 @@ void HandlerWindow::removeChannel()
 //        qDebug() << "Cancel";
         return;
     }
+    removeSingleChannel(chID.toUShort());
+}
 
-    if(channel[chID.toInt()-1] != nullptr){
-        grid->removeWidget(channel[chID.toInt()-1]);
-        delete channel[chID.toInt()-1];
-        channel[chID.toInt()-1] = nullptr;
+void HandlerWindow::removeSingleChannel(quint8 chID)
+{
+    if(channel[chID-1] != nullptr){
+        grid->removeWidget(channel[chID-1]);
+        delete channel[chID-1];
+        channel[chID-1] = nullptr;
         this->resize(this->width() - Width,Height);
         nAddedChannels--;
         nextChannelID--;
@@ -509,9 +568,20 @@ void HandlerWindow::removeChannel()
         ui->b_4->setVisible(false);
 //        ui->b_5->setVisible(false);
         ui->b_6->setVisible(false);
-
-
     }
+}
+
+void HandlerWindow::removeChannelRange(QString chIDs)
+{
+    QVector<quint8> vec;
+    DecodeChsRegExp(chIDs,vec);
+//    qDebug() << vec;
+
+    quint8 j=0;
+    do{
+        removeSingleChannel(vec.at(j));
+        j++;
+    }while(j<vec.size() );
 }
 
 void HandlerWindow::removeAllChannel()
@@ -523,23 +593,10 @@ void HandlerWindow::removeAllChannel()
 
     if (reply == QMessageBox::Yes)
     {
-        for(quint16 i=0;i<12;i++){
-            if(channel[i]!=nullptr) {
-                delete channel[i];
-                channel[i] = nullptr;
-                nextChannelID--;
-            }
-        }
-
-        nAddedChannels=0;
-        this->resize(0,0);
-        lbl.show();
-        ui->b_2->setVisible(false);
-        ui->b_3->setVisible(false);
-        ui->b_4->setVisible(false);
-//        ui->b_5->setVisible(false);
-        ui->b_6->setVisible(false);
-
+//        for(quint16 i=1;i<=12;i++){
+//            removeSingleChannel(i);
+//        }
+        removeChannelRange("1-12");
     }
 }
 
@@ -555,15 +612,32 @@ void HandlerWindow::reset()
 //        qDebug() << "Cancel";
         return;
     }
+    resetSingleChannel(chID.toUShort());
+}
 
+void HandlerWindow::resetSingleChannel(quint8 chID)
+{
     this->statusBar()->showMessage("Clearing data...");
 
-    if(channel[chID.toInt()-1]!=nullptr){
-        channel[chID.toInt()-1]->Clear();
-        channel[chID.toInt()-1]->PlotHistograms();
+    if(channel[chID-1]!=nullptr){
+        channel[chID-1]->Clear();
+        channel[chID-1]->PlotHistograms();
     }
 
     this->statusBar()->clearMessage();
+}
+
+void HandlerWindow::resetChannelRange(QString chIDs)
+{
+    QVector<quint8> vec;
+    DecodeChsRegExp(chIDs,vec);
+//    qDebug() << vec;
+
+    quint8 j=0;
+    do{
+        resetSingleChannel(vec.at(j));
+        j++;
+    }while(j<vec.size() );
 }
 
 void HandlerWindow::resetAll()
@@ -575,12 +649,7 @@ void HandlerWindow::resetAll()
 
     if (reply == QMessageBox::Yes)
     {
-        for(quint16 i=0;i<12;i++) {
-            if(channel[i]!=nullptr){
-                channel[i]->Clear();
-            }
-        }
-        PlotHistograms();
+        resetChannelRange("1-12");
     }
 }
 
@@ -603,40 +672,13 @@ void HandlerWindow::hideZeroBars()
     }
 }
 
-void HandlerWindow::chooseADC()
+void HandlerWindow::chooseADC(quint8 chID,quint8 adcID)
 {
-
-    bool bOk;
-    QStringList listID = {"0","1","2"};
-    QString adcNum=QInputDialog::getItem(this,"ADC","Choose ADC number:",listID,0,0,&bOk);
-
-    if(!bOk){
-//        qDebug() << "Cancel";
-        return;
-    }
-
-    quint8 adc = adcNum.toUShort();
-//    qDebug() << adc;
-    ADCNumber = adc;
-
-}
-
-void HandlerWindow::showStatWindow()
-{
-    QString text;
-    QMessageBox msgBox;
-    msgBox.setWindowTitle("Stat");
-    msgBox.show();
-    for(quint16 i=0;i<12;i++) {
-        if(channel[i]!=nullptr){
-            text.append(channel[i]->GetStatInfo());
-//            qDebug()<<"";
-//            channel[i]->PrintInfo(1);
+    if(chID>=1 && chID<=12){
+        if(channel[chID-1]!=nullptr){
+            channel[chID-1]->ADC_ID=adcID;
         }
     }
-    msgBox.setText(text);
-    msgBox.exec();
-
 }
 
 

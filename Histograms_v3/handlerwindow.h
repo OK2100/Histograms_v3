@@ -11,6 +11,8 @@
 #include <QThread>
 #include <QLabel>
 #include <QtGui>
+#include <QRegExp>
+#include <QStringList>
 
 #include "channelhistwidget.h"
 //#include "../sources/DataBlockReaderFT0.h"
@@ -69,39 +71,60 @@ public:
     explicit HandlerWindow(HandlerWindow* prevWindow = nullptr,QWidget *parent = nullptr);
     ~HandlerWindow();
 
-private:
-    Ui::HandlerWindow *ui;
-    QLabel label;
-
-
-public slots:                       //  Slots for connecting with other progs
-    void updateScreen();
-    void sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qint16 time);
+public slots:
 
     void addEvent(quint8 chID, quint8 flags, qint16 charge, qint16 time);
     void addEvent(QString gbtword,bool doPrintDecoded=false);
     void addEvent(quint8 chID, quint32 bitset, bool doPrintDecoded=false); // without "time info lost"
 
-    void chooseADC();
+    void addSingleChannel(quint8 chID);
+    void addChannelRange(QString chIDs);
+
+    void removeSingleChannel(quint8 chID);
+    void removeChannelRange(QString chIDs);
+
+    void resetSingleChannel(quint8 chID);
+    void resetChannelRange(QString chIDs);
+
+    QString getFilePath(){return filePath;}
+    void setFilePath(QString path){filePath = path;}
+
+    bool isEmptyBarsHidden(){return doHide;}
+    void hideZeroBars();        // works as switch
+
+    void readFile();
+    void updateScreen();
+
+    void chooseADC(quint8 chID,quint8 adcID);           // [0,1,2]  2 mean both ADC0 and ADC1
+
+
+private slots:
+    void startNewWindow(quint8 firstChannelID);
+    bool openSourceFile();
+    void addChannel();              // with input
+    void removeChannel();           // with input
+    void removeAllChannel();        // with input
+    void reset();                   // with input
+    void resetAll();                // with input
+    void doAddChannelRange();
 
 signals:
     void showNewWindow(quint8 firstChannelID);
 
+
 private:
+    Ui::HandlerWindow *ui;
+    QLabel label;
+    HandlerWindow* prevWin=nullptr;
+
     int Height;
     int Width;
     bool doHide=1;
     bool doCheckFlags=0;
 
-
-//    QWidget* centralWidget = new QWidget;
-//    QHBoxLayout* grid = new QHBoxLayout;
     QHBoxLayout* grid;
-
     ChannelHistWidget* channel[12];
-//    const char* filePath;                 //  Path and name. It breaks somewhere in DataBlock lib
     QString filePath;
-//    QString filePathSave;           //  Save of 'filePath'
     QString fileType;
 
     quint8 nAddedChannels = 0;
@@ -114,6 +137,7 @@ private:
     void PlotHistograms();
 //    void ReadBinaryFile();
     void ReadTxtFile();
+    void sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qint16 time);
 
 //------------------------- Apearance --------------------------
 
@@ -128,6 +152,7 @@ private:
 
     QMenu* optionsBar;              //  'Options' field in menu
     QAction* addChannelAction;
+    QAction* addChannelRangeAction;
     QAction* removeChannelAction;
     QAction* removeAllChannelAction;
     QAction* updateAction;
@@ -135,21 +160,9 @@ private:
     QAction* resetAction;
     QAction* resetAllAction;
     QAction* hideZeroBarsAction;
-    QAction* chooseADCAction;
 
     QLabel lbl;                     //  Opening label
 //----------------------------------------------------
 
-private slots:
-    void startNewWindow(quint8 firstChannelID);
-    bool openSourceFile();
-    void readFile();
-    void addChannel();
-    void removeChannel();
-    void removeAllChannel();
-    void reset();
-    void resetAll();
-    void hideZeroBars();
-    void showStatWindow();
 };
 #endif // HANDLERWINDOW_H

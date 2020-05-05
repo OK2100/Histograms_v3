@@ -408,13 +408,13 @@ void ChannelHistWidget::PlotHistograms()
 //---------------------- CHARGE ------------------------
         setData(chargeBars);
         if(chargeData->isEmpty() && chargeData1->isEmpty() )   { chargeHist->yAxis->setRange(0,5); }
-        else                        { chargeHist->yAxis->rescale(); }
+        else { chargeHist->yAxis->rescale(); chargeHist->yAxis->setRange(0,chargeHist->yAxis->range().upper*1.1); }
         chargeBars->setWidth(chargeData->getbinWidth());
 
 //----------------------- TIME --------------------------
         setData(timeBars);
         if(timeData->isEmpty() && timeData1->isEmpty() )     { timeHist->yAxis->setRange(0,5); }
-        else                        { timeHist->yAxis->rescale(); }
+        else { timeHist->yAxis->rescale(); timeHist->yAxis->setRange(0,timeHist->yAxis->range().upper*1.1);}
         timeBars->setWidth(timeData->getbinWidth());
 
 //-------------------- CHARGE-TIME ----------------------
@@ -431,6 +431,7 @@ void ChannelHistWidget::PlotHistograms()
 //    if(!chargeData->inputs.isEmpty()&&!timeData->inputs.isEmpty()) {
 //        if(doHideZeroBars) HideZeroBars();
 //    }
+
 
     chargeHist->replot();
     timeHist->replot();

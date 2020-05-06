@@ -2,20 +2,18 @@
 #include "ui_channelhistwidget.h"
 #include <QtGlobal>
 
+void ChannelHistWidget::add2data(qint16 _charge,qint16 _time){
+    chargeTimeHist->graph()->addData(_charge+((1.0*(qrand()%51)/100)*hist0->getbinYWidth())-hist0->getbinYWidth()/4,
+                                     _time+((1.0*(qrand()%51)/100)*hist0->getbinXWidth()-hist0->getbinXWidth()/4) );
+}
+
 void ChannelHistWidget::Experements()
 {
-//    colorMap->data()->setSize(50, 50);
-//    colorMap->data()->setRange(QCPRange(0, 2), QCPRange(0, 2));
-    
-//    for (int x=0; x<50; ++x)
-//      for (int y=0; y<50; ++y)
-//        colorMap->data()->setCell(x, y, qCos(x/10.0)+qSin(y/10.0));
-    
-//    colorMap->setGradient(QCPColorGradient::gpCold);
-//    colorMap->setInterpolate(false);
-//    colorMap->rescaleDataRange(true);
-//    chargeTimeHist->rescaleAxes();
-//    chargeTimeHist->replot();
+    chargeTimeHist->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc,Qt::red,10));
+    add2data(0,0);
+    chargeTimeHist->addGraph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc,Qt::blue,10));
+    add2data(1,0);
+
 }
 
 void ChannelHistWidget::setData(QCPBars* bars)
@@ -42,6 +40,36 @@ void ChannelHistWidget::setData(QCPBars* bars)
     for(quint16 i=0;i<data->getnBins();i++){
         if(extra_data==nullptr) bars->addData(data->getLeftLimit() + (i*data->getbinWidth()),(*data)[i]) ;
         else bars->addData(data->getLeftLimit() + (i*data->getbinWidth()),(*data)[i]+(*extra_data)[i]) ;
+    }
+}
+
+void ChannelHistWidget::set2Data()
+{
+    Hist2Data* data = nullptr;
+    Hist2Data* extra_data = nullptr;
+
+    if(ADC_ID == 0) {
+        data = hist0;
+    }
+    else if(ADC_ID == 1) {
+        data = hist1;
+    }
+    else if(ADC_ID == 2) {
+        data = hist0; extra_data = hist1;
+    }
+
+
+
+    for(quint16 i=0;i<data->getnXBins();i++){
+        for(quint16 j=0;j<data->getnYBins();j++){
+            for(quint16 k=0;k<(*data)(i,j);k++){
+//                if((*data)(i,j)/data->getTotalEvents()>0.1){ chargeTimeHist->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc,QColor(1,1,0),2));}
+//                else {chargeTimeHist->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc,QColor(0,0,1),2));}
+                add2data(data->getLeftXLimit() + (i*data->getbinXWidth()),data->getLeftYLimit() + (j*data->getbinYWidth()) );
+                if(extra_data!=nullptr) add2data(extra_data->getLeftXLimit() + (i*extra_data->getbinXWidth()),extra_data->getLeftYLimit() + (j*extra_data->getbinYWidth()) );
+            }
+
+        }
     }
 }
 
@@ -119,6 +147,9 @@ ChannelHistWidget::~ChannelHistWidget()
     delete timeData;
     delete timeData1;
 
+    delete hist0;
+    delete hist1;
+
     chargeHist->clearPlottables();
     timeHist->clearPlottables();
     chargeTimeHist->clearPlottables();
@@ -176,15 +207,16 @@ void ChannelHistWidget::InitHistograms()
     timeData->name = "Channel "+chID+" time";
     chargeBars = new QCPBars(chargeHist->xAxis,chargeHist->yAxis);
     timeBars = new QCPBars(timeHist->xAxis,timeHist->yAxis);
-    chargeTimeGraph = new QCPGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);
 
     chargeData1 = new HistData(-100,4095,4196);
     chargeData1->name = "Channel "+chID+" charge _ ADC1";
     timeData1 = new HistData(-2048,2047,4096);
     timeData1->name = "Channel "+chID+" time _ ADC1";
 
-//    hist0 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
-//    hist1 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
+    chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);
+
+    hist0 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
+    hist1 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
 }
 
 void ChannelHistWidget::setLabels()
@@ -344,9 +376,10 @@ void ChannelHistWidget::SetupView(){
     timeLabel1->setFont(QFont(font().family(),10)); // make font a bit larger
     timeLabel1->setBrush(Qt::white);
 
-//    chargeTimeHist->xAxis->setLabel("Charge");
-//    chargeTimeHist->yAxis->setLabel("Time");
     chargeTimeHist->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+
+    chargeTimeHist->graph()->setLineStyle(QCPGraph::lsNone);
+    chargeTimeHist->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc,2));
 
     chargeHist->xAxis->setRange(chargeData->getLeftLimit(),chargeData->getRightLimit());
     timeHist->xAxis->setRange(timeData->getLeftLimit(),timeData->getRightLimit());
@@ -379,8 +412,8 @@ void ChannelHistWidget::LoadSettings(QString file_ini)
 
 void ChannelHistWidget::AddEvent(quint8 adc_id, qint16 charge, qint16 time)
 {
-    if(adc_id == 0) { chargeData->addEvent(charge);     timeData->addEvent(time); }
-    if(adc_id == 1) { chargeData1->addEvent(charge);    timeData1->addEvent(time); }
+    if(adc_id == 0) { chargeData->addEvent(charge);     timeData->addEvent(time);   hist0->addEvent(charge,time);}
+    if(adc_id == 1) { chargeData1->addEvent(charge);    timeData1->addEvent(time);  hist1->addEvent(charge,time);}
 }
 
 void ChannelHistWidget::Update()
@@ -418,11 +451,10 @@ void ChannelHistWidget::PlotHistograms()
         timeBars->setWidth(timeData->getbinWidth());
 
 //-------------------- CHARGE-TIME ----------------------
-    chargeTimeHist->addGraph();
-    chargeTimeHist->graph()->setLineStyle(QCPGraph::lsNone);
-    chargeTimeHist->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare,2));
 
-    chargeTimeHist->graph()->setData(chargeData->inputs,timeData->inputs);
+//    qDebug() << chargeTimeHist->graph();
+    set2Data();
+
 
     chargeTimeHist->rescaleAxes();
 
@@ -450,7 +482,7 @@ void ChannelHistWidget::Clear()
 
     chargeBars->data().data()->clear();
     timeBars->data().data()->clear();
-    chargeTimeHist->clearGraphs();
+    chargeTimeHist->graph()->data().data()->clear();
 }
 
 void ChannelHistWidget::PrintInfo(bool onlyStat)

@@ -310,7 +310,7 @@ void Hist2Data::setnXBins(quint16 _nBins)
 
 quint16 Hist2Data::getnXBins() { return nBins; }
 
-//quint16 Hist2Data::getnYBins() { return nYBins; }
+quint16 Hist2Data::getnYBins() { return nYBins; }
 
 void Hist2Data::setbinXWidth(qreal _binWidth)
 {
@@ -321,13 +321,12 @@ void Hist2Data::setbinXWidth(qreal _binWidth)
 //void Hist2Data::setbinYWidth(qreal _binYWidth)
 //{
 //    quint16 _nYBins=qCeil((rightYLimit-leftYLimit+1)/_binYWidth);            //convert _binWidth to nearest
-//    setnXBins(_nYBins);
+//    setnYBins(_nYBins);
 //}
-
 
 qreal Hist2Data::getbinXWidth() { return binWidth; }
 
-//qreal Hist2Data::getbinYWidth() { return binYWidth; }
+qreal Hist2Data::getbinYWidth() { return binYWidth; }
 
 void Hist2Data::setHistName(QString _name) { name=_name; }
 

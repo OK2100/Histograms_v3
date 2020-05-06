@@ -75,12 +75,18 @@ public:
     void setHistName(QString _name);
     void setnXBins(quint16 _nXBins);
     quint16 getnXBins();
+    quint16 getnYBins();
     void setbinXWidth(qreal _binXWidth);
     qreal getbinXWidth();
+    qreal getbinYWidth();
     QString getHistName();
     quint32 getTotalEvents();
     qint16 getLeftXLimit(){ return leftLimit;}
     qint16 getRightXLimit(){ return rightLimit;}
+    qint16 getLeftYLimit(){ return leftYLimit;}
+    qint16 getRightYLimit(){ return rightYLimit;}
+
+
 
     bool isEmpty(){return bEmpty;}
 

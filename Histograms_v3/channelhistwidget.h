@@ -59,8 +59,9 @@ private slots:
 private:
 
     void Experements();
-
+    void add2data(qint16 _charge,qint16 _time);
     void setData(QCPBars*);
+    void set2Data();
     void setLabels();
 
     Ui::ChannelHistWidget *ui;
@@ -70,8 +71,8 @@ private:
     HistData* timeData;
     HistData* timeData1;
 
-//    Hist2Data* hist0;
-//    Hist2Data* hist1;
+    Hist2Data* hist0;
+    Hist2Data* hist1;
 
     SetupChannelWindow* setupWindow;
     QString chID;
@@ -84,7 +85,6 @@ private:
     QCPBars* timeBars;
 
     QCustomPlot* chargeTimeHist;        // Graph
-    QCPGraph* chargeTimeGraph;
 
 //    quint8 isLeftRangeSelected = 0;
 //    quint8 isRightRangeSelected = 0;

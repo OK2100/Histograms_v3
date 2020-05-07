@@ -226,6 +226,7 @@ quint16 Hist2Data::addEvent(qint16 _valX,qint16 _valY)
             for(quint16 j=0;j<nYBins;j++) {
                 if((leftYborder<=_valY)&&(_valY<=rightYborder)) {
                     nEvents[i][j]++;
+                    Nev++;
                     bEmpty = 0;
                     return i;
                 }
@@ -277,6 +278,7 @@ void Hist2Data::clear()
     nLosts = 0;
     initNevents();
     fillNevents(0);
+    Nev=0;
     bEmpty = 1;
 }
 
@@ -338,13 +340,14 @@ QString Hist2Data::getHistName()
 
 quint32 Hist2Data::getTotalEvents()
 {
-    quint32 sum=0;
-    foreach(QVector<quint32> v,nEvents){
-        foreach(quint32 elem,v){
-            sum += elem;
-        }
-    }
-    return sum;
+    return Nev;
+//    quint32 sum=0;
+//    foreach(QVector<quint32> v,nEvents){
+//        foreach(quint32 elem,v){
+//            sum += elem;
+//        }
+//    }
+//    return sum;
 }
 
 quint32& Hist2Data::operator() (const quint16 indexX,const quint16 indexY)

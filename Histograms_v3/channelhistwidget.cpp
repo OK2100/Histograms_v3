@@ -2,17 +2,19 @@
 #include "ui_channelhistwidget.h"
 #include <QtGlobal>
 
-void ChannelHistWidget::add2data(qint16 _charge,qint16 _time){
-    chargeTimeHist->graph()->addData(_charge+((1.0*(qrand()%51)/100)*hist0->getbinYWidth())-hist0->getbinYWidth()/4,
-                                     _time+((1.0*(qrand()%51)/100)*hist0->getbinXWidth()-hist0->getbinXWidth()/4) );
+void ChannelHistWidget::add2data(qint16 _charge,qint16 _time,quint8 graph_id){
+
+    bool makeHaos = true;
+    if(makeHaos)
+        chargeTimeHist->graph(graph_id)->addData(_charge+((1.0*(qrand()%101)/100)*hist0->getbinYWidth())-hist0->getbinYWidth()/2,
+                                     _time+((1.0*(qrand()%101)/100)*hist0->getbinXWidth()-hist0->getbinXWidth()/2) );
+    else chargeTimeHist->graph(graph_id)->addData(_charge,_time);
+
 }
 
 void ChannelHistWidget::Experements()
 {
-    chargeTimeHist->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc,Qt::red,10));
-    add2data(0,0);
-    chargeTimeHist->addGraph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc,Qt::blue,10));
-    add2data(1,0);
+    qDebug() << (*hist0)(20,0) << (*hist1)(20,0);
 
 }
 
@@ -58,19 +60,49 @@ void ChannelHistWidget::set2Data()
         data = hist0; extra_data = hist1;
     }
 
-
+    quint8 graph_id=0;
 
     for(quint16 i=0;i<data->getnXBins();i++){
         for(quint16 j=0;j<data->getnYBins();j++){
-            for(quint16 k=0;k<(*data)(i,j);k++){
-//                if((*data)(i,j)/data->getTotalEvents()>0.1){ chargeTimeHist->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc,QColor(1,1,0),2));}
-//                else {chargeTimeHist->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc,QColor(0,0,1),2));}
-                add2data(data->getLeftXLimit() + (i*data->getbinXWidth()),data->getLeftYLimit() + (j*data->getbinYWidth()) );
-                if(extra_data!=nullptr) add2data(extra_data->getLeftXLimit() + (i*extra_data->getbinXWidth()),extra_data->getLeftYLimit() + (j*extra_data->getbinYWidth()) );
+
+            if(extra_data == nullptr){
+                for(quint16 k=0;k<(*data)(i,j);k++){
+                    if(     (*data)(i,j)*1.0/data->getTotalEvents()>0.04)   { graph_id=7;}
+                    else if((*data)(i,j)*1.0/data->getTotalEvents()>0.03)   { graph_id=6;}
+                    else if((*data)(i,j)*1.0/data->getTotalEvents()>0.02)   { graph_id=5;}
+                    else if((*data)(i,j)*1.0/data->getTotalEvents()>0.01)   { graph_id=4;}
+                    else if((*data)(i,j)*1.0/data->getTotalEvents()>0.008)  { graph_id=3;}
+                    else if((*data)(i,j)*1.0/data->getTotalEvents()>0.004)  { graph_id=2;}
+                    else if((*data)(i,j)*1.0/data->getTotalEvents()>0.001)  { graph_id=1;}
+                    else                                                    { graph_id=0;}
+
+                    add2data(data->getLeftXLimit() + (i*data->getbinXWidth()),data->getLeftYLimit() + (j*data->getbinYWidth()),graph_id);
+//                    if(extra_data!=nullptr) add2data(extra_data->getLeftXLimit() + (i*extra_data->getbinXWidth()),extra_data->getLeftYLimit() + (j*extra_data->getbinYWidth()),graph_id);
+                }
+
+            }
+            else{
+                for(quint16 k=0;k<((*data)(i,j)+(*extra_data)(i,j));k++){
+                    if(     ((*data)(i,j)+(*extra_data)(i,j))*1.0/(data->getTotalEvents()+extra_data->getTotalEvents())>0.04)   { graph_id=7;}
+                    else if(((*data)(i,j)+(*extra_data)(i,j))*1.0/(data->getTotalEvents()+extra_data->getTotalEvents())>0.03)   { graph_id=6;}
+                    else if(((*data)(i,j)+(*extra_data)(i,j))*1.0/(data->getTotalEvents()+extra_data->getTotalEvents())>0.02)   { graph_id=5;}
+                    else if(((*data)(i,j)+(*extra_data)(i,j))*1.0/(data->getTotalEvents()+extra_data->getTotalEvents())>0.01)   { graph_id=4;}
+                    else if(((*data)(i,j)+(*extra_data)(i,j))*1.0/(data->getTotalEvents()+extra_data->getTotalEvents())>0.008)  { graph_id=3;}
+                    else if(((*data)(i,j)+(*extra_data)(i,j))*1.0/(data->getTotalEvents()+extra_data->getTotalEvents())>0.004)  { graph_id=2;}
+                    else if(((*data)(i,j)+(*extra_data)(i,j))*1.0/(data->getTotalEvents()+extra_data->getTotalEvents())>0.001)  { graph_id=1;}
+                    else                                                    { graph_id=0;}
+
+                    add2data(data->getLeftXLimit() + (i*data->getbinXWidth()),data->getLeftYLimit() + (j*data->getbinYWidth()),graph_id);
+//                    add2data(extra_data->getLeftXLimit() + (i*extra_data->getbinXWidth()),extra_data->getLeftYLimit() + (j*extra_data->getbinYWidth()),graph_id);
+                }
+
+
             }
 
         }
     }
+
+
 }
 
 ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
@@ -79,6 +111,9 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
 {
     ui->setupUi(this);
 
+    QRect rec = QApplication::desktop()->screenGeometry();
+    this->setMaximumWidth(rec.width() / 4-18);
+
     chID = _chID;
     chargeHist = ui->chargeHist;
     timeHist = ui->timeHist;
@@ -86,7 +121,6 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
 
     channelIDButton = ui->channelIDButton;
     channelIDButton->setText("Setup channel "+chID+":");
-//    channelIDButton->setFixedWidth(150);
 
     connect(channelIDButton,SIGNAL(clicked()),this,SLOT(channelIDButton_clicked()));
 
@@ -99,6 +133,8 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
 //    HideZeroBars();
 
 //    Experements();
+
+
 
     setupWindow = new SetupChannelWindow;
 
@@ -123,8 +159,22 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
             chargeTimeHist->yAxis,
             static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::setRange));
 
+    connect(chargeTimeHist->xAxis,
+            static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged),
+            chargeHist->xAxis,
+            static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::setRange));
+
+    connect(chargeTimeHist->yAxis,
+            static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged),
+            timeHist->xAxis,
+            static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::setRange));
+
+
     connect(chargeHist,&QCustomPlot::afterReplot,this,&ChannelHistWidget::replot_chargeTimeHist);
     connect(timeHist,&QCustomPlot::afterReplot,this,&ChannelHistWidget::replot_chargeTimeHist);
+
+    connect(chargeTimeHist,&QCustomPlot::afterReplot,this,&ChannelHistWidget::replot_chargeHist);
+    connect(chargeTimeHist,&QCustomPlot::afterReplot,this,&ChannelHistWidget::replot_timeHist);
 
     connect(ui->rb_0,&QRadioButton::clicked,this,&ChannelHistWidget::ADC0_choosed);
     connect(ui->rb_1,&QRadioButton::clicked,this,&ChannelHistWidget::ADC1_choosed);
@@ -178,25 +228,19 @@ void ChannelHistWidget::auto_rescale(const QCPRange &newRange){
 //void ChannelHistWidget::hist_double_clicked( QCPAbstractPlottable *  	plottable, int  	dataIndex, QMouseEvent *  	event )
 void ChannelHistWidget::hist_double_clicked( QMouseEvent * event )
 {
+    if(ui->doFixRanges->isChecked()) return;
+
     QCustomPlot* hist = static_cast<QCustomPlot*>( QObject::sender() );
 
     if(event->buttons() & Qt::RightButton){
         hist->xAxis->setRangeUpper(qFloor(hist->xAxis->pixelToCoord(event->x())));
         hist->replot();
-//        if(hist == chargeHist) isRightRangeSelected = 1;
-//        if(hist == timeHist)   isLeftRangeSelected = 2;
     }
     else if(event->buttons() & Qt::LeftButton){
         hist->xAxis->setRangeLower(qFloor(hist->xAxis->pixelToCoord(event->x())));
         hist->replot();
-//        if(hist == chargeHist) isLeftRangeSelected = 1;
-//        if(hist == timeHist) isLeftRangeSelected = 2;
     }
 
-//    if( (isRightRangeSelected == isLeftRangeSelected != 0) ){
-//        hist->replot();
-//        isRightRangeSelected = isLeftRangeSelected = 0;
-//    }
 }
 
 void ChannelHistWidget::InitHistograms()
@@ -214,6 +258,13 @@ void ChannelHistWidget::InitHistograms()
     timeData1->name = "Channel "+chID+" time _ ADC1";
 
     chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);
+    chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);
+    chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);
+    chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);
+    chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);
+    chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);
+    chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);
+    chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);
 
     hist0 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
     hist1 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
@@ -222,58 +273,58 @@ void ChannelHistWidget::InitHistograms()
 void ChannelHistWidget::setLabels()
 {
     if(ADC_ID==0){
-        ui->lbl_Nev->setText("Nev:"+QString::number(chargeData->getTotalEvents()));
+        ui->lbl_Nev->setText("Sum:"+QString::number(chargeData->getTotalEvents()));
         ui->lbl_Mean->setText("Mean:"+QString::number(chargeData->getSampleMean(),'g',5));
-        ui->lbl_StdDev->setText("StdDev:"+QString::number( sqrt(chargeData->getSampleVariance()),'g',4 ));
-        ui->lbl_Nev1->setText("Nev:"+QString::number(timeData->getTotalEvents()));
+        ui->lbl_StdDev->setText("RMS:"+QString::number( sqrt(chargeData->getSampleVariance()),'g',4 ));
+        ui->lbl_Nev1->setText("Sum:"+QString::number(timeData->getTotalEvents()));
         ui->lbl_Mean1->setText("Mean:"+QString::number(timeData->getSampleMean(),'g',5));
-        ui->lbl_StdDev1->setText("StdDev:"+QString::number( sqrt(timeData->getSampleVariance()),'g',4 ));
+        ui->lbl_StdDev1->setText("RMS:"+QString::number( sqrt(timeData->getSampleVariance()),'g',4 ));
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
     if(ADC_ID==1){
-        ui->lbl_Nev->setText("Nev:"+QString::number(chargeData1->getTotalEvents()));
+        ui->lbl_Nev->setText("Sum:"+QString::number(chargeData1->getTotalEvents()));
         ui->lbl_Mean->setText("Mean:"+QString::number(chargeData1->getSampleMean(),'g',5));
-        ui->lbl_StdDev->setText("StdDev:"+QString::number( sqrt(chargeData1->getSampleVariance()),'g',4 ));
-        ui->lbl_Nev1->setText("Nev:"+QString::number(timeData1->getTotalEvents()));
+        ui->lbl_StdDev->setText("RMS:"+QString::number( sqrt(chargeData1->getSampleVariance()),'g',4 ));
+        ui->lbl_Nev1->setText("Sum:"+QString::number(timeData1->getTotalEvents()));
         ui->lbl_Mean1->setText("Mean:"+QString::number(timeData1->getSampleMean(),'g',5));
-        ui->lbl_StdDev1->setText("StdDev:"+QString::number( sqrt(timeData1->getSampleVariance()),'g',4 ));
+        ui->lbl_StdDev1->setText("RMS:"+QString::number( sqrt(timeData1->getSampleVariance()),'g',4 ));
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
     if(ADC_ID==2){
-        ui->lbl_Nev->setText("Nev:"+QString::number(chargeData->getTotalEvents()+chargeData1->getTotalEvents()));
+        ui->lbl_Nev->setText("Sum:"+QString::number(chargeData->getTotalEvents()+chargeData1->getTotalEvents()));
         if(chargeData->getTotalEvents()!=0 && chargeData1->getTotalEvents()!=0){
-            ui->lbl_StdDev->setText("StdDev:"+QString::number(sqrt(1000*(chargeData->getSumSquares()+chargeData1->getSumSquares())/(chargeData->getTotalEvents()+chargeData1->getTotalEvents())
+            ui->lbl_StdDev->setText("RMS:"+QString::number(sqrt(1000*(chargeData->getSumSquares()+chargeData1->getSumSquares())/(chargeData->getTotalEvents()+chargeData1->getTotalEvents())
                                                                - pow((chargeData->getSampleMean()+chargeData1->getSampleMean())/2,2)),'g',4));
             ui->lbl_Mean->setText("Mean:"+QString::number( (chargeData->getSampleMean()+chargeData1->getSampleMean())/2,'g',5 ));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else if(chargeData->getTotalEvents()==0){
-            ui->lbl_StdDev->setText("StdDev:"+QString::number(sqrt(chargeData1->getSampleVariance()),'g',4));
+            ui->lbl_StdDev->setText("RMS:"+QString::number(sqrt(chargeData1->getSampleVariance()),'g',4));
             ui->lbl_Mean->setText("Mean:"+QString::number(chargeData1->getSampleMean(),'g',5));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else{
-            ui->lbl_StdDev->setText("StdDev:"+QString::number(sqrt(chargeData->getSampleVariance()),'g',4));
+            ui->lbl_StdDev->setText("RMS:"+QString::number(sqrt(chargeData->getSampleVariance()),'g',4));
             ui->lbl_Mean->setText("Mean:"+QString::number(chargeData->getSampleMean(),'g',5));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
 
-        ui->lbl_Nev1->setText("Nev:"+QString::number(timeData->getTotalEvents()+timeData1->getTotalEvents()));
+        ui->lbl_Nev1->setText("Sum:"+QString::number(timeData->getTotalEvents()+timeData1->getTotalEvents()));
         if(timeData->getTotalEvents()!=0 && timeData1->getTotalEvents()!=0){
-            ui->lbl_StdDev1->setText("StdDev:"+QString::number(sqrt(1000*(timeData->getSumSquares()+timeData1->getSumSquares())/(timeData->getTotalEvents()+timeData1->getTotalEvents())
+            ui->lbl_StdDev1->setText("RMS:"+QString::number(sqrt(1000*(timeData->getSumSquares()+timeData1->getSumSquares())/(timeData->getTotalEvents()+timeData1->getTotalEvents())
                                                                - pow((timeData->getSampleMean()+timeData1->getSampleMean())/2,2)),'g',4));
             ui->lbl_Mean1->setText("Mean:"+QString::number( (timeData->getSampleMean()+timeData1->getSampleMean())/2,'g',5 ));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else if(timeData->getTotalEvents()==0){
-            ui->lbl_StdDev1->setText("StdDev:"+QString::number(sqrt(timeData1->getSampleVariance()),'g',4));
+            ui->lbl_StdDev1->setText("RMS:"+QString::number(sqrt(timeData1->getSampleVariance()),'g',4));
             ui->lbl_Mean1->setText("Mean:"+QString::number(timeData1->getSampleMean(),'g',5));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else{
-            ui->lbl_StdDev1->setText("StdDev:"+QString::number(sqrt(timeData->getSampleVariance()),'g',4));
+            ui->lbl_StdDev1->setText("RMS:"+QString::number(sqrt(timeData->getSampleVariance()),'g',4));
             ui->lbl_Mean1->setText("Mean:"+QString::number(timeData->getSampleMean(),'g',5));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
@@ -378,8 +429,16 @@ void ChannelHistWidget::SetupView(){
 
     chargeTimeHist->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
 
-    chargeTimeHist->graph()->setLineStyle(QCPGraph::lsNone);
-    chargeTimeHist->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc,2));
+    for(quint8 j=0;j<8;j++) chargeTimeHist->graph(j)->setLineStyle(QCPGraph::lsNone);
+
+    chargeTimeHist->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare,QColor(0,0,0),QColor(0,0,0),3));
+    chargeTimeHist->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare,QColor(0,0,100),QColor(0,0,100),3));
+    chargeTimeHist->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare,QColor(0,0,255),QColor(0,0,255),3));
+    chargeTimeHist->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare,QColor(0,240,240),QColor(0,240,240),3));
+    chargeTimeHist->graph(4)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare,QColor(0,255,0),QColor(0,255,0),3));
+    chargeTimeHist->graph(5)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare,QColor(255,255,0),QColor(255,255,0),3));
+    chargeTimeHist->graph(6)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare,QColor(255,180,0),QColor(255,127,0),3));
+    chargeTimeHist->graph(7)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare,QColor(255,0,0),QColor(255,0,0),3));
 
     chargeHist->xAxis->setRange(chargeData->getLeftLimit(),chargeData->getRightLimit());
     timeHist->xAxis->setRange(timeData->getLeftLimit(),timeData->getRightLimit());
@@ -396,8 +455,6 @@ void ChannelHistWidget::LoadSettings(QString file_ini)
     qDebug() << sett.value("TEST","ini doesn't work").toString() ;
     sett.endGroup();
 
-//    chargeHist->xAxis->setRange(-2,2);
-//    chargeHist->xAxis->setRangeLower(0);
     qDebug() << chargeHist->xAxis->range().lower;
     qDebug() << chargeHist->xAxis->range().upper;
 
@@ -424,7 +481,8 @@ void ChannelHistWidget::Update()
 
 void ChannelHistWidget::ClearScreen()
 {
-    chargeTimeHist->graph()->data().data()->clear();
+    for(quint8 j=0;j<8;j++) chargeTimeHist->graph(j)->data().data()->clear();
+
     chargeBars->data().data()->clear();
     timeBars->data().data()->clear();
     chargeHist->yAxis->setRange(0,5);
@@ -452,11 +510,8 @@ void ChannelHistWidget::PlotHistograms()
 
 //-------------------- CHARGE-TIME ----------------------
 
-//    qDebug() << chargeTimeHist->graph();
     set2Data();
-
-
-    chargeTimeHist->rescaleAxes();
+//    chargeTimeHist->rescaleAxes();
 
 //=======================================================
 
@@ -482,7 +537,10 @@ void ChannelHistWidget::Clear()
 
     chargeBars->data().data()->clear();
     timeBars->data().data()->clear();
-    chargeTimeHist->graph()->data().data()->clear();
+
+    hist0->clear();
+    hist1->clear();
+    for(quint8 j=0;j<8;j++) chargeTimeHist->graph(j)->data().data()->clear();
 }
 
 void ChannelHistWidget::PrintInfo(bool onlyStat)
@@ -530,6 +588,8 @@ void ChannelHistWidget::channelIDButton_clicked()
 
 void ChannelHistWidget::HideZeroBars()
 {
+    if(ui->doFixRanges->isChecked()) return;
+
     HistData* cdata[2];
     HistData* tdata[2];
     bool ADC_empty[2];
@@ -629,6 +689,7 @@ void ChannelHistWidget::HideZeroBars()
 }
 
 void ChannelHistWidget::ShowFullRange(){
+    if(ui->doFixRanges->isChecked()) return;
     chargeHist->xAxis->setRange(chargeData->getLeftLimit(),chargeData->getRightLimit());
     chargeHist->replot();
     timeHist->xAxis->setRange(timeData->getLeftLimit(),timeData->getRightLimit());

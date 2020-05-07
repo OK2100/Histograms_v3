@@ -49,6 +49,8 @@ private slots:
     //    void hist_double_clicked( QCPAbstractPlottable *  	plottable, int  	dataIndex, QMouseEvent *  	event );
     void hist_double_clicked( QMouseEvent* event);
     void replot_chargeTimeHist(){ chargeTimeHist->replot(); }
+    void replot_chargeHist(){chargeHist->replot();}
+    void replot_timeHist(){timeHist->replot();}
 
     void ADC0_choosed(){ ADC_ID = 0; Update();}
     void ADC1_choosed(){ ADC_ID = 1; Update();}
@@ -59,7 +61,7 @@ private slots:
 private:
 
     void Experements();
-    void add2data(qint16 _charge,qint16 _time);
+    void add2data(qint16 _charge,qint16 _time,quint8 graph_id);
     void setData(QCPBars*);
     void set2Data();
     void setLabels();

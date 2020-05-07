@@ -70,12 +70,11 @@ void HandlerWindow::SetUp()
     for(quint16 i=0;i<12;i++) {
         channel[i]=nullptr;
     }
+    this->statusBar()->addWidget(&label);
 
     QRect rec = QApplication::desktop()->screenGeometry();
     Height = rec.height() - rec.height() / 8;
     Width = rec.width() / 4;
-
-    this->statusBar()->addWidget(&label);
 
     this->setMinimumSize(Width,Height);
     this->setGeometry(rec.x(),rec.y(),Width,Height);
@@ -178,6 +177,7 @@ void HandlerWindow::PlotHistograms()
     for (quint16 i=0;i<12;i++) {
         if(channel[i]!=nullptr){
             channel[i]->PlotHistograms();
+            //            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
             if(doHide){ channel[i]->HideZeroBars();}
         }
     }
@@ -464,6 +464,7 @@ void HandlerWindow::addSingleChannel(quint8 chID)
 //        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         this->resize(Width+Width*nAddedChannels,Height);
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+
         nAddedChannels++;
         nextChannelID++;
         if(!filePath.isEmpty()){ readFile(); }

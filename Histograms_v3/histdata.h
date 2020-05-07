@@ -58,6 +58,11 @@ private:
     void calcnBins();
 };
 
+
+
+
+
+
 class Hist2Data
 {
 public:
@@ -104,6 +109,7 @@ private:
     qint16 rightLimit;
     quint16 nBins;
     qreal binWidth;
+    quint32 Nev=0;
 
     qint16 leftYLimit;
     qint16 rightYLimit;

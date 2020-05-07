@@ -84,7 +84,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Nev:</string>
+                <string>Sum:</string>
                </property>
               </widget>
              </item>
@@ -140,7 +140,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>StdDev:</string>
+                <string>RMS:</string>
                </property>
               </widget>
              </item>
@@ -203,7 +203,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Nev:</string>
+                <string>Sum:</string>
                </property>
               </widget>
              </item>
@@ -233,7 +233,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>StdDev:</string>
+                <string>RMS:</string>
                </property>
               </widget>
              </item>
@@ -255,17 +255,17 @@
            </widget>
           </item>
           <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+           <widget class="QCheckBox" name="doFixRanges">
+            <property name="maximumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>16777215</width>
+              <height>16777215</height>
              </size>
             </property>
-           </spacer>
+            <property name="text">
+             <string>Fix ranges</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QFrame" name="frame_2">

@@ -65,6 +65,9 @@ private:
     void setData(QCPBars*);
     void set2Data();
     void setLabels();
+    void fillColorMap();
+
+    double threshold[256];
 
     Ui::ChannelHistWidget *ui;
 

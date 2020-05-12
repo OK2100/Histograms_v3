@@ -15,53 +15,28 @@
 #include <QStringList>
 
 #include "channelhistwidget.h"
-//#include "../sources/DataBlockReaderFT0.h"
-//#include "../sources/DataBlockFT0.h"
-//#include "../sources/DataBlockFileReaderFT0.h"
 
 
 struct EventData	{
-    uint64_t time:12,
-        charge:13,
-        numberADC:1,
-        isDoubleEvent:1,
-        is1TimeLostEvent:1,
-        is2TimeLostEvent:1,
-        isADCinGate:1,
-        isTimeInfoLate:1,
-        isAmpHigh:1,
-        isEventInTVDC:1,
-        isTimeInfoLost:1,
-        reservedField:2,
-        channelID:4; /// equal to zero in case of half-word
-//		ClassDefNV(EventData, 1);
+    quint16 time:12;
+    quint16 charge:13;
 };
 struct EventDataReal {
-        int time:12;
-        int	charge:13;
-        bool	numberADC:1,
-            isDoubleEvent:1,
-            is1TimeLostEvent:1,
-            is2TimeLostEvent:1,
-            isADCinGate:1,
-            isTimeInfoLate:1,
-            isAmpHigh:1,
-            isEventInTVDC:1,
-            isTimeInfoLost:1;
-        unsigned short	reservedField:2,
-            channelID:4;
-//			ClassDefNV(EventData, 1);
+    qint16 time:12;
+    qint16	charge:13;
 };
+
 union DataConversion {
     EventData dataBlocks;
     EventDataReal dataReal;
-//		ClassDefNV(EventData, 1);
 };
-
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class HandlerWindow; }
 QT_END_NAMESPACE
+
+
+
 
 class HandlerWindow : public QMainWindow
 {

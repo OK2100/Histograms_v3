@@ -27,17 +27,18 @@ public:
     explicit ChannelHistWidget(QWidget *parent = nullptr,QString _chID = "");
     ~ChannelHistWidget();
 
-    quint8 ADC_ID = 2;              // 0 -> ADC0; 1->ADC1; 2->ADC0+ADC1
-    bool doHideZeroBars=1;          // Flag
-    void PlotHistograms();
-    void Clear();
+    void AddEvent(quint8 adc_id,qint16 charge, qint16 time);    // add data to data containers
+
+    void PlotHistograms();                                      // Draw current data
+    void Clear();                                               // Clear all data containers
     void ClearScreen();
-    void Update();
-    void AddEvent(quint8 adc_id,qint16 charge, qint16 time);
-    void PrintInfo(bool onlyStat = false);
-    QString GetStatInfo();
-    void HideZeroBars();
+    void UpdateScreen();
+    void HideZeroBars();                                        // hide empty bars from left and right
     void ShowFullRange();
+
+    void PrintInfo(bool onlyStat = false);                      // Print info about data containers to console
+
+    quint8 ADC_ID = 2;                                          // 0 -> ADC0; 1->ADC1; 2->ADC0+ADC1
 
 private slots:
     void channelIDButton_clicked();
@@ -46,31 +47,36 @@ private slots:
     void nBins_charge_was_changed(const QString&);
     void nBins_time_was_changed(const QString&);
 
-    //    void hist_double_clicked( QCPAbstractPlottable *  	plottable, int  	dataIndex, QMouseEvent *  	event );
     void hist_double_clicked( QMouseEvent* event);
     void replot_chargeTimeHist(){ chargeTimeHist->replot(); }
     void replot_chargeHist(){chargeHist->replot();}
     void replot_timeHist(){timeHist->replot();}
 
-    void ADC0_choosed(){ ADC_ID = 0; Update();}
-    void ADC1_choosed(){ ADC_ID = 1; Update();}
-    void ADC01_choosed(){ADC_ID = 2; Update();}
+    void ADC0_choosed(){ ADC_ID = 0; UpdateScreen();}
+    void ADC1_choosed(){ ADC_ID = 1; UpdateScreen();}
+    void ADC01_choosed(){ADC_ID = 2; UpdateScreen();}
 
     void auto_rescale(const QCPRange &newRange);
 
 private:
+    Ui::ChannelHistWidget *ui;
 
-    void Experements();
+    void InitHistograms();              // Create chargeData, chargeBars, timeData, timeBars, chargeTimeGraph
+    void SetupView();
+    void LoadSettings(QString file_ini);
+
     void add2data(qint16 _charge,qint16 _time,quint8 graph_id);
     void setData(QCPBars*);
     void set2Data();
     void setLabels();
     void fillColorMap();
 
-    double threshold[256];
+    void Experements();                 //  function to do some tests
 
-    Ui::ChannelHistWidget *ui;
 
+    QString chID;
+
+    //  ----Data containers---
     HistData* chargeData;
     HistData* chargeData1;
     HistData* timeData;
@@ -78,10 +84,7 @@ private:
 
     Hist2Data* hist0;
     Hist2Data* hist1;
-
-    SetupChannelWindow* setupWindow;
-    QString chID;
-    QPushButton* channelIDButton;
+    // -----------------------
 
     QCustomPlot* chargeHist;            // First hist
     QCPBars* chargeBars;
@@ -89,15 +92,12 @@ private:
     QCustomPlot* timeHist;              // Second hist
     QCPBars* timeBars;
 
-    QCustomPlot* chargeTimeHist;        // Graph
+    QCustomPlot* chargeTimeHist;        // 2dim hist
 
-//    quint8 isLeftRangeSelected = 0;
-//    quint8 isRightRangeSelected = 0;
+    SetupChannelWindow* setupWindow;
+    QPushButton* channelIDButton;
 
-
-    void InitHistograms();              // Create chargeData, chargeBars, timeData, timeBars, chargeTimeGraph
-    void SetupView();
-    void LoadSettings(QString file_ini);
+    double threshold[256];              // for color map
 
 
 };

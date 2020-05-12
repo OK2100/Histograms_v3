@@ -413,7 +413,7 @@ void HandlerWindow::updateScreen()
 
     for(quint16 i=0;i<12;i++) {
         if(channel[i]!=nullptr){
-            channel[i]->Update();
+            channel[i]->UpdateScreen();
         }
     }
 }

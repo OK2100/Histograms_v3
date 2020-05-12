@@ -532,7 +532,7 @@ void ChannelHistWidget::AddEvent(quint8 adc_id, qint16 charge, qint16 time)
     if(adc_id == 1) { chargeData1->addEvent(charge);    timeData1->addEvent(time);  hist1->addEvent(charge,time);}
 }
 
-void ChannelHistWidget::Update()
+void ChannelHistWidget::UpdateScreen()
 {
     ClearScreen();
     PlotHistograms();
@@ -554,36 +554,30 @@ void ChannelHistWidget::ClearScreen()
 void ChannelHistWidget::PlotHistograms()
 {
 
-
 //---------------------- CHARGE ------------------------
-        setData(chargeBars);
-        if(chargeData->isEmpty() && chargeData1->isEmpty() )   { chargeHist->yAxis->setRange(0,5); }
-        else { chargeHist->yAxis->rescale(); chargeHist->yAxis->setRange(0,chargeHist->yAxis->range().upper*1.1); }
-        chargeBars->setWidth(chargeData->getbinWidth());
+    setData(chargeBars);
+    if(chargeData->isEmpty() && chargeData1->isEmpty() )   { chargeHist->yAxis->setRange(0,5); }
+    else { chargeHist->yAxis->rescale(); chargeHist->yAxis->setRange(0,chargeHist->yAxis->range().upper*1.1); }
+    chargeBars->setWidth(chargeData->getbinWidth());
 
 //----------------------- TIME --------------------------
-        setData(timeBars);
-        if(timeData->isEmpty() && timeData1->isEmpty() )     { timeHist->yAxis->setRange(0,5); }
-        else { timeHist->yAxis->rescale(); timeHist->yAxis->setRange(0,timeHist->yAxis->range().upper*1.1);}
-        timeBars->setWidth(timeData->getbinWidth());
+
+    setData(timeBars);
+    if(timeData->isEmpty() && timeData1->isEmpty() )     { timeHist->yAxis->setRange(0,5); }
+    else { timeHist->yAxis->rescale(); timeHist->yAxis->setRange(0,timeHist->yAxis->range().upper*1.1);}
+    timeBars->setWidth(timeData->getbinWidth());
 
 //-------------------- CHARGE-TIME ----------------------
 
     set2Data();
-//    chargeTimeHist->rescaleAxes();
 
 //=======================================================
-
-//    if(!chargeData->inputs.isEmpty()&&!timeData->inputs.isEmpty()) {
-//        if(doHideZeroBars) HideZeroBars();
-//    }
-
 
     chargeHist->replot();
     timeHist->replot();
     chargeTimeHist->replot();
 
-    setLabels();
+    setLabels();                    // Calculate statistics
 }
 
 void ChannelHistWidget::Clear()
@@ -611,18 +605,6 @@ void ChannelHistWidget::PrintInfo(bool onlyStat)
         timeData1->printInfo(0,0,onlyStat);
 }
 
-QString ChannelHistWidget::GetStatInfo()
-{
-    QString statStr;
-    statStr.append("@ "+chargeData->name+"\n");
-    statStr.append("Sample mean "+QString::number(chargeData->getSampleMean())+"\n");
-    statStr.append("Sample variance "+QString::number(chargeData->getSampleVariance())+"\n");
-    statStr.append("Sigma "+QString::number(chargeData->getSigma())+"\n");
-    statStr.append("FWHM "+QString::number(chargeData->getFWHM())+"\n");
-    statStr.append("\n");
-
-    return statStr;
-}
 
 void ChannelHistWidget::channelIDButton_clicked()
 {
@@ -764,7 +746,7 @@ void ChannelHistWidget::binWidth_charge_was_changed(const QString& _binWidth)
 //    setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
     setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
 //    setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
-    Update();
+    UpdateScreen();
 //    chargeData->printInfo();
 }
 
@@ -776,7 +758,7 @@ void ChannelHistWidget::binWidth_time_was_changed(const QString& _binWidth)
     setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
 //    setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
     setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
-    Update();
+    UpdateScreen();
 //    timeData->printInfo();
 }
 
@@ -788,7 +770,7 @@ void ChannelHistWidget::nBins_charge_was_changed(const QString& _nBins)
     setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
     setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
     setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
-    Update();
+    UpdateScreen();
 //    chargeData->printInfo(0,1);
 }
 
@@ -800,6 +782,6 @@ void ChannelHistWidget::nBins_time_was_changed(const QString& _nBins)
     setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
     setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
     setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
-    Update();
+    UpdateScreen();
 //    timeData->printInfo();
 }

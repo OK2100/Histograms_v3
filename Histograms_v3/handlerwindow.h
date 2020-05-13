@@ -114,6 +114,9 @@ private:
     void ReadTxtFile();
     void sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qint16 time);
 
+    void LoadSettings(QString file_ini);
+//    void SaveSettings();
+
 //------------------------- Apearance --------------------------
 
     QMenu* fileBar;                 //  'File' field in menu

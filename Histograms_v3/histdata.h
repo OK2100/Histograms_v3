@@ -37,7 +37,7 @@ public:
     double getFWHM();
     double getSumSquares(){ return sampleVariance; }
 
-    quint32& operator[] (const quint16 index);      //  return nEvents per bin
+    quint16& operator[] (const quint16 index);      //  return nEvents per bin
 
     QString name;
 
@@ -48,11 +48,11 @@ private:
     qreal binWidth;
     qint32 sampleMean=0;
     double sampleVariance=0;
-    quint32 nLosts=0;
+    quint16 nLosts=0;
 
     bool bEmpty = 1;
 
-    QVector<quint32> nEvents;       // Number of events per bin
+    QVector<quint16> nEvents;       // Number of events per bin
 
     void calcbinWidth();
     void calcnBins();
@@ -100,7 +100,7 @@ public:
 //    double getSigma();
 //    double getFWHM();
 
-    quint32& operator() (const quint16 indexX,const quint16 indexY);      //  return nEvents per cell
+    quint16& operator() (const quint16 indexX,const quint16 indexY);      //  return nEvents per cell
 
     QString name;
 
@@ -123,12 +123,12 @@ private:
 
     bool bEmpty = 1;
 
-    QVector<QVector<quint32>> nEvents;       // Number of events per cell
+    QVector<QVector<quint16>> nEvents;       // Number of events per cell
 
     void calcbinWidth();            // ??
     void calcnBins();
 
-    void fillNevents(quint32 val=0);
+    void fillNevents(quint16 val=0);
     void initNevents();
     void clearNevents();
 };

@@ -113,7 +113,7 @@ quint32 HistData::getTotalEvents()
     return sum;
 }
 
-quint32& HistData::operator[] (const quint16 index)
+quint16& HistData::operator[] (const quint16 index)
 {
     return nEvents[index];
 };
@@ -192,7 +192,7 @@ void Hist2Data::initNevents()
     }
 }
 
-void Hist2Data::fillNevents(quint32 val)
+void Hist2Data::fillNevents(quint16 val)
 {
     for(quint16 i=0;i<nBins;i++) {
         for(quint16 j=0;j<nYBins;j++) {
@@ -264,7 +264,7 @@ void Hist2Data::printInfo(bool doPrintAllInputs,bool doPrintNumberEventsPerBin, 
     if(doPrintAllInputs) {qDebug()<<"Inputs:"<<inputs;}
     if(doPrintNumberEventsPerBin) {
         qDebug()<<"Number of events per bin:";
-        foreach(QVector<quint32> v, nEvents)
+        foreach(QVector<quint16> v, nEvents)
             qDebug()<<v;
     }
     qDebug()<<"##############";
@@ -350,7 +350,7 @@ quint32 Hist2Data::getTotalEvents()
 //    return sum;
 }
 
-quint32& Hist2Data::operator() (const quint16 indexX,const quint16 indexY)
+quint16& Hist2Data::operator() (const quint16 indexX,const quint16 indexY)
 {
     return nEvents[indexX][indexY];
 };

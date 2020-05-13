@@ -59,6 +59,7 @@ HandlerWindow::HandlerWindow(HandlerWindow* prevWindow,QWidget *parent)
     connect(ui->b_6,&QPushButton::clicked,this,&HandlerWindow::readFile);
 
 
+    LoadSettings("../default.ini");
     SetUp();
 }
 
@@ -171,6 +172,27 @@ void HandlerWindow::SetUp()
 
 //--------------------------------------------------------------------------
 }
+
+void HandlerWindow::LoadSettings(QString file_ini)
+{
+    QSettings sett(file_ini, QSettings::IniFormat);
+
+    sett.beginGroup("HANDLER WINDOW");
+    doHide = sett.value("DO_HIDE_ZEROS",1).toBool();
+    sett.endGroup();
+
+//    qDebug() << chargeHist->xAxis->range().lower;
+//    qDebug() << chargeHist->xAxis->range().upper;
+
+//    chargeTimeHist->xAxis->setRange(-3,3);
+//    chargeTimeHist->yAxis->setRange(-3,3);
+
+//    ui->rb_1->setChecked(1);
+//    qDebug() << ui->rb_01->isChecked();
+
+
+}
+
 
 void HandlerWindow::PlotHistograms()
 {

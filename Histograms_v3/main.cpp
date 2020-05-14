@@ -7,11 +7,11 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     HandlerWindow w1;
-    HandlerWindow w2;
-    HandlerWindow w3;
+//    HandlerWindow w2;
+//    HandlerWindow w3;
     w1.show();
-    w2.show();
-    w3.show();
+//    w2.show();
+//    w3.show();
 
 //    w1.addEvent("A0923BA05B90923C103E",1);
 //    w1.addEvent(9,quint32(0x923C103E),1);       // part of right half 90923C103E

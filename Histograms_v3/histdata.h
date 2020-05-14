@@ -12,8 +12,9 @@ class HistData
 {
 public:
     HistData(qint16 _leftLimit,qint16 _rightLimit,quint16 _nBins);
+    ~HistData();
 
-    QVector <double> inputs;                      //    All input values
+    std::vector<quint16> inputs;                      //    All input values
 
     void printInfo(bool doPrintAllInputs=0,bool doPrintNumberEventsPerBin=0, bool doPrintOnlyStat = 0);
     quint16 addEvent(qint16 _event);
@@ -52,14 +53,14 @@ private:
 
     bool bEmpty = 1;
 
-    QVector<quint16> nEvents;       // Number of events per bin
+    quint16* nEvents=nullptr;       // Number of events per bin
 
     void calcbinWidth();
     void calcnBins();
+    void initNevents();
+    void fillNevents(quint16 val=0);
+    void clearNevents();
 };
-
-
-
 
 
 
@@ -68,9 +69,9 @@ class Hist2Data
 public:
     Hist2Data(qint16 _leftXLimit,qint16 _rightXLimit,quint16 _nXBins,
               qint16 _leftYLimit,qint16 _rightYLimit,quint16 _nYBins);
+    ~Hist2Data();
 
-
-    QVector <double> inputs;                      //    All input values
+    QVector <quint16> inputs;                      //    All input values
 
 
     void printInfo(bool doPrintAllInputs=0,bool doPrintNumberEventsPerCell=0, bool doPrintOnlyStat = 0);
@@ -123,7 +124,8 @@ private:
 
     bool bEmpty = 1;
 
-    QVector<QVector<quint16>> nEvents;       // Number of events per cell
+    quint16* nEvents;       // Number of events per cell
+
 
     void calcbinWidth();            // ??
     void calcnBins();

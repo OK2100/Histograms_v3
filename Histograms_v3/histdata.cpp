@@ -6,13 +6,35 @@ HistData::HistData(qint16 _leftLimit,qint16 _rightLimit,quint16 _nBins)
     rightLimit = _rightLimit;
     nBins = _nBins;
     calcbinWidth();
-    nEvents.resize(nBins);
-    nEvents.fill(0);
+
+    inputs.reserve(50000);
+    initNevents();
+    fillNevents(0);
+}
+
+HistData::~HistData()
+{
+ clearNevents();
+}
+
+void HistData::initNevents()
+{
+    nEvents = new quint16[nBins];
+}
+
+void HistData::fillNevents(quint16 val)
+{
+    if(nEvents!=nullptr){
+        for(quint16 i=0;i<nBins;i++){
+            nEvents[i]=val;
+        }
+    }
+    else return;
 }
 
 quint16 HistData::addEvent(qint16 _event)
 {
-    inputs<<_event;
+    inputs.push_back(_event);
     qreal leftborder=leftLimit - binWidth/2;
     qreal rightborder=leftborder+binWidth;
 
@@ -51,13 +73,22 @@ void HistData::printInfo(bool doPrintAllInputs,bool doPrintNumberEventsPerBin, b
     qDebug()<<"";
 }
 
+void HistData::clearNevents()
+{
+    if(nEvents!=nullptr){
+        delete[] nEvents;
+        nEvents=nullptr;
+    }
+    else return;
+}
+
 void HistData::clear()
 {
     inputs.clear();
-    nEvents.clear();
+    clearNevents();
+    initNevents();
+    fillNevents(0);
     nLosts = 0;
-    nEvents.resize(nBins);
-    nEvents.fill(0);
     bEmpty = 1;
     sampleMean=0;
     sampleVariance=0;
@@ -65,12 +96,13 @@ void HistData::clear()
 
 void HistData::setnBins(quint16 _nBins)
 {
-    nEvents.clear();
     nBins=_nBins;
     calcbinWidth();
-    nEvents.resize(nBins);
 
-    QVector<double> _inputs(inputs);
+    clearNevents();
+    initNevents();
+
+    std::vector<quint16> _inputs(inputs);
     inputs.clear();
     foreach(double _inp,_inputs) {
         addEvent(_inp);
@@ -106,11 +138,12 @@ QString HistData::getHistName()
 
 quint32 HistData::getTotalEvents()
 {
-    quint32 sum=0;
-    foreach(quint32 ev,nEvents) {
-        sum+=ev;
+    if(nEvents != nullptr){
+        quint32 sum=0;
+        for(quint16 i=0;i<nBins;i++){ sum+=nEvents[i]; }
+        return sum;
     }
-    return sum;
+    else return 0;
 }
 
 quint16& HistData::operator[] (const quint16 index)
@@ -180,35 +213,33 @@ Hist2Data::Hist2Data(qint16 _leftXLimit,qint16 _rightXLimit,quint16 _nXBins,
 
     calcbinWidth();
 
+    inputs.reserve(100000);
+
     initNevents();
     fillNevents(0);
 }
 
+Hist2Data::~Hist2Data()
+{
+    clearNevents();
+}
+
 void Hist2Data::initNevents()
 {
-    nEvents.resize(nBins);
-    for(quint16 i=0;i<nBins;i++) {
-        nEvents[i].resize(nYBins);
-    }
+    nEvents = new quint16[nBins*nYBins];
 }
 
 void Hist2Data::fillNevents(quint16 val)
 {
-    for(quint16 i=0;i<nBins;i++) {
-        for(quint16 j=0;j<nYBins;j++) {
-            nEvents[i][j] = val;
-        }
+    for(quint32 i=0;i<nBins*nYBins;i++) {
+            nEvents[i] = val;
     }
 }
 
 
 void Hist2Data::clearNevents()
 {
-//    nEvents.resize(nBins);
-    for(quint16 i=0;i<nBins;i++) {
-        nEvents[i].clear();
-    }
-    nEvents.clear();
+    delete [] nEvents;
 }
 
 quint16 Hist2Data::addEvent(qint16 _valX,qint16 _valY)
@@ -225,7 +256,7 @@ quint16 Hist2Data::addEvent(qint16 _valX,qint16 _valY)
         if((leftXborder<=_valX)&&(_valX<=rightXborder)) {
             for(quint16 j=0;j<nYBins;j++) {
                 if((leftYborder<=_valY)&&(_valY<=rightYborder)) {
-                    nEvents[i][j]++;
+                    nEvents[i*nBins+j]++;
                     Nev++;
                     bEmpty = 0;
                     return i;
@@ -264,8 +295,8 @@ void Hist2Data::printInfo(bool doPrintAllInputs,bool doPrintNumberEventsPerBin, 
     if(doPrintAllInputs) {qDebug()<<"Inputs:"<<inputs;}
     if(doPrintNumberEventsPerBin) {
         qDebug()<<"Number of events per bin:";
-        foreach(QVector<quint16> v, nEvents)
-            qDebug()<<v;
+//        foreach(QVector<quint16> v, nEvents)
+//            qDebug()<<v;
     }
     qDebug()<<"##############";
     qDebug()<<"";
@@ -289,7 +320,7 @@ void Hist2Data::setnXBins(quint16 _nBins)
     calcbinWidth();
     initNevents();
 
-    QVector<double> _inputs(inputs);
+    QVector<quint16> _inputs(inputs);
     inputs.clear();
     foreach(double _inp,_inputs) {
 //        addEvent(_inp);
@@ -352,7 +383,7 @@ quint32 Hist2Data::getTotalEvents()
 
 quint16& Hist2Data::operator() (const quint16 indexX,const quint16 indexY)
 {
-    return nEvents[indexX][indexY];
+    return nEvents[indexX*nBins+indexY];
 };
 
 //double Hist2Data::getSampleMean()

@@ -336,8 +336,8 @@ void HandlerWindow::addEvent(QString gbtword,bool doPrint)
         }
 
         // get time, charge and channelID for first channel in gbt word
-        convertor.dataBlocks.time = halfgbt[j].right(12).toULongLong(&ok,2);
-        convertor.dataBlocks.charge = halfgbt[j].mid(15,13).toULongLong(&ok,2);
+        convertor.dataBlocks.time = halfgbt[j].right(12).toUShort(&ok,2);
+        convertor.dataBlocks.charge = halfgbt[j].mid(15,13).toUShort(&ok,2);
         channelID = halfgbt[j].left(4).toUShort(&ok,2);
         tADCNum = halfgbt[j].mid(14,1).toUShort();
 
@@ -411,11 +411,6 @@ void HandlerWindow::addEvent(quint8 channelID, quint8 flags, qint16 charge, qint
 
     sendEventToChannel(channelID,ar[0],charge,time);
 }
-
-
-
-
-
 
 
 void HandlerWindow::sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qint16 time)

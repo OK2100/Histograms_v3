@@ -18,8 +18,6 @@ int main(int argc, char *argv[])
 //    w1.addEvent(9,quint8(0x49),961,62);    // flags are 01001001 -> 0x49
 
 
-
-
 //  ##  TEST of HistData class  ##
 //  ##  uncomment "CONFIG += console" in .pro file  ##
 

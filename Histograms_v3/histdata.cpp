@@ -4,8 +4,7 @@ HistData::HistData(qint16 _leftLimit,qint16 _rightLimit,quint16 _nBins)
 {
     leftLimit  = _leftLimit;
     rightLimit = _rightLimit;
-    nBins = _nBins;
-    calcbinWidth();
+    setnBins(_nBins);
 
     inputs.reserve(50000);
     initNevents();
@@ -35,42 +34,67 @@ void HistData::fillNevents(quint16 val)
 quint16 HistData::addEvent(qint16 _event)
 {
     inputs.push_back(_event);
-    qreal leftborder=leftLimit - binWidth/2;
-    qreal rightborder=leftborder+binWidth;
 
-    for(quint16 i=0;i<nBins;i++) {
-        if((leftborder<=_event)&&(_event<=rightborder)) {
-            nEvents[i]++;
-            bEmpty = 0;
-            sampleMean+=_event;
-            sampleVariance+=(_event*_event*1.0)/1000;
-            return i;
-        }
-        leftborder+=binWidth;
-        rightborder+=binWidth;
+    quint16 idx=(_event-leftLimit)/binWidth;
+    if(idx<nBins) {
+        nEvents[idx]++;
+        sumValues+=_event;
+        sumSquares+=(_event*_event*1.0)/1000;
+        Nev++;
     }
-    nLosts++;
-    return nBins;
+    else    nLosts++;
+
+    return idx;
 }
 
-void HistData::printInfo(bool doPrintAllInputs,bool doPrintNumberEventsPerBin, bool doPrintOnlyStat){
-    if(doPrintOnlyStat){
-        qDebug()<<"@@ "<<name;
-        qDebug()<<"Sample mean:"<<getSampleMean();
-        qDebug()<<"Sample variance:"<<getSampleVariance();
-        return;
+
+void HistData::printData(bool doPrintNumberEventsPerBin, bool doPrintAllInputs,QFile* pFileNev,QFile* pFileInp)
+{
+    QTextStream* out_Nev,*out_Inp;
+    if(pFileNev==nullptr) out_Nev = new QTextStream(stdout);
+    else out_Nev = new QTextStream(pFileNev);
+
+    if(pFileInp==nullptr) out_Inp = new QTextStream(stdout);
+    else out_Inp = new QTextStream(pFileInp);
+
+    if(doPrintAllInputs) {
+        *out_Inp<<"Hist \"" << name <<"\" inputs:" << endl;
+        foreach(qint16 _inp,inputs){ *out_Inp << _inp << endl;}
+        *out_Inp << endl;
     }
-    qDebug()<<"#### INFO ####";
-    qDebug()<<"Histogram name"<<name;
-    qDebug()<<"From:"<<leftLimit<< "to:"<<rightLimit;
-    qDebug()<<"Bin width:"<<binWidth;
-    qDebug()<<"Number of bins:"<<nBins;
-    qDebug()<<"Total events in range:" <<getTotalEvents();
-    qDebug()<<"Events out of range:"<<nLosts;
-    if(doPrintAllInputs) {qDebug()<<"Inputs:"<<inputs;}
-    if(doPrintNumberEventsPerBin) {qDebug()<<"Number of events per bin:"<<nEvents;}
-    qDebug()<<"##############";
-    qDebug()<<"";
+    if(doPrintNumberEventsPerBin) {
+        *out_Nev << "Hist \"" << name << "\" number of events per bin: " << endl;
+        *out_Nev << "index\tvalue" <<endl;
+        for(quint16 i=0;i<nBins;i++) *out_Nev  << i << "\t" << nEvents[i] << endl;
+        *out_Nev  << endl;
+    }
+
+    delete out_Inp;
+    delete out_Nev;
+}
+
+void HistData::printInfo(bool doPrintStat,QFile* pFile){
+
+    QTextStream* out;
+    if(pFile==nullptr) out = new QTextStream(stdout);
+    else out = new QTextStream(pFile);
+
+    *out<<"#### INFO ####" << endl;
+    *out<<"Histogram name: \""<<name << "\"" << endl;
+    *out<<"From: "<<leftLimit<< " to "<<rightLimit << endl;
+    *out<<"Bin width: "<<binWidth << endl;
+    *out<<"Number of bins: "<<nBins<< endl;
+    *out<<"Total events in range: " <<getTotalEvents()<< endl;
+    *out<<"Events out of range: "<<nLosts<< endl;
+
+    if(doPrintStat){
+        *out<<"@@ "<<name<< endl;
+        *out<<"Mean:"<<getMean()<< endl;
+        *out<<"RMS:"<<getRMS()<< endl;
+    }
+    *out<<"##############" << endl<< endl;
+
+    delete out;
 }
 
 void HistData::clearNevents()
@@ -88,41 +112,46 @@ void HistData::clear()
     clearNevents();
     initNevents();
     fillNevents(0);
+
+    Nev=0;
     nLosts = 0;
-    bEmpty = 1;
-    sampleMean=0;
-    sampleVariance=0;
+    sumValues=0;
+    sumSquares=0;
 }
 
 void HistData::setnBins(quint16 _nBins)
 {
-    nBins=_nBins;
-    calcbinWidth();
-
-    clearNevents();
-    initNevents();
-
-    std::vector<quint16> _inputs(inputs);
-    inputs.clear();
-    foreach(double _inp,_inputs) {
-        addEvent(_inp);
+    if((rightLimit-leftLimit +1)%_nBins==0){
+        binWidth=(rightLimit-leftLimit +1)/(_nBins);
+        nBins=_nBins;
+    }
+    else {
+        qDebug() << "Wrong number of bins";
+        nBins=0;
+        binWidth=0;
     }
 }
 
-quint16 HistData::getnBins()
+bool HistData::rebin(quint16 newBinWidth)
 {
-    return nBins;
-}
+    if((rightLimit-leftLimit+1)%newBinWidth==0){
+        setnBins((rightLimit-leftLimit+1)/newBinWidth);
+        clearNevents();
+        initNevents();
+        fillNevents(0);
+        sumValues=0;
+        sumSquares=0;
+        Nev=0;
+        nLosts=0;
 
-void HistData::setbinWidth(qreal _binWidth)
-{
-    quint16 _nBins=qCeil((rightLimit-leftLimit+1)/_binWidth);            //convert _binWidth to nearest
-    setnBins(_nBins);
-}
-
-qreal HistData::getbinWidth()
-{
-    return binWidth;
+        quint32 size=inputs.size();
+        for(quint32 i=0;i<size;i++) { addEvent(inputs[i]); inputs.pop_back(); }
+        return 1;
+    }
+    else {
+        qDebug() << "Can't set" <<newBinWidth << "as bin width";
+        return 0;
+    }
 }
 
 void HistData::setHistName(QString _name)
@@ -148,49 +177,25 @@ quint32 HistData::getTotalEvents()
 
 quint16& HistData::operator[] (const quint16 index)
 {
-    return nEvents[index];
+    if(index<nBins) return nEvents[index];
+    else {qDebug() << "Index out of range"; exit(1);}
 };
 
-double HistData::getSampleMean()
+double HistData::getMean()
 {
-//    double sum_elems(0);
-//    foreach(double _elem,inputs){
-//        sum_elems += _elem;
-//    }
-//    sampleMean = sum_elems/(getTotalEvents());
-    if(getTotalEvents()!=0) return sampleMean*1.0/getTotalEvents();
+    if(getTotalEvents()!=0) return sumValues*1.0/getTotalEvents();
     else return 0;
 }
 
-double HistData::getSampleVariance()
+double HistData::getVariance()
 {
-//    double sum_sqs(0);
-//    foreach(double _elem,inputs){
-//        sum_sqs += (_elem-getSampleMean())*(_elem-getSampleMean());
-//    }
-//    sampleVariance = sum_sqs/(getTotalEvents()-1);
-    if(getTotalEvents()!=0) {return (1000*sampleVariance)/getTotalEvents()-pow(getSampleMean(),2);}
+    if(getTotalEvents()!=0) {return (1000*sumSquares)/getTotalEvents()-pow(getMean(),2);}
     else {return 0;}
 }
 
-double HistData::getSigma()
+double HistData::getRMS()
 {
-    return pow(getSampleVariance(),0.5);
-}
-
-double HistData::getFWHM()
-{
-    return 2.355*getSigma();
-}
-
-void HistData::calcbinWidth()
-{
-    binWidth=(rightLimit-leftLimit +1)/(1.0*nBins);
-}
-
-void HistData::calcnBins()
-{
-    nBins=(rightLimit-leftLimit)/binWidth + 1;
+    return pow(getVariance(),0.5);
 }
 
 
@@ -202,16 +207,15 @@ void HistData::calcnBins()
 
 Hist2Data::Hist2Data(qint16 _leftXLimit,qint16 _rightXLimit,quint16 _nXBins,
                      qint16 _leftYLimit,qint16 _rightYLimit,quint16 _nYBins)
-{
-    leftLimit  = _leftXLimit;
-    rightLimit = _rightXLimit;
-    nBins = _nXBins;
+{       
+    leftXLimit  = _leftXLimit;
+    rightXLimit = _rightXLimit;
 
     leftYLimit  = _leftYLimit;
     rightYLimit = _rightYLimit;
-    nYBins = _nYBins;
 
-    calcbinWidth();
+    setnXBins(_nXBins);
+    setnYBins(_nYBins);
 
     inputs.reserve(100000);
 
@@ -226,12 +230,12 @@ Hist2Data::~Hist2Data()
 
 void Hist2Data::initNevents()
 {
-    nEvents = new quint16[nBins*nYBins];
+    nEvents = new quint16[nXBins*nYBins];
 }
 
 void Hist2Data::fillNevents(quint16 val)
 {
-    for(quint32 i=0;i<nBins*nYBins;i++) {
+    for(quint32 i=0;i<nXBins*nYBins;i++) {
             nEvents[i] = val;
     }
 }
@@ -242,64 +246,79 @@ void Hist2Data::clearNevents()
     delete [] nEvents;
 }
 
-quint16 Hist2Data::addEvent(qint16 _valX,qint16 _valY)
+void Hist2Data::addEvent(qint16 _valX,qint16 _valY)
 {
-    inputs<<_valX << _valY;
+    inputs.push_back(_valX);
+    inputs.push_back(_valY);
 
-    qreal leftXborder=leftLimit - binWidth/2;
-    qreal rightXborder=leftXborder+binWidth;
+    quint16 idX=(_valX-leftXLimit)/binXWidth;
+    quint16 idY=(_valY-leftYLimit)/binYWidth;
 
-    qreal leftYborder=leftYLimit - binYWidth/2;
-    qreal rightYborder=leftYborder+binYWidth;
-
-    for(quint16 i=0;i<nBins;i++) {
-        if((leftXborder<=_valX)&&(_valX<=rightXborder)) {
-            for(quint16 j=0;j<nYBins;j++) {
-                if((leftYborder<=_valY)&&(_valY<=rightYborder)) {
-                    nEvents[i*nBins+j]++;
-                    Nev++;
-                    bEmpty = 0;
-                    return i;
-                }
-                leftYborder+=binYWidth;
-                rightYborder+=binYWidth;
-            }
-        }
-        leftXborder+=binWidth;
-        rightXborder+=binWidth;
+    if(idX<nXBins && idY<nYBins) {
+        nEvents[idX*nYBins+idY]++;
+        Nev++;
     }
-    nLosts++;
-    return nBins;
+    else    nLosts++;
+
 }
 
-void Hist2Data::printInfo(bool doPrintAllInputs,bool doPrintNumberEventsPerBin, bool doPrintOnlyStat){
-    if(doPrintOnlyStat){
-        qDebug()<<"@@ "<<name;
-//        qDebug()<<"Sample mean:"<<getSampleMean();
-//        qDebug()<<"Sample variance:"<<getSampleVariance();
-        return;
+void Hist2Data::printData(bool doPrintNumberEventsPerBin, bool doPrintAllInputs, QFile *pFileNev, QFile *pFileInp)
+{
+    QTextStream* out_Nev,*out_Inp;
+
+    if(pFileNev==nullptr) out_Nev = new QTextStream(stdout);
+    else out_Nev = new QTextStream(pFileNev);
+
+    if(pFileInp==nullptr) out_Inp = new QTextStream(stdout);
+    else out_Inp = new QTextStream(pFileInp);
+
+    if(doPrintAllInputs) {
+        *out_Inp<<"Hist \"" << name <<"\" inputs:" << endl;
+        *out_Inp<<"XVal\tYVal" << endl;
+        for(quint32 i=0;i<inputs.size();i+=2){ *out_Inp << inputs[i] << "\t" << inputs[i+1] << endl;}
+        *out_Inp << endl;
     }
-    qDebug()<<"#### INFO ####";
-    qDebug()<<"Histogram name"<<name;
 
-    qDebug()<<"X From:"<<leftLimit<< "to:"<<rightLimit;
-    qDebug()<<"X Bin width:"<<binWidth;
-    qDebug()<<"X Number of bins:"<<nBins;
-
-    qDebug()<<"Y From:"<<leftYLimit<< "to:"<<rightYLimit;
-    qDebug()<<"Y Bin width:"<<binYWidth;
-    qDebug()<<"Y Number of bins:"<<nYBins;
-
-    qDebug()<<"Total events in range:" <<getTotalEvents();
-    qDebug()<<"Events out of range:"<<nLosts;
-    if(doPrintAllInputs) {qDebug()<<"Inputs:"<<inputs;}
     if(doPrintNumberEventsPerBin) {
-        qDebug()<<"Number of events per bin:";
-//        foreach(QVector<quint16> v, nEvents)
-//            qDebug()<<v;
+        *out_Nev<<"Number of events per cell:" << endl;
+        *out_Nev<<"idX\tidY\tValue" << endl;
+
+        for(quint16 i=0;i<nXBins;i++){
+            for(quint16 j=0;j<nYBins;j++){
+                *out_Nev << i << "\t" << j << "\t" << nEvents[i*nYBins+j] << endl;
+            }
+        *out_Nev << endl;
+        }
     }
-    qDebug()<<"##############";
-    qDebug()<<"";
+
+    delete out_Inp;
+    delete out_Nev;
+}
+
+
+void Hist2Data::printInfo(QFile *pFile)
+{
+    QTextStream* out;
+    if(pFile==nullptr) out = new QTextStream(stdout);
+    else out = new QTextStream(pFile);
+
+    *out<<"#### INFO ####" << endl;
+    *out<<"Histogram name: \""<<name <<"\"" << endl;
+
+    *out<<"X From: "<<leftXLimit<< " to "<<rightXLimit << endl;
+    *out<<"X Bin width: "<<binXWidth << endl;
+    *out<<"X Number of bins: "<<nXBins << endl;
+
+    *out<<"Y From: "<<leftYLimit<< " to "<<rightYLimit << endl;
+    *out<<"Y Bin width: "<<binYWidth << endl;
+    *out<<"Y Number of bins: "<<nYBins << endl;
+
+    *out<<"Total events: " << Nev << endl;
+    *out<<"Events out of range:"<<nLosts << endl;
+    *out<<"##############" << endl;
+    *out<< endl;
+
+    delete out;
 }
 
 void Hist2Data::clear()
@@ -310,122 +329,85 @@ void Hist2Data::clear()
     initNevents();
     fillNevents(0);
     Nev=0;
-    bEmpty = 1;
 }
 
-void Hist2Data::setnXBins(quint16 _nBins)
+bool Hist2Data::rebinX(quint16 _newBinXWidth)
 {
-    clearNevents();
-    nBins=_nBins;
-    calcbinWidth();
-    initNevents();
+    if((rightXLimit-leftXLimit+1)%_newBinXWidth==0){
+        setnXBins((rightXLimit-leftXLimit+1)/_newBinXWidth);
+        clearNevents();
+        initNevents();
+        fillNevents(0);
+        Nev=0;
+        nLosts=0;
 
-    QVector<quint16> _inputs(inputs);
-    inputs.clear();
-    foreach(double _inp,_inputs) {
-//        addEvent(_inp);
+        quint32 size=inputs.size();
+        for(quint32 i=0;i<size;i+=2) { addEvent(inputs[i],inputs[i+1]); inputs.pop_back();inputs.pop_back(); }
+        return 1;
+    }
+    else {
+        qDebug() << "Can't set" <<_newBinXWidth << "as X bin width";
+        return 0;
     }
 }
 
-//void Hist2Data::setnYBins(quint16 _nYBins)
-//{
-//    clearNevents();
-//    nYBins=_nYBins;
-//    calcbinWidth();
-//    initNevents();
 
-//    QVector<double> _inputs(inputs);
-//    inputs.clear();
-//    foreach(double _inp,_inputs) {
-//        addEvent(_inp);
-//    }
-//}
+bool Hist2Data::rebinY(quint16 _newBinYWidth)
+{
+    if((rightYLimit-leftYLimit+1)%_newBinYWidth==0){
+        setnYBins((rightYLimit-leftYLimit+1)/_newBinYWidth);
+        clearNevents();
+        initNevents();
+        fillNevents(0);
+        Nev=0;
+        nLosts=0;
 
-quint16 Hist2Data::getnXBins() { return nBins; }
+        quint32 size=inputs.size();
+        for(quint32 i=0;i<size;i+=2) { addEvent(inputs[i],inputs[i+1]); inputs.pop_back();inputs.pop_back(); }
+        return 1;
+    }
+    else {
+        qDebug() << "Can't set" <<_newBinYWidth << "as Y bin width";
+        return 0;
+    }
+}
 
-quint16 Hist2Data::getnYBins() { return nYBins; }
+
+
+void Hist2Data::setnXBins(quint16 _nXBins)
+{
+    if((rightXLimit-leftXLimit +1)%_nXBins==0){
+        binXWidth=(rightXLimit-leftXLimit +1)/(_nXBins);
+        nXBins=_nXBins;
+    }
+    else {
+        qDebug() << "Wrong number of X bins";
+        nXBins=0;
+        binXWidth=0;
+    }
+}
+
+void Hist2Data::setnYBins(quint16 _nYBins)
+{
+    if((rightYLimit-leftYLimit +1)%_nYBins==0){
+        binYWidth=(rightYLimit-leftYLimit +1)/(_nYBins);
+        nYBins=_nYBins;
+    }
+    else {
+        qDebug() << "Wrong number of Y bins";
+        nYBins=0;
+        binYWidth=0;
+    }
+}
 
 void Hist2Data::setbinXWidth(qreal _binWidth)
 {
-    quint16 _nBins=qCeil((rightLimit-leftLimit+1)/_binWidth);            //convert _binWidth to nearest
-    setnXBins(_nBins);
-}
-
-//void Hist2Data::setbinYWidth(qreal _binYWidth)
-//{
-//    quint16 _nYBins=qCeil((rightYLimit-leftYLimit+1)/_binYWidth);            //convert _binWidth to nearest
-//    setnYBins(_nYBins);
-//}
-
-qreal Hist2Data::getbinXWidth() { return binWidth; }
-
-qreal Hist2Data::getbinYWidth() { return binYWidth; }
-
-void Hist2Data::setHistName(QString _name) { name=_name; }
-
-QString Hist2Data::getHistName()
-{
-    if (name.isEmpty()) {return "";}
-    else { return name;}
-}
-
-quint32 Hist2Data::getTotalEvents()
-{
-    return Nev;
-//    quint32 sum=0;
-//    foreach(QVector<quint32> v,nEvents){
-//        foreach(quint32 elem,v){
-//            sum += elem;
-//        }
-//    }
-//    return sum;
+    quint16 _nXBins=qCeil((rightXLimit-leftXLimit+1)/_binWidth);            //convert _binWidth to nearest
+    setnXBins(_nXBins);
 }
 
 quint16& Hist2Data::operator() (const quint16 indexX,const quint16 indexY)
 {
-    return nEvents[indexX*nBins+indexY];
+    return nEvents[indexX*nYBins+indexY];
 };
-
-//double Hist2Data::getSampleMean()
-//{
-//    double sum_elems(0);
-//    foreach(double _elem,inputs){
-//        sum_elems += _elem;
-//    }
-//    sampleMean = sum_elems/(getTotalEvents());
-
-//    return sampleMean;
-//}
-
-//double Hist2Data::getSampleVariance()
-//{
-//    double sum_sqs(0);
-//    foreach(double _elem,inputs){
-//        sum_sqs += (_elem-getSampleMean())*(_elem-getSampleMean());
-//    }
-//    sampleVariance = sum_sqs/(getTotalEvents()-1);
-//    return sampleVariance;
-//}
-
-//double Hist2Data::getSigma()
-//{
-//    return pow(getSampleVariance(),0.5);
-//}
-
-//double Hist2Data::getFWHM()
-//{
-//    return 2.355*getSigma();
-//}
-
-void Hist2Data::calcbinWidth()
-{
-    binWidth=(rightLimit-leftLimit +1)/(1.0*nBins);
-    binYWidth=(rightYLimit-leftYLimit +1)/(1.0*nYBins);
-}
-
-void Hist2Data::calcnBins()
-{
-    nBins=(rightLimit-leftLimit)/binWidth + 1;
-    nYBins=(rightYLimit-leftYLimit)/binYWidth + 1;
-}
 

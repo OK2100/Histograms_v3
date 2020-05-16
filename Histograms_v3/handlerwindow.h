@@ -52,7 +52,7 @@ public slots:
     void addEvent(QString gbtword,bool doPrintDecoded=false);
     void addEvent(quint8 chID, quint32 bitset, bool doPrintDecoded=false); // without "time info lost"
 
-    void addSingleChannel(quint8 chID);
+    bool addSingleChannel(quint8 chID);
     void addChannelRange(QString chIDs);
 
     void removeSingleChannel(quint8 chID);
@@ -74,7 +74,7 @@ public slots:
 
 
 private slots:
-    void startNewWindow(quint8 firstChannelID);
+    void startNewWindow(QVector<quint8>& channelsToAdd);
     bool openSourceFile();
     void addChannel();              // with input
     void removeChannel();           // with input
@@ -84,7 +84,7 @@ private slots:
     void doAddChannelRange();
 
 signals:
-    void showNewWindow(quint8 firstChannelID);
+    void showNewWindow(QVector<quint8>& channelsToAdd);
 
 
 private:
@@ -102,11 +102,14 @@ private:
     QString filePath;
     QString fileType;
 
+    QStack<quint8> addedChannelsID;
     quint8 nAddedChannels = 0;
     quint8 nextChannelID = 1;
     quint8 ADCNumber = 2;       //  2 mean both ADC0 and ADC1
 
     HandlerWindow* secondWindow;
+
+    void closeEvent(QCloseEvent *event) override;
 
     void SetUp();
     void PlotHistograms();

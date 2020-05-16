@@ -10,18 +10,22 @@ void ChannelHistWidget::add2data(qint16 _charge,qint16 _time,quint8 graph_id){
 
 
     if(!makeHaos)
-        for(quint8 i=0;i<=step+1;i++){
-            for(quint8 j=0;j<=step+1;j++) {
-                chargeTimeHist->graph(graph_id)->addData(_charge+((1.0*(i%(step+1))/step)*hist0->getbinYWidth())-hist0->getbinYWidth()*0.5,
-                                             _time+((1.0*(j%(step+1))/step)*hist0->getbinXWidth()-hist0->getbinXWidth()*0.5) );
+        for(quint8 i=0;i<step+1;i++){
+            for(quint8 j=0;j<step+1;j++) {
+                chargeTimeHist->graph(graph_id)->addData(
+                            _charge+((1.0*(i%(step+1))/step)*hist0->getbinXWidth())-hist0->getbinXWidth()*0.5,
+                            _time  +((1.0*(j%(step+1))/step)*hist0->getbinYWidth()-hist0->getbinYWidth()*0.5)
+                            );
 
             }
         }
     else
-        for(quint8 i=0;i<=step+1;i++){
-            for(quint8 j=0;j<=step+1;j++) {
-                chargeTimeHist->graph(graph_id)->addData(_charge+((1.0*(qrand()%(step+1))/step)*hist0->getbinYWidth())-hist0->getbinYWidth()*0.5,
-                                             _time+((1.0*(qrand()%(step+1))/step)*hist0->getbinXWidth()-hist0->getbinXWidth()*0.5) );
+        for(quint8 i=0;i<step+1;i++){
+            for(quint8 j=0;j<step+1;j++) {
+                chargeTimeHist->graph(graph_id)->addData(
+                            _charge+((1.0*(qrand()%(step))/step)*hist0->getbinXWidth())-hist0->getbinXWidth()*0.5,
+                            _time  +((1.0*(qrand()%(step))/step)*hist0->getbinYWidth()-hist0->getbinYWidth()*0.5)
+                            );
 
             }
         }
@@ -98,9 +102,13 @@ void ChannelHistWidget::setData(QCPBars* bars)
         else   { qDebug() << "ERROR: setData empty pointer"; return;}
     }
 
+    double left=data->getLeftLimit()-0.5 + data->getbinWidth()/2.0;
+
     for(quint16 i=0;i<data->getnBins();i++){
-        if(extra_data==nullptr) bars->addData(data->getLeftLimit() + (i*data->getbinWidth()),(*data)[i]) ;
-        else bars->addData(data->getLeftLimit() + (i*data->getbinWidth()),(*data)[i]+(*extra_data)[i]) ;
+        if(extra_data==nullptr) {
+            bars->addData(left + (i*data->getbinWidth()),(*data)[i]) ;
+        }
+        else bars->addData(left + (i*data->getbinWidth()),(*data)[i]+(*extra_data)[i]) ;
     }
 }
 
@@ -120,6 +128,10 @@ void ChannelHistWidget::set2Data()
     }
 
     quint8 graph_id=0;
+    double leftX,leftY;
+
+    leftX=data->getLeftXLimit()-0.5+data->getbinXWidth()/2.0;
+    leftY=data->getLeftYLimit()-0.5+data->getbinYWidth()/2.0;
 
     for(quint16 i=0;i<data->getnXBins();i++){
         for(quint16 j=0;j<data->getnYBins();j++){
@@ -131,9 +143,7 @@ void ChannelHistWidget::set2Data()
                         if(tr>=threshold[255-c]){ graph_id = 255-c;break; }
                         else {continue;}
                     }
-
-                    add2data(data->getLeftXLimit() + (i*data->getbinXWidth()),data->getLeftYLimit() + (j*data->getbinYWidth()),graph_id);
-
+                    add2data(leftX + (i*data->getbinXWidth()),leftY + (j*data->getbinYWidth()),graph_id);
             }
             else{
                 if(((*data)(i,j)+(*extra_data)(i,j))==0){continue;}
@@ -142,9 +152,7 @@ void ChannelHistWidget::set2Data()
                         if(tr>=threshold[255-c]){ graph_id = 255-c;break; }
                         else {continue;}
                     }
-                    add2data(data->getLeftXLimit() + (i*data->getbinXWidth()),data->getLeftYLimit() + (j*data->getbinYWidth()),graph_id);
-
-
+                    add2data(leftX + (i*data->getbinXWidth()),leftY + (j*data->getbinYWidth()),graph_id);
             }
         }
     }
@@ -181,20 +189,22 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
 
 //    Experements();
 
+    //    LoadSettings("../../default.ini");
 
 
     setupWindow = new SetupChannelWindow;
 
-    connect(setupWindow,SIGNAL(binWidth_charge_changed(const QString&)),this,SLOT(binWidth_charge_was_changed(const QString&)));
-    connect(setupWindow,SIGNAL(binWidth_time_changed(const QString&)),this,SLOT(binWidth_time_was_changed(const QString&)));
-    connect(setupWindow,SIGNAL(nBins_charge_changed(const QString&)),this,SLOT(nBins_charge_was_changed(const QString&)));
-    connect(setupWindow,SIGNAL(nBins_time_changed(const QString&)),this,SLOT(nBins_time_was_changed(const QString&)));
+    connect(setupWindow,&SetupChannelWindow::binWidth_charge_changed,this,&ChannelHistWidget::binWidth_charge_was_changed);
+    connect(setupWindow,&SetupChannelWindow::binWidth_time_changed,this,&ChannelHistWidget::binWidth_time_was_changed);
+    connect(setupWindow,&SetupChannelWindow::end_of_apply,this,&ChannelHistWidget::UpdateScreen);
+    connect(setupWindow,&SetupChannelWindow::end_of_apply,this,&ChannelHistWidget::HideZeroBars);
+    connect(setupWindow,
+            reinterpret_cast<void (SetupChannelWindow::*)(Qt::CheckState)>(&SetupChannelWindow::check_status)
+            ,ui->doFixRanges,&QCheckBox::setCheckState);
+    connect(ui->doFixRanges,&QCheckBox::stateChanged,setupWindow,&SetupChannelWindow::set_fix_range_chaecked);
 
-
-//    connect(chargeHist,&QCustomPlot::plottableDoubleClick,this,&ChannelHistWidget::hist_double_clicked);
     connect(chargeHist,&QCustomPlot::mouseDoubleClick,this,&ChannelHistWidget::hist_double_clicked);
     connect(timeHist,  &QCustomPlot::mouseDoubleClick,this,&ChannelHistWidget::hist_double_clicked);
-//    LoadSettings("../../default.ini");
 
     connect(chargeHist->xAxis,
             static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged),
@@ -255,6 +265,8 @@ ChannelHistWidget::~ChannelHistWidget()
     delete timeHist;
     delete chargeTimeHist;
 
+    delete setupWindow;
+
     delete ui;
 }
 
@@ -293,43 +305,43 @@ void ChannelHistWidget::hist_double_clicked( QMouseEvent * event )
 void ChannelHistWidget::InitHistograms()
 {
     chargeData = new HistData(-100,4095,4196);
-    chargeData->name = "Channel "+chID+" charge";
+    chargeData->setHistName("Channel "+chID+" charge");
     timeData = new HistData(-2048,2047,4096);
-    timeData->name = "Channel "+chID+" time";
+    timeData->setHistName("Channel "+chID+" time");
     chargeBars = new QCPBars(chargeHist->xAxis,chargeHist->yAxis);
     timeBars = new QCPBars(timeHist->xAxis,timeHist->yAxis);
 
     chargeData1 = new HistData(-100,4095,4196);
-    chargeData1->name = "Channel "+chID+" charge _ ADC1";
+    chargeData1->setHistName("Channel "+chID+" charge _ ADC1");
     timeData1 = new HistData(-2048,2047,4096);
-    timeData1->name = "Channel "+chID+" time _ ADC1";
+    timeData1->setHistName("Channel "+chID+" time _ ADC1");
 
     for(quint16 j=0;j<256;j++){    chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);}
     chargeTimeHist->graph(15)->isWidgetType();
 
-    hist0 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
-    hist1 = new Hist2Data(-2048,2047,4096,-100,4095,4196);
+    hist0 = new Hist2Data(-100,4095,4196,-2048,2047,4096);
+    hist1 = new Hist2Data(-100,4095,4196,-2048,2047,4096);
 }
 
 void ChannelHistWidget::setLabels()
 {
     if(ADC_ID==0){
         ui->lbl_Nev->setText("Sum: "+QString::number(chargeData->getTotalEvents()));
-        ui->lbl_Mean->setText("Mean: "+QString::number(chargeData->getSampleMean(),'g',5));
-        ui->lbl_StdDev->setText("RMS: "+QString::number( sqrt(chargeData->getSampleVariance()),'g',4 ));
+        ui->lbl_Mean->setText("Mean: "+QString::number(chargeData->getMean(),'g',5));
+        ui->lbl_StdDev->setText("RMS: "+QString::number( chargeData->getRMS(),'g',4 ));
         ui->lbl_Nev1->setText("Sum: "+QString::number(timeData->getTotalEvents()));
-        ui->lbl_Mean1->setText("Mean: "+QString::number(timeData->getSampleMean(),'g',5));
-        ui->lbl_StdDev1->setText("RMS: "+QString::number( sqrt(timeData->getSampleVariance()),'g',4 ));
+        ui->lbl_Mean1->setText("Mean: "+QString::number(timeData->getMean(),'g',5));
+        ui->lbl_StdDev1->setText("RMS: "+QString::number( timeData->getRMS(),'g',4 ));
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
     if(ADC_ID==1){
         ui->lbl_Nev->setText("Sum: "+QString::number(chargeData1->getTotalEvents()));
-        ui->lbl_Mean->setText("Mean: "+QString::number(chargeData1->getSampleMean(),'g',5));
-        ui->lbl_StdDev->setText("RMS: "+QString::number( sqrt(chargeData1->getSampleVariance()),'g',4 ));
+        ui->lbl_Mean->setText("Mean: "+QString::number(chargeData1->getMean(),'g',5));
+        ui->lbl_StdDev->setText("RMS: "+QString::number( chargeData1->getRMS(),'g',4 ));
         ui->lbl_Nev1->setText("Sum: "+QString::number(timeData1->getTotalEvents()));
-        ui->lbl_Mean1->setText("Mean: "+QString::number(timeData1->getSampleMean(),'g',5));
-        ui->lbl_StdDev1->setText("RMS: "+QString::number( sqrt(timeData1->getSampleVariance()),'g',4 ));
+        ui->lbl_Mean1->setText("Mean: "+QString::number(timeData1->getMean(),'g',5));
+        ui->lbl_StdDev1->setText("RMS: "+QString::number( timeData1->getRMS(),'g',4 ));
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
@@ -337,36 +349,36 @@ void ChannelHistWidget::setLabels()
         ui->lbl_Nev->setText("Sum: "+QString::number(chargeData->getTotalEvents()+chargeData1->getTotalEvents()));
         if(chargeData->getTotalEvents()!=0 && chargeData1->getTotalEvents()!=0){
             ui->lbl_StdDev->setText("RMS: "+QString::number(sqrt(1000*(chargeData->getSumSquares()+chargeData1->getSumSquares())/(chargeData->getTotalEvents()+chargeData1->getTotalEvents())
-                                                               - pow((chargeData->getSampleMean()+chargeData1->getSampleMean())/2,2)),'g',4));
-            ui->lbl_Mean->setText("Mean: "+QString::number( (chargeData->getSampleMean()+chargeData1->getSampleMean())/2,'g',5 ));
+                                                               - pow((chargeData->getMean()+chargeData1->getMean())/2,2)),'g',4));
+            ui->lbl_Mean->setText("Mean: "+QString::number( (chargeData->getMean()+chargeData1->getMean())/2,'g',5 ));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else if(chargeData->getTotalEvents()==0){
-            ui->lbl_StdDev->setText("RMS: "+QString::number(sqrt(chargeData1->getSampleVariance()),'g',4));
-            ui->lbl_Mean->setText("Mean: "+QString::number(chargeData1->getSampleMean(),'g',5));
+            ui->lbl_StdDev->setText("RMS: "+QString::number(chargeData1->getRMS(),'g',4));
+            ui->lbl_Mean->setText("Mean: "+QString::number(chargeData1->getMean(),'g',5));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else{
-            ui->lbl_StdDev->setText("RMS: "+QString::number(sqrt(chargeData->getSampleVariance()),'g',4));
-            ui->lbl_Mean->setText("Mean: "+QString::number(chargeData->getSampleMean(),'g',5));
+            ui->lbl_StdDev->setText("RMS: "+QString::number(chargeData->getRMS(),'g',4));
+            ui->lbl_Mean->setText("Mean: "+QString::number(chargeData->getMean(),'g',5));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
 
         ui->lbl_Nev1->setText("Sum: "+QString::number(timeData->getTotalEvents()+timeData1->getTotalEvents()));
         if(timeData->getTotalEvents()!=0 && timeData1->getTotalEvents()!=0){
             ui->lbl_StdDev1->setText("RMS: "+QString::number(sqrt(1000*(timeData->getSumSquares()+timeData1->getSumSquares())/(timeData->getTotalEvents()+timeData1->getTotalEvents())
-                                                               - pow((timeData->getSampleMean()+timeData1->getSampleMean())/2,2)),'g',4));
-            ui->lbl_Mean1->setText("Mean: "+QString::number( (timeData->getSampleMean()+timeData1->getSampleMean())/2,'g',5 ));
+                                                               - pow((timeData->getMean()+timeData1->getMean())/2,2)),'g',4));
+            ui->lbl_Mean1->setText("Mean: "+QString::number( (timeData->getMean()+timeData1->getMean())/2,'g',5 ));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else if(timeData->getTotalEvents()==0){
-            ui->lbl_StdDev1->setText("RMS: "+QString::number(sqrt(timeData1->getSampleVariance()),'g',4));
-            ui->lbl_Mean1->setText("Mean: "+QString::number(timeData1->getSampleMean(),'g',5));
+            ui->lbl_StdDev1->setText("RMS: "+QString::number(timeData1->getRMS(),'g',4));
+            ui->lbl_Mean1->setText("Mean: "+QString::number(timeData1->getMean(),'g',5));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else{
-            ui->lbl_StdDev1->setText("RMS: "+QString::number(sqrt(timeData->getSampleVariance()),'g',4));
-            ui->lbl_Mean1->setText("Mean: "+QString::number(timeData->getSampleMean(),'g',5));
+            ui->lbl_StdDev1->setText("RMS: "+QString::number(timeData->getRMS(),'g',4));
+            ui->lbl_Mean1->setText("Mean: "+QString::number(timeData->getMean(),'g',5));
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         }
 
@@ -553,6 +565,9 @@ void ChannelHistWidget::ClearScreen()
 
 void ChannelHistWidget::PlotHistograms()
 {
+    chargeBars->data().data()->clear();
+    timeBars->data().data()->clear();
+    for(quint16 j=0;j<256;j++) chargeTimeHist->graph(j)->data().data()->clear();
 
 //---------------------- CHARGE ------------------------
     setData(chargeBars);
@@ -598,11 +613,11 @@ void ChannelHistWidget::Clear()
 
 void ChannelHistWidget::PrintInfo(bool onlyStat)
 {
-        chargeData->printInfo(0,0,onlyStat);
-        timeData->printInfo(0,0,onlyStat);
+        chargeData->printInfo(0);
+        timeData->printInfo(0);
 
-        chargeData1->printInfo(0,0,onlyStat);
-        timeData1->printInfo(0,0,onlyStat);
+        chargeData1->printInfo(0);
+        timeData1->printInfo(0);
 }
 
 
@@ -610,16 +625,14 @@ void ChannelHistWidget::channelIDButton_clicked()
 {
 //    qDebug()<<"Clicked";
     if(setupWindow->isHidden()){
-        setupWindow->set_charge_hist_range(QString::number(chargeHist->xAxis->range().lower),
-                                           QString::number(chargeHist->xAxis->range().upper));
-        setupWindow->set_time_hist_range(QString::number(timeHist->xAxis->range().lower),
-                                           QString::number(timeHist->xAxis->range().upper));
+        setupWindow->set_charge_range(chargeHist->xAxis->range().lower,chargeHist->xAxis->range().upper);
+        setupWindow->set_time_range(timeHist->xAxis->range().lower,timeHist->xAxis->range().upper);
         setupWindow->set_chID(chID);
-        setupWindow->set_binWidth_charge(QString::number(chargeData->getbinWidth()));
-        setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
+        setupWindow->set_binWidth_charge(chargeData->getbinWidth());
+        setupWindow->set_binWidth_time(timeData->getbinWidth());
         setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
         setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
-
+        setupWindow->set_fix_range_chaecked(ui->doFixRanges->checkState());
         setupWindow->show();
     }
     else {
@@ -657,7 +670,7 @@ void ChannelHistWidget::HideZeroBars()
         for(quint8 j=0;j<2;j++) {
              if(cdata[j]==nullptr || ADC_empty[j]){ continue; }
              else{
-                 double leftBorder,rightBorder,binWidth;
+                 qint16 leftBorder,rightBorder,binWidth;
                  quint16 nBins;
                  quint16 i=0;
 
@@ -738,50 +751,24 @@ void ChannelHistWidget::ShowFullRange(){
 }
 
 
-void ChannelHistWidget::binWidth_charge_was_changed(const QString& _binWidth)
+void ChannelHistWidget::binWidth_charge_was_changed(quint16 _binWidth)
 {
-    chargeData->setbinWidth(_binWidth.toDouble());
-    chargeData1->setbinWidth(_binWidth.toDouble());
-    setupWindow->set_binWidth_charge(QString::number(chargeData->getbinWidth()));
-//    setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
+    chargeData->rebin(_binWidth);
+    chargeData1->rebin(_binWidth);
+    hist0->rebinX(_binWidth);
+    hist1->rebinX(_binWidth);
+    setupWindow->set_binWidth_charge(chargeData->getbinWidth());
     setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
-//    setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
-    UpdateScreen();
-//    chargeData->printInfo();
+    setupWindow->set_charge_range(chargeHist->xAxis->range().lower,chargeHist->xAxis->range().upper);
 }
 
-void ChannelHistWidget::binWidth_time_was_changed(const QString& _binWidth)
+void ChannelHistWidget::binWidth_time_was_changed(quint16 _binWidth)
 {
-    timeData->setbinWidth(_binWidth.toDouble());
-    timeData1->setbinWidth(_binWidth.toDouble());
-//    setupWindow->set_binWidth_charge(QString::number(chargeData->getbinWidth()));
-    setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
-//    setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
+    timeData->rebin(_binWidth);
+    timeData1->rebin(_binWidth);
+    hist0->rebinY(_binWidth);
+    hist1->rebinY(_binWidth);
+    setupWindow->set_binWidth_time(timeData->getbinWidth());
     setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
-    UpdateScreen();
-//    timeData->printInfo();
-}
-
-void ChannelHistWidget::nBins_charge_was_changed(const QString& _nBins)
-{
-    chargeData->setnBins(_nBins.toUInt());
-    chargeData1->setnBins(_nBins.toUInt());
-    setupWindow->set_binWidth_charge(QString::number(chargeData->getbinWidth()));
-    setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
-    setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
-    setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
-    UpdateScreen();
-//    chargeData->printInfo(0,1);
-}
-
-void ChannelHistWidget::nBins_time_was_changed(const QString& _nBins)
-{
-    timeData->setnBins(_nBins.toUInt());
-    timeData1->setnBins(_nBins.toUInt());
-    setupWindow->set_binWidth_charge(QString::number(chargeData->getbinWidth()));
-    setupWindow->set_binWidth_time(QString::number(timeData->getbinWidth()));
-    setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
-    setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
-    UpdateScreen();
-//    timeData->printInfo();
+    setupWindow->set_time_range(timeHist->xAxis->range().lower,timeHist->xAxis->range().upper);
 }

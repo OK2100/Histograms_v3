@@ -1,5 +1,5 @@
 //===========================================================================
-//                           Histogram's data class
+//                           Integer Histogram's data classes
 //===========================================================================
 #ifndef HISTDATA_H
 #define HISTDATA_H
@@ -7,6 +7,9 @@
 #include <QVector>
 #include <QDebug>
 #include <QtMath>
+#include <iostream>
+#include <QFile>
+
 
 class HistData
 {
@@ -14,52 +17,51 @@ public:
     HistData(qint16 _leftLimit,qint16 _rightLimit,quint16 _nBins);
     ~HistData();
 
-    std::vector<quint16> inputs;                      //    All input values
-
-    void printInfo(bool doPrintAllInputs=0,bool doPrintNumberEventsPerBin=0, bool doPrintOnlyStat = 0);
     quint16 addEvent(qint16 _event);
+    quint16& operator[] (const quint16 index);      //  return nEvents per bin
+    bool isEmpty(){return Nev>0?0:1 ;}
     void clear();
 
-    void setnBins(quint16 _nBins);
-    quint16 getnBins();
-    void setbinWidth(qreal _binWidth);
-    qreal getbinWidth();
-    void setHistName(QString _name);
+    quint16 getnBins(){return nBins;}
+    quint16 getbinWidth(){return binWidth;}
     QString getHistName();
+    qint16  getLeftLimit(){ return leftLimit;}
+    qint16  getRightLimit(){ return rightLimit;}
+
+    void    setHistName(QString _name);
+    bool    rebin(quint16 newBinWidth);
+
     quint32 getTotalEvents();
-    qint16 getLeftLimit(){ return leftLimit;}
-    qint16 getRightLimit(){ return rightLimit;}
+    double getMean();
+    double getVariance();
+    double getRMS();
+    double getSumSquares(){ return sumSquares; }
 
-    bool isEmpty(){return bEmpty;}
-
-    double getSampleMean();
-    double getSampleVariance();
-    double getSigma();
-    double getFWHM();
-    double getSumSquares(){ return sampleVariance; }
-
-    quint16& operator[] (const quint16 index);      //  return nEvents per bin
-
-    QString name;
+    void printInfo( bool doPrintStat = 0, QFile* pFile=nullptr);
+    void printData(bool doPrintNumberEventsPerBin=0, bool doPrintAllInputs=0,
+                   QFile* pFileNev=nullptr,QFile* pFileInp=nullptr );
 
 private:
-    qint16 leftLimit;
-    qint16 rightLimit;
+    QString name;
+
+    qint16  leftLimit;
+    qint16  rightLimit;
     quint16 nBins;
-    qreal binWidth;
-    qint32 sampleMean=0;
-    double sampleVariance=0;
+    quint16 binWidth;
+    qint32  sumValues=0;
+    double  sumSquares=0;
     quint16 nLosts=0;
+    quint32 Nev=0;
 
-    bool bEmpty = 1;
-
+    std::vector<qint16> inputs;                      //    All input values
     quint16* nEvents=nullptr;       // Number of events per bin
 
-    void calcbinWidth();
-    void calcnBins();
     void initNevents();
     void fillNevents(quint16 val=0);
     void clearNevents();
+    void setnBins(quint16 _nBins);
+
+
 };
 
 
@@ -71,64 +73,56 @@ public:
               qint16 _leftYLimit,qint16 _rightYLimit,quint16 _nYBins);
     ~Hist2Data();
 
-    QVector <quint16> inputs;                      //    All input values
+    std::vector <qint16> inputs;                                            //    All input values
 
-
-    void printInfo(bool doPrintAllInputs=0,bool doPrintNumberEventsPerCell=0, bool doPrintOnlyStat = 0);
-    quint16 addEvent(qint16 _valX,qint16 _valY);
+    void addEvent(qint16 _valX,qint16 _valY);
+    quint16& operator() (const quint16 indexX,const quint16 indexY);        //  return nEvents per cell
+    bool isEmpty(){return inputs.empty();}
     void clear();
 
-    void setHistName(QString _name);
-    void setnXBins(quint16 _nXBins);
-    quint16 getnXBins();
-    quint16 getnYBins();
+    quint16 getnXBins()     {return nXBins;}
+    quint16 getnYBins()     {return nYBins;}
+    quint16 getbinXWidth()  {return binXWidth;}
+    quint16 getbinYWidth()  {return binYWidth;}
+    QString getHistName()   {return name;}
+    qint16  getLeftXLimit() {return leftXLimit;}
+    qint16  getRightXLimit(){return rightXLimit;}
+    qint16  getLeftYLimit() {return leftYLimit;}
+    qint16  getRightYLimit(){return rightYLimit;}
+
+    quint32 getTotalEvents(){return Nev;}
+
+    void setHistName(QString _name){name=_name;}
+    bool rebinX(quint16 _newBinXWidth);
+    bool rebinY(quint16 _newBinYWidth);
+
     void setbinXWidth(qreal _binXWidth);
-    qreal getbinXWidth();
-    qreal getbinYWidth();
-    QString getHistName();
-    quint32 getTotalEvents();
-    qint16 getLeftXLimit(){ return leftLimit;}
-    qint16 getRightXLimit(){ return rightLimit;}
-    qint16 getLeftYLimit(){ return leftYLimit;}
-    qint16 getRightYLimit(){ return rightYLimit;}
 
+    void printInfo(QFile* pFile=nullptr);
+    void printData(bool doPrintNumberEventsPerBin=0, bool doPrintAllInputs=0,
+                   QFile* pFileNev=nullptr,QFile* pFileInp=nullptr );
 
-
-    bool isEmpty(){return bEmpty;}
-
-//    double getSampleMean();
-//    double getSampleVariance();
-//    double getSigma();
-//    double getFWHM();
-
-    quint16& operator() (const quint16 indexX,const quint16 indexY);      //  return nEvents per cell
-
-    QString name;
 
 private:
-    qint16 leftLimit;
-    qint16 rightLimit;
-    quint16 nBins;
-    qreal binWidth;
-    quint32 Nev=0;
 
-    qint16 leftYLimit;
-    qint16 rightYLimit;
+    QString name;
+    qint16  leftXLimit;
+    qint16  rightXLimit;
+    quint16 nXBins;
+    quint16 binXWidth;
+
+    qint16  leftYLimit;
+    qint16  rightYLimit;
     quint16 nYBins;
-    qreal binYWidth;
-
-//    double sampleMean;
-//    double sampleVariance;
-
-    quint32 nLosts=0;
-
-    bool bEmpty = 1;
+    quint16 binYWidth;
 
     quint16* nEvents;       // Number of events per cell
 
+    quint32 Nev=0;
+    quint32 nLosts=0;
 
-    void calcbinWidth();            // ??
-    void calcnBins();
+    void setnXBins(quint16 _nXBins);
+    void setnYBins(quint16 _nYBins);
 
     void fillNevents(quint16 val=0);
     void initNevents();

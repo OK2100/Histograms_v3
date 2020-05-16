@@ -42,10 +42,8 @@ public:
 
 private slots:
     void channelIDButton_clicked();
-    void binWidth_charge_was_changed(const QString&);
-    void binWidth_time_was_changed(const QString&);
-    void nBins_charge_was_changed(const QString&);
-    void nBins_time_was_changed(const QString&);
+    void binWidth_charge_was_changed(quint16);
+    void binWidth_time_was_changed(quint16);
 
     void hist_double_clicked( QMouseEvent* event);
     void replot_chargeTimeHist(){ chargeTimeHist->replot(); }

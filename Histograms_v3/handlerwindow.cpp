@@ -49,7 +49,7 @@ HandlerWindow::HandlerWindow(HandlerWindow* prevWindow,QWidget *parent)
     grid = ui->grid;
     prevWin=prevWindow;
     if(prevWindow!=nullptr) {
-        connect(prevWindow,SIGNAL(showNewWindow(quint8)),this,SLOT(startNewWindow(quint8)));
+        connect(prevWindow,&HandlerWindow::showNewWindow,this,&HandlerWindow::startNewWindow);
     }
 
     connect(ui->b_1,&QPushButton::clicked,this,&HandlerWindow::addChannel);
@@ -90,6 +90,7 @@ void HandlerWindow::SetUp()
     ui->b_7->setVisible(false);
     ui->b_8->setVisible(false);
 
+    addedChannelsID.reserve(4);
 
 //--------------------------- Appearance ---------------------------------
 
@@ -440,13 +441,24 @@ void HandlerWindow::updateScreen()
     }
 }
 
-void HandlerWindow::startNewWindow(quint8 firstChannelID)
+void HandlerWindow::startNewWindow(QVector<quint8>& channelsToAdd)
 {
     this->show();
-    nextChannelID = firstChannelID;
+    this->activateWindow();
     filePath=prevWin->getFilePath();
     doHide=prevWin->isEmptyBarsHidden();
-    addChannel();
+
+    quint8 j=0;
+    do{
+        if(addSingleChannel(channelsToAdd.at(j))) j++;
+        else{
+            QVector<quint8> vec1=channelsToAdd.mid(j);
+            emit showNewWindow(vec1);
+            return;
+        }
+    }while(j<channelsToAdd.size());
+
+
 }
 
 void HandlerWindow::doAddChannelRange()
@@ -463,38 +475,52 @@ void HandlerWindow::doAddChannelRange()
 
 }
 
+void HandlerWindow::closeEvent(QCloseEvent *event)
+{
+    removeChannelRange("1-12");
+    event->accept();
+}
+
 void HandlerWindow::addChannelRange(QString chIDs)
 {
     QVector<quint8> vec;
+    vec.reserve(12);
     DecodeChsRegExp(chIDs,vec);
-//    qDebug() << vec;
 
     quint8 j=0;
     do{
-        addSingleChannel(vec.at(j));
-        j++;
-    }while(j<=4 && j<vec.size() );
+        if(addSingleChannel(vec.at(j))) j++;
+        else{
+            QVector<quint8> vec1=vec.mid(j);
+            emit showNewWindow(vec1);
+            return;
+        }
+    }while(j<vec.size());
 }
 
-void HandlerWindow::addSingleChannel(quint8 chID)
+bool HandlerWindow::addSingleChannel(quint8 chID)
 {
+    if(addedChannelsID.size() == 4){
+        this->statusBar()->clearMessage();
+        return 0;
+    }
+
     if(channel[chID-1]==nullptr) {
         channel[chID-1] = new ChannelHistWidget(this,QString::number(chID));
         lbl.hide();
 //        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         grid->addWidget(channel[chID-1]);
 //        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        this->resize(Width+Width*nAddedChannels,Height);
+        this->resize(Width+Width*addedChannelsID.size(),Height);
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
-        nAddedChannels++;
-        nextChannelID++;
+        addedChannelsID.push(chID);
+
         if(!filePath.isEmpty()){ readFile(); }
 
     }
 
-
-    if(nAddedChannels == 1){
+    if(addedChannelsID.size() == 1){
         ui->b_2->setVisible(true);
         ui->b_3->setVisible(true);
         ui->b_4->setVisible(true);
@@ -502,6 +528,7 @@ void HandlerWindow::addSingleChannel(quint8 chID)
         ui->b_6->setVisible(true);
     }
 
+    return 1;
 }
 
 bool HandlerWindow::openSourceFile()
@@ -529,6 +556,9 @@ bool HandlerWindow::openSourceFile()
 
 void HandlerWindow::readFile()
 {
+    qDebug() << "Read file" << filePath;
+
+    label.clear();
     label.setText("Reading File...");
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     if(filePath.isEmpty()){ openSourceFile(); label.clear(); return; }
@@ -540,32 +570,31 @@ void HandlerWindow::readFile()
 void HandlerWindow::addChannel()
 {
     this->statusBar()->showMessage("Adding channel...");
-
-    if(nAddedChannels == 4){
-//        qDebug() <<"start new window" ;
-        emit showNewWindow(nextChannelID);
-        this->statusBar()->clearMessage();
-        return;
-    }
-
     bool bOk;
     QStringList listID = {"1","2","3","4","5","6","7","8","9","10","11","12"};
-    QString chID=QInputDialog::getItem(this,tr("Input"),"Add channel:",listID,nextChannelID-1,0,&bOk);
+    QString chID=QInputDialog::getItem(this,tr("Input"),"Add channel:",listID,
+                                       addedChannelsID.empty()?0:addedChannelsID.back(),0,&bOk);
     if(!bOk){
 //        qDebug() << "Cancel";
         return;
     }
 
+    quint8 choosed_cannel = chID.toUShort();
+
     this->statusBar()->clearMessage();
 
-    addSingleChannel(chID.toUShort());
+    if( addSingleChannel(choosed_cannel) ){}
+    else{
+        QVector<quint8> v={choosed_cannel};
+        emit showNewWindow(v);
+    }
 }
 
 void HandlerWindow::removeChannel()
 {
     bool bOk;
     QStringList listID = {"1","2","3","4","5","6","7","8","9","10","11","12"};
-    QString chID=QInputDialog::getItem(this,"Delete","Remove channel:",listID,nextChannelID-2,0,&bOk);
+    QString chID=QInputDialog::getItem(this,"Delete","Remove channel:",listID,addedChannelsID.back()-1,0,&bOk);
 
     if(!bOk){
 //        qDebug() << "Cancel";
@@ -581,10 +610,9 @@ void HandlerWindow::removeSingleChannel(quint8 chID)
         delete channel[chID-1];
         channel[chID-1] = nullptr;
         this->resize(this->width() - Width,Height);
-        nAddedChannels--;
-        nextChannelID--;
+        addedChannelsID.pop();
     }
-    if(nAddedChannels==0){
+    if(addedChannelsID.size()==0){
         lbl.show();
         ui->b_2->setVisible(false);
         ui->b_3->setVisible(false);

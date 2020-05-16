@@ -71,13 +71,15 @@ void ChannelHistWidget::fillColorMap()
 
 void ChannelHistWidget::Experements()
 {
-    for(quint16 j=0;j<1000;j++) AddEvent(0,1001,100);
-    for(quint16 j=0;j<1000;j++) AddEvent(0,1003,102);
-    for(quint16 j=0;j<1000;j++) AddEvent(0,1010,100);
 
-    for(quint16 j=0;j<1000;j++) AddEvent(1,1008,97);
-    for(quint16 j=0;j<1000;j++) AddEvent(1,998,95);
-    for(quint16 j=0;j<1000;j++) AddEvent(1,1000,99);
+
+//    for(quint16 j=0;j<1000;j++) AddEvent(0,1001,100);
+//    for(quint16 j=0;j<1000;j++) AddEvent(0,1003,102);
+//    for(quint16 j=0;j<1000;j++) AddEvent(0,1010,100);
+
+//    for(quint16 j=0;j<1000;j++) AddEvent(1,1008,97);
+//    for(quint16 j=0;j<1000;j++) AddEvent(1,998,95);
+//    for(quint16 j=0;j<1000;j++) AddEvent(1,1000,99);
 
 }
 
@@ -175,7 +177,7 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
     chargeTimeHist = ui->chargeTimeHist;
 
     channelIDButton = ui->channelIDButton;
-    channelIDButton->setText("Setup channel "+chID+":");
+    channelIDButton->setText("Setup Ch "+chID+":");
 
     connect(channelIDButton,SIGNAL(clicked()),this,SLOT(channelIDButton_clicked()));
 
@@ -187,7 +189,7 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
 
 //    HideZeroBars();
 
-//    Experements();
+    Experements();
 
     //    LoadSettings("../../default.ini");
 
@@ -317,7 +319,6 @@ void ChannelHistWidget::InitHistograms()
     timeData1->setHistName("Channel "+chID+" time _ ADC1");
 
     for(quint16 j=0;j<256;j++){    chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);}
-    chargeTimeHist->graph(15)->isWidgetType();
 
     hist0 = new Hist2Data(-100,4095,4196,-2048,2047,4096);
     hist1 = new Hist2Data(-100,4095,4196,-2048,2047,4096);

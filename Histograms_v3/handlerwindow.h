@@ -62,6 +62,7 @@ public slots:
     void resetChannelRange(QString chIDs);
 
     QString getFilePath(){return filePath;}
+    QString getFileType(){return fileType;}
     void setFilePath(QString path){filePath = path;}
 
     bool isEmptyBarsHidden(){return doHide;}
@@ -98,7 +99,7 @@ private:
     bool doCheckFlags=0;
 
     QHBoxLayout* grid;
-    ChannelHistWidget* channel[12];
+    ChannelHistWidget* channel[4];
     QString filePath;
     QString fileType;
 

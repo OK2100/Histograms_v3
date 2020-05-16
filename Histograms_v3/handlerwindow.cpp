@@ -27,7 +27,7 @@ void DecodeChsRegExp(QString chIDs, QVector<quint8> &vec)
         quint8 num = expr2.cap(0).toUShort();
         if(!vec.contains(num) && num<=12 && num!=0) { vec.append(num); }
     }
-    std::sort(vec.begin(),vec.end());
+//    std::sort(vec.begin(),vec.end());
 
 }
 
@@ -67,8 +67,7 @@ HandlerWindow::HandlerWindow(HandlerWindow* prevWindow,QWidget *parent)
 
 void HandlerWindow::SetUp()
 {
-
-    for(quint16 i=0;i<12;i++) {
+    for(quint16 i=0;i<4;i++) {
         channel[i]=nullptr;
     }
     this->statusBar()->addWidget(&label);
@@ -197,7 +196,7 @@ void HandlerWindow::LoadSettings(QString file_ini)
 
 void HandlerWindow::PlotHistograms()
 {
-    for (quint16 i=0;i<12;i++) {
+    for (quint16 i=0;i<4;i++) {
         if(channel[i]!=nullptr){
             channel[i]->PlotHistograms();
             //            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -260,7 +259,7 @@ void HandlerWindow::ReadBinaryFile()
 void HandlerWindow::ReadTxtFile()
 {
 
-    for(quint16 i=0;i<12;i++) {
+    for(quint16 i=0;i<4;i++) {
         if(channel[i]!=nullptr){
             channel[i]->Clear();
         }
@@ -421,9 +420,10 @@ void HandlerWindow::addEvent(quint8 channelID, quint8 flags, qint16 charge, qint
 
 void HandlerWindow::sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qint16 time)
 {
+    if(addedChannelsID.indexOf(chID)==-1){return;}      // no such channel
     if((chID<=12)&&(chID>=1)){
-        if(channel[chID-1]!=nullptr){
-            channel[chID-1]->AddEvent(adc_id,charge,time);
+        if(channel[addedChannelsID.indexOf(chID)]!=nullptr){
+            channel[addedChannelsID.indexOf(chID)]->AddEvent(adc_id,charge,time);
         }
     }
 }
@@ -434,7 +434,7 @@ void HandlerWindow::updateScreen()
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
 
-    for(quint16 i=0;i<12;i++) {
+    for(quint16 i=0;i<4;i++) {
         if(channel[i]!=nullptr){
             channel[i]->UpdateScreen();
         }
@@ -446,6 +446,7 @@ void HandlerWindow::startNewWindow(QVector<quint8>& channelsToAdd)
     this->show();
     this->activateWindow();
     filePath=prevWin->getFilePath();
+    fileType=prevWin->getFileType();
     doHide=prevWin->isEmptyBarsHidden();
 
     quint8 j=0;
@@ -505,11 +506,13 @@ bool HandlerWindow::addSingleChannel(quint8 chID)
         return 0;
     }
 
-    if(channel[chID-1]==nullptr) {
-        channel[chID-1] = new ChannelHistWidget(this,QString::number(chID));
+    //  check if already contain this channel
+    if(addedChannelsID.indexOf(chID)==-1){
+
+        channel[addedChannelsID.size()] = new ChannelHistWidget(this,QString::number(chID));
         lbl.hide();
 //        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        grid->addWidget(channel[chID-1]);
+        grid->addWidget(channel[addedChannelsID.size()]);
 //        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         this->resize(Width+Width*addedChannelsID.size(),Height);
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -518,17 +521,16 @@ bool HandlerWindow::addSingleChannel(quint8 chID)
 
         if(!filePath.isEmpty()){ readFile(); }
 
+        if(addedChannelsID.size() == 1){
+            ui->b_2->setVisible(true);
+            ui->b_3->setVisible(true);
+            ui->b_4->setVisible(true);
+    //        ui->b_5->setVisible(true);
+            ui->b_6->setVisible(true);
+        }
     }
-
-    if(addedChannelsID.size() == 1){
-        ui->b_2->setVisible(true);
-        ui->b_3->setVisible(true);
-        ui->b_4->setVisible(true);
-//        ui->b_5->setVisible(true);
-        ui->b_6->setVisible(true);
-    }
-
     return 1;
+
 }
 
 bool HandlerWindow::openSourceFile()
@@ -556,14 +558,13 @@ bool HandlerWindow::openSourceFile()
 
 void HandlerWindow::readFile()
 {
-    qDebug() << "Read file" << filePath;
-
     label.clear();
+    label.setVisible(1);
     label.setText("Reading File...");
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     if(filePath.isEmpty()){ openSourceFile(); label.clear(); return; }
 //    if(fileType == "Binary files (*.bin)"){ ReadBinaryFile();}
-    if(fileType == "GBT files (*.GBT *.gbt)"){ ReadTxtFile();}
+    if(fileType == "GBT files (*.GBT *.gbt)"){ReadTxtFile();}
         label.clear();
 }
 
@@ -605,12 +606,14 @@ void HandlerWindow::removeChannel()
 
 void HandlerWindow::removeSingleChannel(quint8 chID)
 {
-    if(channel[chID-1] != nullptr){
-        grid->removeWidget(channel[chID-1]);
-        delete channel[chID-1];
-        channel[chID-1] = nullptr;
+    if(addedChannelsID.indexOf(chID)==-1){return;}      // no such channel
+
+    if(channel[addedChannelsID.indexOf(chID)] != nullptr){
+        grid->removeWidget(channel[addedChannelsID.indexOf(chID)]);
+        delete channel[addedChannelsID.indexOf(chID)];
+        channel[addedChannelsID.indexOf(chID)] = nullptr;
         this->resize(this->width() - Width,Height);
-        addedChannelsID.pop();
+        if(chID==addedChannelsID.back())addedChannelsID.pop();
     }
     if(addedChannelsID.size()==0){
         lbl.show();
@@ -626,13 +629,19 @@ void HandlerWindow::removeChannelRange(QString chIDs)
 {
     QVector<quint8> vec;
     DecodeChsRegExp(chIDs,vec);
-//    qDebug() << vec;
 
-    quint8 j=0;
-    do{
-        removeSingleChannel(vec.at(j));
-        j++;
-    }while(j<vec.size() );
+    while(!addedChannelsID.isEmpty()){
+        if(vec.contains(addedChannelsID.back())){
+            removeSingleChannel(addedChannelsID.back());
+        }
+    }
+
+//    quint8 j=0;
+
+
+//    do{
+//        j++;
+//    }while(j<vec.size() );
 }
 
 void HandlerWindow::removeAllChannel()
@@ -670,9 +679,11 @@ void HandlerWindow::resetSingleChannel(quint8 chID)
 {
     this->statusBar()->showMessage("Clearing data...");
 
-    if(channel[chID-1]!=nullptr){
-        channel[chID-1]->Clear();
-        channel[chID-1]->PlotHistograms();
+    if(addedChannelsID.indexOf(chID)==-1){return;}      // no such channel
+
+    if(channel[addedChannelsID.indexOf(chID)]!=nullptr){
+        channel[addedChannelsID.indexOf(chID)]->Clear();
+        channel[addedChannelsID.indexOf(chID)]->PlotHistograms();
     }
 
     this->statusBar()->clearMessage();
@@ -709,7 +720,7 @@ void HandlerWindow::hideZeroBars()
     if(doHide) doHide=0;
     else doHide=1;
 
-    for(quint16 i=0;i<12;i++) {
+    for(quint16 i=0;i<4;i++) {
         if(channel[i]!=nullptr){
             if(doHide) {
                 this->statusBar()->showMessage("Hiding emty bars...",500);
@@ -735,6 +746,7 @@ void HandlerWindow::chooseADC(quint8 chID,quint8 adcID)
 
 HandlerWindow::~HandlerWindow()
 {
+
     delete ui;
 }
 

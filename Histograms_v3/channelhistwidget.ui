@@ -261,8 +261,15 @@
           </property>
           <item>
            <widget class="QPushButton" name="channelIDButton">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="text">
-             <string>Setup Channel</string>
+             <string>Setup Ch</string>
             </property>
            </widget>
           </item>

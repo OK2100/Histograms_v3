@@ -2,70 +2,70 @@
 #include "ui_channelhistwidget.h"
 #include <QtGlobal>
 
-void ChannelHistWidget::add2data(qint16 _charge,qint16 _time,quint8 graph_id){
+//void ChannelHistWidget::add2data(qint16 _charge,qint16 _time,quint8 graph_id){
 
 
-    bool makeHaos = true;
-    quint8 step = 20;
+//    bool makeHaos = true;
+//    quint8 step = 20;
 
 
-    if(!makeHaos)
-        for(quint8 i=0;i<step+1;i++){
-            for(quint8 j=0;j<step+1;j++) {
-                chargeTimeHist->graph(graph_id)->addData(
-                            _charge+((1.0*(i%(step+1))/step)*hist0->getbinXWidth())-hist0->getbinXWidth()*0.5,
-                            _time  +((1.0*(j%(step+1))/step)*hist0->getbinYWidth()-hist0->getbinYWidth()*0.5)
-                            );
+//    if(!makeHaos)
+//        for(quint8 i=0;i<step+1;i++){
+//            for(quint8 j=0;j<step+1;j++) {
+//                chargeTimeHist->graph(graph_id)->addData(
+//                            _charge+((1.0*(i%(step+1))/step)*hist0->getbinXWidth())-hist0->getbinXWidth()*0.5,
+//                            _time  +((1.0*(j%(step+1))/step)*hist0->getbinYWidth()-hist0->getbinYWidth()*0.5)
+//                            );
 
-            }
-        }
-    else
-        for(quint8 i=0;i<step+1;i++){
-            for(quint8 j=0;j<step+1;j++) {
-                chargeTimeHist->graph(graph_id)->addData(
-                            _charge+((1.0*(qrand()%(step))/step)*hist0->getbinXWidth())-hist0->getbinXWidth()*0.5,
-                            _time  +((1.0*(qrand()%(step))/step)*hist0->getbinYWidth()-hist0->getbinYWidth()*0.5)
-                            );
+//            }
+//        }
+//    else
+//        for(quint8 i=0;i<step+1;i++){
+//            for(quint8 j=0;j<step+1;j++) {
+//                chargeTimeHist->graph(graph_id)->addData(
+//                            _charge+((1.0*(qrand()%(step))/step)*hist0->getbinXWidth())-hist0->getbinXWidth()*0.5,
+//                            _time  +((1.0*(qrand()%(step))/step)*hist0->getbinYWidth()-hist0->getbinYWidth()*0.5)
+//                            );
 
-            }
-        }
+//            }
+//        }
 
-}
+//}
 
 
 
-void ChannelHistWidget::fillColorMap()
-{
-//    QFile file("../sources/black-body-table-byte-0256.csv");
-    QFile file("../sources/colormap.csv");
-    if ( !file.open(QFile::ReadOnly | QFile::Text) ) {
-        qDebug() << "File not exists";
-    }
-    else {
-        QStringList wordList;
-        quint8 r,g,b;
-        quint16 counter=0;
+//void ChannelHistWidget::fillColorMap()
+//{
+////    QFile file("../sources/black-body-table-byte-0256.csv");
+//    QFile file("../sources/colormap.csv");
+//    if ( !file.open(QFile::ReadOnly | QFile::Text) ) {
+//        qDebug() << "File not exists";
+//    }
+//    else {
+//        QStringList wordList;
+//        quint8 r,g,b;
+//        quint16 counter=0;
 
-        while (!file.atEnd()) {
-            QString line = file.readLine();
-            wordList = line.split(",");
-            double x=wordList[0].toDouble();
-            threshold[counter] = (1.0/50) * (x/(1.01-pow(x,2)));
-//            threshold[counter] = wordList[0].toDouble();                      // linear
-//            threshold[counter] = 1-sqrt(1-pow(wordList[0].toDouble(),4));     // pseudo circle
-//            threshold[counter] = -qLn(1-wordList[0].toDouble())/(8*qLn(2));
-//            threshold[counter] = pow(wordList[0].toDouble(),8);               // poly
-            r = wordList[1].toUShort();
-            g = wordList[2].toUShort();
-            b = wordList[3].toUShort();
-            chargeTimeHist->graph(counter)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare,QColor(r,g,b),QColor(r,g,b),5));
-//            qDebug() <<counter << threshold[counter] << r << g << b;
-            counter++;
-        }
-        file.close();
-    }
+//        while (!file.atEnd()) {
+//            QString line = file.readLine();
+//            wordList = line.split(",");
+//            double x=wordList[0].toDouble();
+//            threshold[counter] = (1.0/50) * (x/(1.01-pow(x,2)));
+////            threshold[counter] = wordList[0].toDouble();                      // linear
+////            threshold[counter] = 1-sqrt(1-pow(wordList[0].toDouble(),4));     // pseudo circle
+////            threshold[counter] = -qLn(1-wordList[0].toDouble())/(8*qLn(2));
+////            threshold[counter] = pow(wordList[0].toDouble(),8);               // poly
+//            r = wordList[1].toUShort();
+//            g = wordList[2].toUShort();
+//            b = wordList[3].toUShort();
+//            chargeTimeHist->graph(counter)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare,QColor(r,g,b),QColor(r,g,b),5));
+////            qDebug() <<counter << threshold[counter] << r << g << b;
+//            counter++;
+//        }
+//        file.close();
+//    }
 
-}
+//}
 
 
 
@@ -83,84 +83,82 @@ void ChannelHistWidget::Experements()
 
 }
 
-void ChannelHistWidget::setData(QCPBars* bars)
-{
-    HistData* data = nullptr;
-    HistData* extra_data = nullptr;
+//void ChannelHistWidget::setData(QCPBars* bars)
+//{
+//    HistData* data = nullptr;
+//    HistData* extra_data = nullptr;
 
-    if(ADC_ID == 0) {
-        if(bars == chargeBars) data = chargeData;
-        else if(bars == timeBars) data = timeData;
-        else   { qDebug() << "ERROR: setData empty pointer"; return;}
-    }
-    else if(ADC_ID == 1) {
-        if(bars == chargeBars) data = chargeData1;
-        else if(bars == timeBars) data = timeData1;
-        else   { qDebug() << "ERROR: setData empty pointer"; return;}
-    }
-    else if(ADC_ID == 2) {
-        if(bars == chargeBars){ data = chargeData;   extra_data = chargeData1;}
-        else if(bars == timeBars){ data = timeData;   extra_data = timeData1;}
-        else   { qDebug() << "ERROR: setData empty pointer"; return;}
-    }
+//    if(ADC_ID == 0) {
+//        if(bars == chargeBars) data = chargeData;
+//        else if(bars == timeBars) data = timeData;
+//        else   { qDebug() << "ERROR: setData empty pointer"; return;}
+//    }
+//    else if(ADC_ID == 1) {
+//        if(bars == chargeBars) data = chargeData1;
+//        else if(bars == timeBars) data = timeData1;
+//        else   { qDebug() << "ERROR: setData empty pointer"; return;}
+//    }
+//    else if(ADC_ID == 2) {
+//        if(bars == chargeBars){ data = chargeData;   extra_data = chargeData1;}
+//        else if(bars == timeBars){ data = timeData;   extra_data = timeData1;}
+//        else   { qDebug() << "ERROR: setData empty pointer"; return;}
+//    }
 
-    double left=data->getLeftLimit()-0.5 + data->getbinWidth()/2.0;
+//    double left=data->getLeftLimit()-0.5 + data->getbinWidth()/2.0;
 
-    for(quint16 i=0;i<data->getnBins();i++){
-        if(extra_data==nullptr) {
-            bars->addData(left + (i*data->getbinWidth()),(*data)[i]) ;
-        }
-        else bars->addData(left + (i*data->getbinWidth()),(*data)[i]+(*extra_data)[i]) ;
-    }
-}
+//    for(quint16 i=0;i<data->getnBins();i++){
+//        if(extra_data==nullptr) {
+//            bars->addData(left + (i*data->getbinWidth()),(*data)[i]) ;
+//        }
+//        else bars->addData(left + (i*data->getbinWidth()),(*data)[i]+(*extra_data)[i]) ;
+//    }
+//}
 
-void ChannelHistWidget::set2Data()
-{
-    Hist2Data* data = nullptr;
-    Hist2Data* extra_data = nullptr;
+//void ChannelHistWidget::set2Data()
+//{
+//    Hist2Data* data = nullptr;
+//    Hist2Data* extra_data = nullptr;
 
-    if(ADC_ID == 0) {
-        data = hist0;
-    }
-    else if(ADC_ID == 1) {
-        data = hist1;
-    }
-    else if(ADC_ID == 2) {
-        data = hist0; extra_data = hist1;
-    }
+//    if(ADC_ID == 0) {
+//        data = hist0;
+//    }
+//    else if(ADC_ID == 1) {
+//        data = hist1;
+//    }
+//    else if(ADC_ID == 2) {
+//        data = hist0; extra_data = hist1;
+//    }
 
-    quint8 graph_id=0;
-    double leftX,leftY;
+//    quint8 graph_id=0;
+//    double leftX,leftY;
 
-    leftX=data->getLeftXLimit()-0.5+data->getbinXWidth()/2.0;
-    leftY=data->getLeftYLimit()-0.5+data->getbinYWidth()/2.0;
+//    leftX=data->getLeftXLimit()-0.5+data->getbinXWidth()/2.0;
+//    leftY=data->getLeftYLimit()-0.5+data->getbinYWidth()/2.0;
 
-    for(quint16 i=0;i<data->getnXBins();i++){
-        for(quint16 j=0;j<data->getnYBins();j++){
+//    for(quint16 i=0;i<data->getnXBins();i++){
+//        for(quint16 j=0;j<data->getnYBins();j++){
 
-            if(extra_data == nullptr){
-                if((*data)(i,j)==0){continue;}
-                    double tr=(*data)(i,j)*1.0/data->getTotalEvents();
-                    for(quint16 c=0;c<256;c++){
-                        if(tr>=threshold[255-c]){ graph_id = 255-c;break; }
-                        else {continue;}
-                    }
-                    add2data(leftX + (i*data->getbinXWidth()),leftY + (j*data->getbinYWidth()),graph_id);
-            }
-            else{
-                if(((*data)(i,j)+(*extra_data)(i,j))==0){continue;}
-                    double tr=((*data)(i,j)+(*extra_data)(i,j))*1.0/(data->getTotalEvents()+extra_data->getTotalEvents());
-                    for(quint16 c=0;c<256;c++){
-                        if(tr>=threshold[255-c]){ graph_id = 255-c;break; }
-                        else {continue;}
-                    }
-                    add2data(leftX + (i*data->getbinXWidth()),leftY + (j*data->getbinYWidth()),graph_id);
-            }
-        }
-    }
-
-
-}
+//            if(extra_data == nullptr){
+//                if((*data)(i,j)==0){continue;}
+//                    double tr=(*data)(i,j)*1.0/data->getTotalEvents();
+//                    for(quint16 c=0;c<256;c++){
+//                        if(tr>=threshold[255-c]){ graph_id = 255-c;break; }
+//                        else {continue;}
+//                    }
+//                    add2data(leftX + (i*data->getbinXWidth()),leftY + (j*data->getbinYWidth()),graph_id);
+//            }
+//            else{
+//                if(((*data)(i,j)+(*extra_data)(i,j))==0){continue;}
+//                    double tr=((*data)(i,j)+(*extra_data)(i,j))*1.0/(data->getTotalEvents()+extra_data->getTotalEvents());
+//                    for(quint16 c=0;c<256;c++){
+//                        if(tr>=threshold[255-c]){ graph_id = 255-c;break; }
+//                        else {continue;}
+//                    }
+//                    add2data(leftX + (i*data->getbinXWidth()),leftY + (j*data->getbinYWidth()),graph_id);
+//            }
+//        }
+//    }
+//}
 
 ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
     QWidget(parent),
@@ -189,21 +187,21 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
 
 //    HideZeroBars();
 
-    Experements();
+//    Experements();
 
     //    LoadSettings("../../default.ini");
 
 
-    setupWindow = new SetupChannelWindow;
+    //    setupWindow = new SetupChannelWindow;
 
-    connect(setupWindow,&SetupChannelWindow::binWidth_charge_changed,this,&ChannelHistWidget::binWidth_charge_was_changed);
-    connect(setupWindow,&SetupChannelWindow::binWidth_time_changed,this,&ChannelHistWidget::binWidth_time_was_changed);
-    connect(setupWindow,&SetupChannelWindow::end_of_apply,this,&ChannelHistWidget::UpdateScreen);
-    connect(setupWindow,&SetupChannelWindow::end_of_apply,this,&ChannelHistWidget::HideZeroBars);
-    connect(setupWindow,
-            reinterpret_cast<void (SetupChannelWindow::*)(Qt::CheckState)>(&SetupChannelWindow::check_status)
-            ,ui->doFixRanges,&QCheckBox::setCheckState);
-    connect(ui->doFixRanges,&QCheckBox::stateChanged,setupWindow,&SetupChannelWindow::set_fix_range_chaecked);
+    //    connect(setupWindow,&SetupChannelWindow::binWidth_charge_changed,this,&ChannelHistWidget::binWidth_charge_was_changed);
+    //    connect(setupWindow,&SetupChannelWindow::binWidth_time_changed,this,&ChannelHistWidget::binWidth_time_was_changed);
+    //    connect(setupWindow,&SetupChannelWindow::end_of_apply,this,&ChannelHistWidget::UpdateScreen);
+    //    connect(setupWindow,&SetupChannelWindow::end_of_apply,this,&ChannelHistWidget::HideZeroBars);
+    //    connect(setupWindow,
+    //            reinterpret_cast<void (SetupChannelWindow::*)(Qt::CheckState)>(&SetupChannelWindow::check_status)
+    //            ,ui->doFixRanges,&QCheckBox::setCheckState);
+    //    connect(ui->doFixRanges,&QCheckBox::stateChanged,setupWindow,&SetupChannelWindow::set_fix_range_chaecked);
 
     connect(chargeHist,&QCustomPlot::mouseDoubleClick,this,&ChannelHistWidget::hist_double_clicked);
     connect(timeHist,  &QCustomPlot::mouseDoubleClick,this,&ChannelHistWidget::hist_double_clicked);
@@ -251,13 +249,13 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
 
 ChannelHistWidget::~ChannelHistWidget()
 {
-    delete chargeData;
-    delete chargeData1;
-    delete timeData;
-    delete timeData1;
+//    delete chargeData;
+//    delete chargeData1;
+//    delete timeData;
+//    delete timeData1;
 
-    delete hist0;
-    delete hist1;
+//    delete hist0;
+//    delete hist1;
 
     chargeHist->clearPlottables();
     timeHist->clearPlottables();
@@ -267,7 +265,7 @@ ChannelHistWidget::~ChannelHistWidget()
     delete timeHist;
     delete chargeTimeHist;
 
-    delete setupWindow;
+//    delete setupWindow;
 
     delete ui;
 }
@@ -306,85 +304,96 @@ void ChannelHistWidget::hist_double_clicked( QMouseEvent * event )
 
 void ChannelHistWidget::InitHistograms()
 {
-    chargeData = new HistData(-100,4095,4196);
-    chargeData->setHistName("Channel "+chID+" charge");
-    timeData = new HistData(-2048,2047,4096);
-    timeData->setHistName("Channel "+chID+" time");
+//    chargeData = new HistData(-100,4095,4196);
+//    chargeData->setHistName("Channel "+chID+" charge");
+//    timeData = new HistData(-2048,2047,4096);
+//    timeData->setHistName("Channel "+chID+" time");
     chargeBars = new QCPBars(chargeHist->xAxis,chargeHist->yAxis);
     timeBars = new QCPBars(timeHist->xAxis,timeHist->yAxis);
 
-    chargeData1 = new HistData(-100,4095,4196);
-    chargeData1->setHistName("Channel "+chID+" charge _ ADC1");
-    timeData1 = new HistData(-2048,2047,4096);
-    timeData1->setHistName("Channel "+chID+" time _ ADC1");
+    chargeBars1 = new QCPBars(chargeHist->xAxis,chargeHist->yAxis);
+    timeBars1 = new QCPBars(timeHist->xAxis,timeHist->yAxis);
+
+    chargeBars->setStackingGap(0);
+    chargeBars1->setStackingGap(0);
+    timeBars->setStackingGap(0);
+    timeBars1->setStackingGap(0);
+
+    chargeBars1->moveAbove(chargeBars);
+    timeBars1->moveAbove(timeBars);
+
+//    chargeData1 = new HistData(-100,4095,4196);
+//    chargeData1->setHistName("Channel "+chID+" charge _ ADC1");
+//    timeData1 = new HistData(-2048,2047,4096);
+//    timeData1->setHistName("Channel "+chID+" time _ ADC1");
 
     for(quint16 j=0;j<256;j++){    chargeTimeHist->addGraph(chargeTimeHist->xAxis,chargeTimeHist->yAxis);}
 
-    hist0 = new Hist2Data(-100,4095,4196,-2048,2047,4096);
-    hist1 = new Hist2Data(-100,4095,4196,-2048,2047,4096);
+//    hist0 = new Hist2Data(-100,4095,4196,-2048,2047,4096);
+//    hist1 = new Hist2Data(-100,4095,4196,-2048,2047,4096);
 }
 
-void ChannelHistWidget::setLabels()
-{
-    if(ADC_ID==0){
-        ui->lbl_Nev->setText("Sum: "+QString::number(chargeData->getTotalEvents()));
-        ui->lbl_Mean->setText("Mean: "+QString::number(chargeData->getMean(),'g',5));
-        ui->lbl_StdDev->setText("RMS: "+QString::number( chargeData->getRMS(),'g',4 ));
-        ui->lbl_Nev1->setText("Sum: "+QString::number(timeData->getTotalEvents()));
-        ui->lbl_Mean1->setText("Mean: "+QString::number(timeData->getMean(),'g',5));
-        ui->lbl_StdDev1->setText("RMS: "+QString::number( timeData->getRMS(),'g',4 ));
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-    }
+//void ChannelHistWidget::setLabels()
+//{
+//    if(ADC_ID==0){
+//        ui->lbl_Nev->setText("Sum: "+QString::number(chargeData->getTotalEvents()));
+//        ui->lbl_Mean->setText("Mean: "+QString::number(chargeData->getMean(),'g',5));
+//        ui->lbl_StdDev->setText("RMS: "+QString::number( chargeData->getRMS(),'g',4 ));
+//        ui->lbl_Nev1->setText("Sum: "+QString::number(timeData->getTotalEvents()));
+//        ui->lbl_Mean1->setText("Mean: "+QString::number(timeData->getMean(),'g',5));
+//        ui->lbl_StdDev1->setText("RMS: "+QString::number( timeData->getRMS(),'g',4 ));
+//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+//    }
 
-    if(ADC_ID==1){
-        ui->lbl_Nev->setText("Sum: "+QString::number(chargeData1->getTotalEvents()));
-        ui->lbl_Mean->setText("Mean: "+QString::number(chargeData1->getMean(),'g',5));
-        ui->lbl_StdDev->setText("RMS: "+QString::number( chargeData1->getRMS(),'g',4 ));
-        ui->lbl_Nev1->setText("Sum: "+QString::number(timeData1->getTotalEvents()));
-        ui->lbl_Mean1->setText("Mean: "+QString::number(timeData1->getMean(),'g',5));
-        ui->lbl_StdDev1->setText("RMS: "+QString::number( timeData1->getRMS(),'g',4 ));
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-    }
+//    if(ADC_ID==1){
+//        ui->lbl_Nev->setText("Sum: "+QString::number(chargeData1->getTotalEvents()));
+//        ui->lbl_Mean->setText("Mean: "+QString::number(chargeData1->getMean(),'g',5));
+//        ui->lbl_StdDev->setText("RMS: "+QString::number( chargeData1->getRMS(),'g',4 ));
+//        ui->lbl_Nev1->setText("Sum: "+QString::number(timeData1->getTotalEvents()));
+//        ui->lbl_Mean1->setText("Mean: "+QString::number(timeData1->getMean(),'g',5));
+//        ui->lbl_StdDev1->setText("RMS: "+QString::number( timeData1->getRMS(),'g',4 ));
+//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+//    }
 
-    if(ADC_ID==2){
-        ui->lbl_Nev->setText("Sum: "+QString::number(chargeData->getTotalEvents()+chargeData1->getTotalEvents()));
-        if(chargeData->getTotalEvents()!=0 && chargeData1->getTotalEvents()!=0){
-            ui->lbl_StdDev->setText("RMS: "+QString::number(sqrt(1000*(chargeData->getSumSquares()+chargeData1->getSumSquares())/(chargeData->getTotalEvents()+chargeData1->getTotalEvents())
-                                                               - pow((chargeData->getMean()+chargeData1->getMean())/2,2)),'g',4));
-            ui->lbl_Mean->setText("Mean: "+QString::number( (chargeData->getMean()+chargeData1->getMean())/2,'g',5 ));
-            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        }
-        else if(chargeData->getTotalEvents()==0){
-            ui->lbl_StdDev->setText("RMS: "+QString::number(chargeData1->getRMS(),'g',4));
-            ui->lbl_Mean->setText("Mean: "+QString::number(chargeData1->getMean(),'g',5));
-            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        }
-        else{
-            ui->lbl_StdDev->setText("RMS: "+QString::number(chargeData->getRMS(),'g',4));
-            ui->lbl_Mean->setText("Mean: "+QString::number(chargeData->getMean(),'g',5));
-            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        }
+//    if(ADC_ID==2){
+//        ui->lbl_Nev->setText("Sum: "+QString::number(chargeData->getTotalEvents()+chargeData1->getTotalEvents()));
+//        if(chargeData->getTotalEvents()!=0 && chargeData1->getTotalEvents()!=0){
+//            ui->lbl_StdDev->setText("RMS: "+QString::number(sqrt(1000*(chargeData->getSumSquares()+chargeData1->getSumSquares())/(chargeData->getTotalEvents()+chargeData1->getTotalEvents())
+//                                                               - pow((chargeData->getMean()+chargeData1->getMean())/2,2)),'g',4));
+//            ui->lbl_Mean->setText("Mean: "+QString::number( (chargeData->getMean()+chargeData1->getMean())/2,'g',5 ));
+//            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+//        }
+//        else if(chargeData->getTotalEvents()==0){
+//            ui->lbl_StdDev->setText("RMS: "+QString::number(chargeData1->getRMS(),'g',4));
+//            ui->lbl_Mean->setText("Mean: "+QString::number(chargeData1->getMean(),'g',5));
+//            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+//        }
+//        else{
+//            ui->lbl_StdDev->setText("RMS: "+QString::number(chargeData->getRMS(),'g',4));
+//            ui->lbl_Mean->setText("Mean: "+QString::number(chargeData->getMean(),'g',5));
+//            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+//        }
 
-        ui->lbl_Nev1->setText("Sum: "+QString::number(timeData->getTotalEvents()+timeData1->getTotalEvents()));
-        if(timeData->getTotalEvents()!=0 && timeData1->getTotalEvents()!=0){
-            ui->lbl_StdDev1->setText("RMS: "+QString::number(sqrt(1000*(timeData->getSumSquares()+timeData1->getSumSquares())/(timeData->getTotalEvents()+timeData1->getTotalEvents())
-                                                               - pow((timeData->getMean()+timeData1->getMean())/2,2)),'g',4));
-            ui->lbl_Mean1->setText("Mean: "+QString::number( (timeData->getMean()+timeData1->getMean())/2,'g',5 ));
-            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        }
-        else if(timeData->getTotalEvents()==0){
-            ui->lbl_StdDev1->setText("RMS: "+QString::number(timeData1->getRMS(),'g',4));
-            ui->lbl_Mean1->setText("Mean: "+QString::number(timeData1->getMean(),'g',5));
-            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        }
-        else{
-            ui->lbl_StdDev1->setText("RMS: "+QString::number(timeData->getRMS(),'g',4));
-            ui->lbl_Mean1->setText("Mean: "+QString::number(timeData->getMean(),'g',5));
-            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        }
+//        ui->lbl_Nev1->setText("Sum: "+QString::number(timeData->getTotalEvents()+timeData1->getTotalEvents()));
+//        if(timeData->getTotalEvents()!=0 && timeData1->getTotalEvents()!=0){
+//            ui->lbl_StdDev1->setText("RMS: "+QString::number(sqrt(1000*(timeData->getSumSquares()+timeData1->getSumSquares())/(timeData->getTotalEvents()+timeData1->getTotalEvents())
+//                                                               - pow((timeData->getMean()+timeData1->getMean())/2,2)),'g',4));
+//            ui->lbl_Mean1->setText("Mean: "+QString::number( (timeData->getMean()+timeData1->getMean())/2,'g',5 ));
+//            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+//        }
+//        else if(timeData->getTotalEvents()==0){
+//            ui->lbl_StdDev1->setText("RMS: "+QString::number(timeData1->getRMS(),'g',4));
+//            ui->lbl_Mean1->setText("Mean: "+QString::number(timeData1->getMean(),'g',5));
+//            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+//        }
+//        else{
+//            ui->lbl_StdDev1->setText("RMS: "+QString::number(timeData->getRMS(),'g',4));
+//            ui->lbl_Mean1->setText("Mean: "+QString::number(timeData->getMean(),'g',5));
+//            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+//        }
 
-    }
-}
+//    }
+//}
 
 void ChannelHistWidget::SetupView(){
 
@@ -446,18 +455,27 @@ void ChannelHistWidget::SetupView(){
     chargeHist->axisRect()->setRangeDrag(Qt::Horizontal);
     chargeHist->axisRect()->setRangeZoom(Qt::Horizontal);
     chargeHist->axisRect()->setBackgroundScaled(false);
+
     chargeBars->setPen(pen);
-    chargeBars->setBrush(QColor(Qt::darkBlue));
     chargeBars->setBrush(QColor(QColor(100,0,0)));
+    chargeBars1->setPen(pen);
+    chargeBars1->setBrush(QColor(QColor(100,0,0)));
+    chargeBars->setWidth(1);
+    chargeBars1->setWidth(1);
+
 
     timeHist->yAxis->setTicker(fixedTicker);
     timeHist->xAxis->setTicker(fixedTicker);
     timeHist->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     timeHist->axisRect()->setRangeDrag(Qt::Horizontal);
     timeHist->axisRect()->setRangeZoom(Qt::Horizontal);
+
     timeBars->setPen(pen);
-    timeBars->setBrush(QColor(Qt::darkBlue));
     timeBars->setBrush(QColor(QColor(100,0,0)));
+    timeBars1->setPen(pen);
+    timeBars1->setBrush(QColor(QColor(100,0,0)));
+    timeBars->setWidth(1);
+    timeBars1->setWidth(1);
 
     chargeHist->axisRect()->setBackground(QBrush(QColor(0,0,0,30)));
     timeHist->axisRect()->setBackground(QBrush(QColor(0,0,0,30)));
@@ -477,7 +495,6 @@ void ChannelHistWidget::SetupView(){
     chargeTimeHist->yAxis->grid()->setPen(QPen(QColor(140, 140, 140,80), 1));
     chargeTimeHist->xAxis->grid()->setZeroLinePen(Qt::NoPen);
     chargeTimeHist->yAxis->grid()->setZeroLinePen(Qt::NoPen);
-
 
     chargeTimeHist->xAxis->setTicker(fixedTicker);
     chargeTimeHist->yAxis->setTicker(fixedTicker);
@@ -510,15 +527,49 @@ void ChannelHistWidget::SetupView(){
         chargeTimeHist->graph(j)->setLineStyle(QCPGraph::lsNone);
     }
 
-    fillColorMap();
+//    fillColorMap();
 
-    chargeHist->xAxis->setRange(chargeData->getLeftLimit(),chargeData->getRightLimit());
-    timeHist->xAxis->setRange(timeData->getLeftLimit(),timeData->getRightLimit());
+    chargeHist->xAxis->setRange(-100,4095);
+    timeHist->xAxis->setRange(-2048,2047);
 
     chargeTimeHist->xAxis->setRange(-100,4095);
     chargeTimeHist->yAxis->setRange(-2048,2047);
 }
 
+void ChannelHistWidget::ADC0_choosed()
+{
+    ADC_ID = 0;
+    chargeBars->setVisible(1);
+    chargeBars1->setVisible(0);
+    timeBars->setVisible(1);
+    timeBars1->setVisible(0);
+    UpdateScreen();
+}
+void ChannelHistWidget::ADC1_choosed()
+{
+    ADC_ID = 1;
+    chargeBars1->moveAbove(0);
+
+    chargeBars->setVisible(0);
+    chargeBars1->setVisible(1);
+
+    timeBars1->moveAbove(0);
+    timeBars->setVisible(0);
+    timeBars1->setVisible(1);
+    UpdateScreen();
+}
+void ChannelHistWidget::ADC01_choosed()
+{
+    ADC_ID = 2;
+    chargeBars->setVisible(1);
+    chargeBars1->setVisible(1);
+    chargeBars1->moveAbove(chargeBars);
+
+    timeBars->setVisible(1);
+    timeBars1->setVisible(1);
+    timeBars1->moveAbove(timeBars);
+    UpdateScreen();
+}
 
 void ChannelHistWidget::LoadSettings(QString file_ini)
 {
@@ -539,16 +590,19 @@ void ChannelHistWidget::LoadSettings(QString file_ini)
 
 }
 
-void ChannelHistWidget::AddEvent(quint8 adc_id, qint16 charge, qint16 time)
-{
-    if(adc_id == 0) { chargeData->addEvent(charge);     timeData->addEvent(time);   hist0->addEvent(charge,time);}
-    if(adc_id == 1) { chargeData1->addEvent(charge);    timeData1->addEvent(time);  hist1->addEvent(charge,time);}
-}
+//void ChannelHistWidget::AddEvent(quint8 adc_id, qint16 charge, qint16 time)
+//{
+//    if(adc_id == 0) { chargeData->addEvent(charge);     timeData->addEvent(time);   hist0->addEvent(charge,time);}
+//    if(adc_id == 1) { chargeData1->addEvent(charge);    timeData1->addEvent(time);  hist1->addEvent(charge,time);}
+//}
 
 void ChannelHistWidget::UpdateScreen()
 {
-    ClearScreen();
-    PlotHistograms();
+    chargeHist->replot();
+    timeHist->replot();
+    chargeTimeHist->replot();
+//    ClearScreen();
+//    PlotHistograms();
 }
 
 void ChannelHistWidget::ClearScreen()
@@ -566,210 +620,284 @@ void ChannelHistWidget::ClearScreen()
 
 void ChannelHistWidget::PlotHistograms()
 {
-    chargeBars->data().data()->clear();
-    timeBars->data().data()->clear();
-    for(quint16 j=0;j<256;j++) chargeTimeHist->graph(j)->data().data()->clear();
+//    chargeBars->data().data()->clear();
+//    timeBars->data().data()->clear();
+//    for(quint16 j=0;j<256;j++) chargeTimeHist->graph(j)->data().data()->clear();
 
-//---------------------- CHARGE ------------------------
-    setData(chargeBars);
-    if(chargeData->isEmpty() && chargeData1->isEmpty() )   { chargeHist->yAxis->setRange(0,5); }
-    else { chargeHist->yAxis->rescale(); chargeHist->yAxis->setRange(0,chargeHist->yAxis->range().upper*1.1); }
-    chargeBars->setWidth(chargeData->getbinWidth());
+////---------------------- CHARGE ------------------------
+//    setData(chargeBars);
+//    if(chargeData->isEmpty() && chargeData1->isEmpty() )   { chargeHist->yAxis->setRange(0,5); }
+//    else { chargeHist->yAxis->rescale(); chargeHist->yAxis->setRange(0,chargeHist->yAxis->range().upper*1.1); }
+//    chargeBars->setWidth(chargeData->getbinWidth());
 
-//----------------------- TIME --------------------------
+////----------------------- TIME --------------------------
 
-    setData(timeBars);
-    if(timeData->isEmpty() && timeData1->isEmpty() )     { timeHist->yAxis->setRange(0,5); }
-    else { timeHist->yAxis->rescale(); timeHist->yAxis->setRange(0,timeHist->yAxis->range().upper*1.1);}
-    timeBars->setWidth(timeData->getbinWidth());
+//    setData(timeBars);
+//    if(timeData->isEmpty() && timeData1->isEmpty() )     { timeHist->yAxis->setRange(0,5); }
+//    else { timeHist->yAxis->rescale(); timeHist->yAxis->setRange(0,timeHist->yAxis->range().upper*1.1);}
+//    timeBars->setWidth(timeData->getbinWidth());
 
-//-------------------- CHARGE-TIME ----------------------
+////-------------------- CHARGE-TIME ----------------------
 
-    set2Data();
+//    set2Data();
 
-//=======================================================
+////=======================================================
 
-    chargeHist->replot();
-    timeHist->replot();
-    chargeTimeHist->replot();
+//    chargeHist->replot();
+//    timeHist->replot();
+//    chargeTimeHist->replot();
 
-    setLabels();                    // Calculate statistics
+////    setLabels();                    // Calculate statistics
 }
 
-void ChannelHistWidget::Clear()
-{
-    chargeData->clear();
-    timeData->clear();
+//void ChannelHistWidget::Clear()
+//{
+//    chargeData->clear();
+//    timeData->clear();
 
-    chargeData1->clear();
-    timeData1->clear();
+//    chargeData1->clear();
+//    timeData1->clear();
 
-    chargeBars->data().data()->clear();
-    timeBars->data().data()->clear();
+//    chargeBars->data().data()->clear();
+//    timeBars->data().data()->clear();
 
-    hist0->clear();
-    hist1->clear();
-    for(quint16 j=0;j<256;j++) chargeTimeHist->graph(j)->data().data()->clear();
-}
+//    hist0->clear();
+//    hist1->clear();
+//    for(quint16 j=0;j<256;j++) chargeTimeHist->graph(j)->data().data()->clear();
+//}
 
-void ChannelHistWidget::PrintInfo(bool onlyStat)
-{
-        chargeData->printInfo(0);
-        timeData->printInfo(0);
+//void ChannelHistWidget::PrintInfo(bool onlyStat)
+//{
+//        chargeData->printInfo(0);
+//        timeData->printInfo(0);
 
-        chargeData1->printInfo(0);
-        timeData1->printInfo(0);
-}
+//        chargeData1->printInfo(0);
+//        timeData1->printInfo(0);
+//}
 
 
-void ChannelHistWidget::channelIDButton_clicked()
-{
-//    qDebug()<<"Clicked";
-    if(setupWindow->isHidden()){
-        setupWindow->set_charge_range(chargeHist->xAxis->range().lower,chargeHist->xAxis->range().upper);
-        setupWindow->set_time_range(timeHist->xAxis->range().lower,timeHist->xAxis->range().upper);
-        setupWindow->set_chID(chID);
-        setupWindow->set_binWidth_charge(chargeData->getbinWidth());
-        setupWindow->set_binWidth_time(timeData->getbinWidth());
-        setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
-        setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
-        setupWindow->set_fix_range_chaecked(ui->doFixRanges->checkState());
-        setupWindow->show();
-    }
-    else {
-        setupWindow->activateWindow();
-    }
-}
+//void ChannelHistWidget::channelIDButton_clicked()
+//{
+////    qDebug()<<"Clicked";
+//    if(setupWindow->isHidden()){
+//        setupWindow->set_charge_range(chargeHist->xAxis->range().lower,chargeHist->xAxis->range().upper);
+//        setupWindow->set_time_range(timeHist->xAxis->range().lower,timeHist->xAxis->range().upper);
+//        setupWindow->set_chID(chID);
+//        setupWindow->set_binWidth_charge(chargeData->getbinWidth());
+//        setupWindow->set_binWidth_time(timeData->getbinWidth());
+//        setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
+//        setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
+//        setupWindow->set_fix_range_chaecked(ui->doFixRanges->checkState());
+//        setupWindow->show();
+//    }
+//    else {
+//        setupWindow->activateWindow();
+//    }
+//}
 
-void ChannelHistWidget::HideZeroBars()
-{
-    if(ui->doFixRanges->isChecked()) return;
+//void ChannelHistWidget::HideZeroBars()
+//{
+//    if(ui->doFixRanges->isChecked()) return;
 
-    HistData* cdata[2];
-    HistData* tdata[2];
-    bool ADC_empty[2];
-    double chMinBorder[2], chMaxBorder[2], tMinBorder[2], tMaxBorder[2];
-    ADC_empty[0]=ADC_empty[1]=0;
+//    HistData* cdata[2];
+//    HistData* tdata[2];
+//    bool ADC_empty[2];
+//    double chMinBorder[2], chMaxBorder[2], tMinBorder[2], tMaxBorder[2];
+//    ADC_empty[0]=ADC_empty[1]=0;
 
-    for(quint8 j=0;j<2;j++){ cdata[j]=tdata[j]=nullptr; ADC_empty[j]=1;}
+//    for(quint8 j=0;j<2;j++){ cdata[j]=tdata[j]=nullptr; ADC_empty[j]=1;}
 
-    if(ADC_ID ==0){
-        cdata[0] = chargeData;   tdata[0] = timeData;
-        if(!(cdata[0]->isEmpty() && tdata[0]->isEmpty())){ADC_empty[0]=0;}
-    }
-    else if(ADC_ID ==1){
-        cdata[1] = chargeData1;  tdata[1] = timeData1;
-        if(!(cdata[1]->isEmpty() && tdata[1]->isEmpty())){ADC_empty[1]=0;}
-    }
-    else if(ADC_ID ==2){
-        cdata[0] = chargeData;   tdata[0] = timeData;   if(!(cdata[0]->isEmpty() && tdata[0]->isEmpty())){ADC_empty[0]=0;}
-        cdata[1] = chargeData1;  tdata[1] = timeData1;  if(!(cdata[1]->isEmpty() && tdata[1]->isEmpty())){ADC_empty[1]=0;}
-    }
+//    if(ADC_ID ==0){
+//        cdata[0] = chargeData;   tdata[0] = timeData;
+//        if(!(cdata[0]->isEmpty() && tdata[0]->isEmpty())){ADC_empty[0]=0;}
+//    }
+//    else if(ADC_ID ==1){
+//        cdata[1] = chargeData1;  tdata[1] = timeData1;
+//        if(!(cdata[1]->isEmpty() && tdata[1]->isEmpty())){ADC_empty[1]=0;}
+//    }
+//    else if(ADC_ID ==2){
+//        cdata[0] = chargeData;   tdata[0] = timeData;   if(!(cdata[0]->isEmpty() && tdata[0]->isEmpty())){ADC_empty[0]=0;}
+//        cdata[1] = chargeData1;  tdata[1] = timeData1;  if(!(cdata[1]->isEmpty() && tdata[1]->isEmpty())){ADC_empty[1]=0;}
+//    }
 
-    if(ADC_empty[0] && ADC_empty[1]) return;
-    else{
-        for(quint8 j=0;j<2;j++) {
-             if(cdata[j]==nullptr || ADC_empty[j]){ continue; }
-             else{
-                 qint16 leftBorder,rightBorder,binWidth;
-                 quint16 nBins;
-                 quint16 i=0;
+//    if(ADC_empty[0] && ADC_empty[1]) return;
+//    else{
+//        for(quint8 j=0;j<2;j++) {
+//             if(cdata[j]==nullptr || ADC_empty[j]){ continue; }
+//             else{
+//                 qint16 leftBorder,rightBorder,binWidth;
+//                 quint16 nBins;
+//                 quint16 i=0;
 
-                 leftBorder = cdata[j]->getLeftLimit();
-                 binWidth = cdata[j]->getbinWidth();
-                 while((*cdata[j])[i]==0){
-                     i++;
-                     leftBorder+=binWidth;
-                 }
-//                 qDebug() << "Charge" << j << "left" << leftBorder;
+//                 leftBorder = cdata[j]->getLeftLimit();
+//                 binWidth = cdata[j]->getbinWidth();
+//                 while((*cdata[j])[i]==0){
+//                     i++;
+//                     leftBorder+=binWidth;
+//                 }
+////                 qDebug() << "Charge" << j << "left" << leftBorder;
 
-                 i=0;
-                 rightBorder = cdata[j]->getRightLimit();
-                 nBins = cdata[j]->getnBins();
-                 while((*cdata[j])[nBins-1-i]==0){
-                     i++;
-                     rightBorder-=binWidth;
-                 }
-//                 qDebug() << "Charge" << j << "right" << rightBorder;
+//                 i=0;
+//                 rightBorder = cdata[j]->getRightLimit();
+//                 nBins = cdata[j]->getnBins();
+//                 while((*cdata[j])[nBins-1-i]==0){
+//                     i++;
+//                     rightBorder-=binWidth;
+//                 }
+////                 qDebug() << "Charge" << j << "right" << rightBorder;
 
-                 chMinBorder[j]=leftBorder-2*binWidth; chMaxBorder[j]=rightBorder+2*binWidth;
+//                 chMinBorder[j]=leftBorder-2*binWidth; chMaxBorder[j]=rightBorder+2*binWidth;
 
-                 i=0;
-                 leftBorder = tdata[j]->getLeftLimit();
-                 binWidth = tdata[j]->getbinWidth();
-                 while((*tdata[j])[i]==0){
-                     i++;
-                     leftBorder+=binWidth;
-                 }
-//                 qDebug() << "Time" << j << "left" << leftBorder;
+//                 i=0;
+//                 leftBorder = tdata[j]->getLeftLimit();
+//                 binWidth = tdata[j]->getbinWidth();
+//                 while((*tdata[j])[i]==0){
+//                     i++;
+//                     leftBorder+=binWidth;
+//                 }
+////                 qDebug() << "Time" << j << "left" << leftBorder;
 
-                 i=0;
-                 rightBorder = tdata[j]->getRightLimit();
-                 nBins = tdata[j]->getnBins();
-                 while((*tdata[j])[nBins-1-i]==0){
-                     i++;
-                     rightBorder-=binWidth;
-                 }
-//                 qDebug() << "Time" << j << "right" << rightBorder;
+//                 i=0;
+//                 rightBorder = tdata[j]->getRightLimit();
+//                 nBins = tdata[j]->getnBins();
+//                 while((*tdata[j])[nBins-1-i]==0){
+//                     i++;
+//                     rightBorder-=binWidth;
+//                 }
+////                 qDebug() << "Time" << j << "right" << rightBorder;
 
-                 tMinBorder[j]=leftBorder-2*binWidth; tMaxBorder[j]=rightBorder+2*binWidth;
-             }
-         } // end of for
-    }
-    if(ADC_ID==2){
-        if(ADC_empty[0]){
-            chargeHist->xAxis->setRange(chMinBorder[1],chMaxBorder[1]);
-            timeHist->xAxis->setRange(tMinBorder[1],tMaxBorder[1]);
-        }
-        else if(ADC_empty[1]){
-            chargeHist->xAxis->setRange(chMinBorder[0],chMaxBorder[0]);
-            timeHist->xAxis->setRange(tMinBorder[0],tMaxBorder[0]);
-        }
-        else {
-            chargeHist->xAxis->setRange(fmin(chMinBorder[0],chMinBorder[1]),fmax(chMaxBorder[0],chMaxBorder[1]));
-            timeHist->xAxis->setRange(fmin(tMinBorder[0],tMinBorder[1]),fmax(tMaxBorder[0],tMaxBorder[1]));
-        }
-    }
-    else {
-        for(quint8 j=0;j<2;j++){
-            if(ADC_ID==j && !ADC_empty[j]){
-                chargeHist->xAxis->setRange(chMinBorder[j],chMaxBorder[j]);
-                timeHist->xAxis->setRange(tMinBorder[j],tMaxBorder[j]);}
-             else continue;
-        }
-    }
-    chargeHist->replot();
-    timeHist->replot();
+//                 tMinBorder[j]=leftBorder-2*binWidth; tMaxBorder[j]=rightBorder+2*binWidth;
+//             }
+//         } // end of for
+//    }
+//    if(ADC_ID==2){
+//        if(ADC_empty[0]){
+//            chargeHist->xAxis->setRange(chMinBorder[1],chMaxBorder[1]);
+//            timeHist->xAxis->setRange(tMinBorder[1],tMaxBorder[1]);
+//        }
+//        else if(ADC_empty[1]){
+//            chargeHist->xAxis->setRange(chMinBorder[0],chMaxBorder[0]);
+//            timeHist->xAxis->setRange(tMinBorder[0],tMaxBorder[0]);
+//        }
+//        else {
+//            chargeHist->xAxis->setRange(fmin(chMinBorder[0],chMinBorder[1]),fmax(chMaxBorder[0],chMaxBorder[1]));
+//            timeHist->xAxis->setRange(fmin(tMinBorder[0],tMinBorder[1]),fmax(tMaxBorder[0],tMaxBorder[1]));
+//        }
+//    }
+//    else {
+//        for(quint8 j=0;j<2;j++){
+//            if(ADC_ID==j && !ADC_empty[j]){
+//                chargeHist->xAxis->setRange(chMinBorder[j],chMaxBorder[j]);
+//                timeHist->xAxis->setRange(tMinBorder[j],tMaxBorder[j]);}
+//             else continue;
+//        }
+//    }
+//    chargeHist->replot();
+//    timeHist->replot();
 
-}
+//}
 
 void ChannelHistWidget::ShowFullRange(){
     if(ui->doFixRanges->isChecked()) return;
-    chargeHist->xAxis->setRange(chargeData->getLeftLimit(),chargeData->getRightLimit());
+//    chargeHist->xAxis->setRange(chargeData->getLeftLimit(),chargeData->getRightLimit());
+    chargeHist->xAxis->setRange(-100,4095);
     chargeHist->replot();
-    timeHist->xAxis->setRange(timeData->getLeftLimit(),timeData->getRightLimit());
+//    timeHist->xAxis->setRange(timeData->getLeftLimit(),timeData->getRightLimit());
+    timeHist->xAxis->setRange(-2048,2047);
     timeHist->replot();
 }
 
 
-void ChannelHistWidget::binWidth_charge_was_changed(quint16 _binWidth)
+//void ChannelHistWidget::binWidth_charge_was_changed(quint16 _binWidth)
+//{
+//    chargeData->rebin(_binWidth);
+//    chargeData1->rebin(_binWidth);
+//    hist0->rebinX(_binWidth);
+//    hist1->rebinX(_binWidth);
+//    setupWindow->set_binWidth_charge(chargeData->getbinWidth());
+//    setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
+//    setupWindow->set_charge_range(chargeHist->xAxis->range().lower,chargeHist->xAxis->range().upper);
+//}
+
+//void ChannelHistWidget::binWidth_time_was_changed(quint16 _binWidth)
+//{
+//    timeData->rebin(_binWidth);
+//    timeData1->rebin(_binWidth);
+//    hist0->rebinY(_binWidth);
+//    hist1->rebinY(_binWidth);
+//    setupWindow->set_binWidth_time(timeData->getbinWidth());
+//    setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
+//    setupWindow->set_time_range(timeHist->xAxis->range().lower,timeHist->xAxis->range().upper);
+//}
+
+
+
+
+
+dataContainer::dataContainer(ChannelHistWidget *_ui )
 {
-    chargeData->rebin(_binWidth);
-    chargeData1->rebin(_binWidth);
-    hist0->rebinX(_binWidth);
-    hist1->rebinX(_binWidth);
-    setupWindow->set_binWidth_charge(chargeData->getbinWidth());
-    setupWindow->set_nBins_charge(QString::number(chargeData->getnBins()));
-    setupWindow->set_charge_range(chargeHist->xAxis->range().lower,chargeHist->xAxis->range().upper);
+    ui = _ui;
+
+    chargeData = new HistData(-100,4095,4196);
+    chargeData->setHistName("Channel "+ui->chID+" charge");
+    timeData = new HistData(-2048,2047,4096);
+    timeData->setHistName("Channel "+ui->chID+" time");
+
+    chargeData1 = new HistData(-100,4095,4196);
+    chargeData1->setHistName("Channel "+ui->chID+" charge _ ADC1");
+    timeData1 = new HistData(-2048,2047,4096);
+    timeData1->setHistName("Channel "+ui->chID+" time _ ADC1");
+
+    hist0 = new Hist2Data(-100,4095,4196,-2048,2047,4096);
+    hist1 = new Hist2Data(-100,4095,4196,-2048,2047,4096);
+
 }
 
-void ChannelHistWidget::binWidth_time_was_changed(quint16 _binWidth)
+
+dataContainer::~dataContainer()
 {
-    timeData->rebin(_binWidth);
-    timeData1->rebin(_binWidth);
-    hist0->rebinY(_binWidth);
-    hist1->rebinY(_binWidth);
-    setupWindow->set_binWidth_time(timeData->getbinWidth());
-    setupWindow->set_nBins_time(QString::number(timeData->getnBins()));
-    setupWindow->set_time_range(timeHist->xAxis->range().lower,timeHist->xAxis->range().upper);
+    delete chargeData;
+    delete chargeData1;
+    delete timeData;
+    delete timeData1;
+
+    delete hist0;
+    delete hist1;
+}
+
+
+//void add2data(qint16 _charge,qint16 _time,quint8 graph_id);
+//void setData(QCPBars*);
+//void set2Data();
+//void Clear();
+
+void dataContainer::AddEvent(quint8 adc_id, qint16 charge, qint16 time)
+{
+    quint16 idx;
+    quint16 idy;
+    double left;
+
+    if(adc_id == 0) {
+        idx=chargeData->addEvent(charge);
+        idy=timeData->addEvent(time);
+        hist0->addEvent(charge,time);
+
+        left=chargeData->getLeftLimit()-0.5 + chargeData->getbinWidth()/2.0;
+        ui->chargeBars->addData(left + (idx*chargeData->getbinWidth()),(*chargeData)[idx]);
+
+        left=timeData->getLeftLimit()-0.5 + timeData->getbinWidth()/2.0;
+        ui->timeBars->addData(left + (idy*timeData->getbinWidth()),(*timeData)[idy]);
+    }
+    else if(adc_id == 1) {
+        idx=chargeData1->addEvent(charge);
+        idy=timeData1->addEvent(time);
+        hist1->addEvent(charge,time);
+
+        left=chargeData1->getLeftLimit()-0.5 + chargeData1->getbinWidth()/2.0;
+        ui->chargeBars1->addData(left + (idx*chargeData1->getbinWidth()),(*chargeData1)[idx]);
+
+        left=timeData1->getLeftLimit()-0.5 + timeData1->getbinWidth()/2.0;
+        ui->timeBars1->addData(left + (idy*timeData1->getbinWidth()),(*timeData1)[idy]);
+    }
+
 }

@@ -100,6 +100,7 @@ private:
 
     QHBoxLayout* grid;
     ChannelHistWidget* channel[4];
+    dataContainer* histDatas[4];
     QString filePath;
     QString fileType;
 

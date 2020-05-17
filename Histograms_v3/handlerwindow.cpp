@@ -199,8 +199,7 @@ void HandlerWindow::PlotHistograms()
     for (quint16 i=0;i<4;i++) {
         if(channel[i]!=nullptr){
             channel[i]->PlotHistograms();
-            //            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-            if(doHide){ channel[i]->HideZeroBars();}
+//            if(doHide){ channel[i]->HideZeroBars();}
         }
     }
 }
@@ -259,11 +258,11 @@ void HandlerWindow::ReadBinaryFile()
 void HandlerWindow::ReadTxtFile()
 {
 
-    for(quint16 i=0;i<4;i++) {
-        if(channel[i]!=nullptr){
-            channel[i]->Clear();
-        }
-    }
+//    for(quint16 i=0;i<4;i++) {
+//        if(channel[i]!=nullptr){
+//            channel[i]->Clear();
+//        }
+//    }
     QFile file(filePath);
     QString gbtword;
     quint16 nWords;
@@ -299,7 +298,7 @@ void HandlerWindow::ReadTxtFile()
     }
     file.close();
 
-    PlotHistograms();
+//    PlotHistograms();
 
 }
 
@@ -418,7 +417,8 @@ void HandlerWindow::sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qin
     if(addedChannelsID.indexOf(chID)==-1){return;}      // no such channel
     if((chID<=12)&&(chID>=1)){
         if(channel[addedChannelsID.indexOf(chID)]!=nullptr){
-            channel[addedChannelsID.indexOf(chID)]->AddEvent(adc_id,charge,time);
+            histDatas[addedChannelsID.indexOf(chID)]->AddEvent(adc_id,charge,time);
+//            channel[addedChannelsID.indexOf(chID)]->AddEvent(adc_id,charge,time);
         }
     }
 }
@@ -505,6 +505,7 @@ bool HandlerWindow::addSingleChannel(quint8 chID)
     if(addedChannelsID.indexOf(chID)==-1){
 
         channel[addedChannelsID.size()] = new ChannelHistWidget(this,QString::number(chID));
+        histDatas[addedChannelsID.size()] = new dataContainer(channel[addedChannelsID.size()]);
         lbl.hide();
 //        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         grid->addWidget(channel[addedChannelsID.size()]);
@@ -677,7 +678,7 @@ void HandlerWindow::resetSingleChannel(quint8 chID)
     if(addedChannelsID.indexOf(chID)==-1){return;}      // no such channel
 
     if(channel[addedChannelsID.indexOf(chID)]!=nullptr){
-        channel[addedChannelsID.indexOf(chID)]->Clear();
+//        channel[addedChannelsID.indexOf(chID)]->Clear();
         channel[addedChannelsID.indexOf(chID)]->PlotHistograms();
     }
 
@@ -719,7 +720,7 @@ void HandlerWindow::hideZeroBars()
         if(channel[i]!=nullptr){
             if(doHide) {
                 this->statusBar()->showMessage("Hiding emty bars...",500);
-                channel[i]->HideZeroBars();
+//                channel[i]->HideZeroBars();
             }
             else {
                 this->statusBar()->showMessage("Unhiding emty bars...",500);

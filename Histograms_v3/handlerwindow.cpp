@@ -90,6 +90,7 @@ void HandlerWindow::SetUp()
     ui->b_8->setVisible(false);
 
     addedChannelsID.reserve(4);
+    mDataContainer.reserve(4);
 
 //--------------------------- Appearance ---------------------------------
 
@@ -99,8 +100,6 @@ void HandlerWindow::SetUp()
     openSourceFileAction->setShortcut(tr("Ctrl+o"));
     fileBar->addAction(openSourceFileAction);
     connect(openSourceFileAction, SIGNAL(triggered()),this,SLOT(openSourceFile()));
-
-    dataBar=menuBar()->addMenu("&Data");
 
     optionsBar=menuBar()->addMenu("&Options");              //  #Options field
 
@@ -180,17 +179,6 @@ void HandlerWindow::LoadSettings(QString file_ini)
     sett.beginGroup("HANDLER WINDOW");
     doHide = sett.value("DO_HIDE_ZEROS",1).toBool();
     sett.endGroup();
-
-//    qDebug() << chargeHist->xAxis->range().lower;
-//    qDebug() << chargeHist->xAxis->range().upper;
-
-//    chargeTimeHist->xAxis->setRange(-3,3);
-//    chargeTimeHist->yAxis->setRange(-3,3);
-
-//    ui->rb_1->setChecked(1);
-//    qDebug() << ui->rb_01->isChecked();
-
-
 }
 
 
@@ -198,8 +186,8 @@ void HandlerWindow::PlotHistograms()
 {
     for (quint16 i=0;i<4;i++) {
         if(channel[i]!=nullptr){
-            channel[i]->PlotHistograms();
-//            if(doHide){ channel[i]->HideZeroBars();}
+//            channel[i]->PlotHistograms();
+            if(doHide){ channel[i]->HideZeroBars();}
         }
     }
 }
@@ -258,11 +246,11 @@ void HandlerWindow::ReadBinaryFile()
 void HandlerWindow::ReadTxtFile()
 {
 
-//    for(quint16 i=0;i<4;i++) {
-//        if(channel[i]!=nullptr){
-//            channel[i]->Clear();
-//        }
-//    }
+    for(quint16 i=0;i<4;i++) {
+        if(channel[i]!=nullptr){
+            mDataContainer[i]->Clear();
+        }
+    }
     QFile file(filePath);
     QString gbtword;
     quint16 nWords;
@@ -299,6 +287,7 @@ void HandlerWindow::ReadTxtFile()
     file.close();
 
 //    PlotHistograms();
+    updateScreen();
 
 }
 
@@ -417,10 +406,16 @@ void HandlerWindow::sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qin
     if(addedChannelsID.indexOf(chID)==-1){return;}      // no such channel
     if((chID<=12)&&(chID>=1)){
         if(channel[addedChannelsID.indexOf(chID)]!=nullptr){
-            histDatas[addedChannelsID.indexOf(chID)]->AddEvent(adc_id,charge,time);
+            mDataContainer[addedChannelsID.indexOf(chID)]->AddEvent(adc_id,charge,time);
 //            channel[addedChannelsID.indexOf(chID)]->AddEvent(adc_id,charge,time);
         }
     }
+}
+
+void handler(dataContainer*& container)
+{
+    container->set2Data();
+    container->setLabels();
 }
 
 void HandlerWindow::updateScreen()
@@ -428,9 +423,12 @@ void HandlerWindow::updateScreen()
     this->statusBar()->showMessage("Updating screen...",500);
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
+    QFuture< void > future = QtConcurrent::map(mDataContainer,handler);
+    future.waitForFinished();
 
     for(quint16 i=0;i<4;i++) {
         if(channel[i]!=nullptr){
+            channel[i]->HideZeroBars();
             channel[i]->UpdateScreen();
         }
     }
@@ -505,7 +503,7 @@ bool HandlerWindow::addSingleChannel(quint8 chID)
     if(addedChannelsID.indexOf(chID)==-1){
 
         channel[addedChannelsID.size()] = new ChannelHistWidget(this,QString::number(chID));
-        histDatas[addedChannelsID.size()] = new dataContainer(channel[addedChannelsID.size()]);
+        mDataContainer.push_back(new dataContainer(channel[addedChannelsID.size()]));
         lbl.hide();
 //        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         grid->addWidget(channel[addedChannelsID.size()]);
@@ -545,7 +543,10 @@ bool HandlerWindow::openSourceFile()
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
 //    if(fileType == "Binary files (*.bin)"){ ReadBinaryFile();}
-    if(fileType == "GBT files (*.GBT *.gbt)"){ ReadTxtFile();}
+    if(fileType == "GBT files (*.GBT *.gbt)"){
+//        resetChannelRange("1-12");
+        ReadTxtFile();
+    }
     label.clear();
 
     if(filePath.isEmpty()) { return 0; }
@@ -607,6 +608,8 @@ void HandlerWindow::removeSingleChannel(quint8 chID)
     if(channel[addedChannelsID.indexOf(chID)] != nullptr){
         grid->removeWidget(channel[addedChannelsID.indexOf(chID)]);
         delete channel[addedChannelsID.indexOf(chID)];
+        delete mDataContainer[addedChannelsID.indexOf(chID)];
+        mDataContainer.remove(addedChannelsID.indexOf(chID));
         channel[addedChannelsID.indexOf(chID)] = nullptr;
         this->resize(this->width() - Width,Height);
         if(chID==addedChannelsID.back())addedChannelsID.pop();
@@ -678,8 +681,8 @@ void HandlerWindow::resetSingleChannel(quint8 chID)
     if(addedChannelsID.indexOf(chID)==-1){return;}      // no such channel
 
     if(channel[addedChannelsID.indexOf(chID)]!=nullptr){
-//        channel[addedChannelsID.indexOf(chID)]->Clear();
-        channel[addedChannelsID.indexOf(chID)]->PlotHistograms();
+        mDataContainer[addedChannelsID.indexOf(chID)]->Clear();
+        channel[addedChannelsID.indexOf(chID)]->UpdateScreen();
     }
 
     this->statusBar()->clearMessage();
@@ -720,7 +723,7 @@ void HandlerWindow::hideZeroBars()
         if(channel[i]!=nullptr){
             if(doHide) {
                 this->statusBar()->showMessage("Hiding emty bars...",500);
-//                channel[i]->HideZeroBars();
+                channel[i]->HideZeroBars();
             }
             else {
                 this->statusBar()->showMessage("Unhiding emty bars...",500);
@@ -742,7 +745,6 @@ void HandlerWindow::chooseADC(quint8 chID,quint8 adcID)
 
 HandlerWindow::~HandlerWindow()
 {
-
     delete ui;
 }
 

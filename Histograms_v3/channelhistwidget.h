@@ -30,23 +30,14 @@ public:
     explicit ChannelHistWidget(QWidget *parent = nullptr,QString _chID = "");
     ~ChannelHistWidget();
 
-//    void AddEvent(quint8 adc_id,qint16 charge, qint16 time);    // add data to data containers
-
-    void PlotHistograms();                                      // Draw current data
-//    void Clear();                                               // Clear all data containers
-    void ClearScreen();
     void UpdateScreen();
-//    void HideZeroBars();                                        // hide empty bars from left and right
+    void HideZeroBars();                                        // hide empty bars from left and right
     void ShowFullRange();
-
-//    void PrintInfo(bool onlyStat = false);                      // Print info about data containers to console
 
     quint8 ADC_ID = 2;                                          // 0 -> ADC0; 1->ADC1; 2->ADC0+ADC1
 
 private slots:
-//    void channelIDButton_clicked();
-//    void binWidth_charge_was_changed(quint16);
-//    void binWidth_time_was_changed(quint16);
+    void channelIDButton_clicked();
 
     void hist_double_clicked( QMouseEvent* event);
     void replot_chargeTimeHist(){ chargeTimeHist->replot(); }
@@ -61,31 +52,17 @@ private slots:
 
 private:
     Ui::ChannelHistWidget *ui;
+    dataContainer* data;
 
     void InitHistograms();              // Create chargeData, chargeBars, timeData, timeBars, chargeTimeGraph
     void SetupView();
     void LoadSettings(QString file_ini);
 
-//    void add2data(qint16 _charge,qint16 _time,quint8 graph_id);
-//    void setData(QCPBars*);
-//    void set2Data();
-//    void setLabels();
-//    void fillColorMap();
-
     void Experements();                 //  function to do some tests
-
 
     QString chID;
 
-    //  ----Data containers---
-//    HistData* chargeData;
-//    HistData* chargeData1;
-//    HistData* timeData;
-//    HistData* timeData1;
-
-//    Hist2Data* hist0;
-//    Hist2Data* hist1;
-    // -----------------------
+    quint16 nXBins,nYBins,Xwidth,Ywidth;
 
     QCustomPlot* chargeHist;            // First hist
     QCPBars* chargeBars;
@@ -97,34 +74,38 @@ private:
 
     QCustomPlot* chargeTimeHist;        // 2dim hist
 
-//    SetupChannelWindow* setupWindow;
+    SetupChannelWindow* setupWindow;
     QPushButton* channelIDButton;
-
-    double threshold[256];              // for color map
 
     friend dataContainer;
 };
 
 
 
-class dataContainer
+class dataContainer :public QObject
 {
+    Q_OBJECT
 public:
     dataContainer(ChannelHistWidget *);
     ~dataContainer();
 
-    const ChannelHistWidget *ui;
+    ChannelHistWidget *ui=nullptr;
 
     void AddEvent(quint8 adc_id,qint16 charge, qint16 time);    // add data to data containers
 
-    void add2data(qint16 _charge,qint16 _time,quint8 graph_id);
-    void setData(QCPBars*);
+
+    void add2data(double _charge,double _time,quint8 graph_id);
+    void setData(bool);
     void set2Data();
     void Clear();                                               // Clear all data containers
+    void setLabels();
 
-    double threshold[256];              // for color map
+
+    static const quint16 Ncols=256;
+    double threshold[Ncols];              // for color map
 
     void fillColorMap();
+    //    void PrintInfo(bool onlyStat = false);                      // Print info about data containers to console
 
     HistData* chargeData;
     HistData* chargeData1;
@@ -133,6 +114,12 @@ public:
 
     Hist2Data* hist0;
     Hist2Data* hist1;
+
+    void updateUiScreen(){set2Data();ui->UpdateScreen();}
+
+public slots:
+    void rebinX(quint16);
+    void rebinY(quint16);
 
 };
 

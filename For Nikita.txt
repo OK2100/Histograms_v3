@@ -1,0 +1,24 @@
+
+	1) Все файлы channelhistwidget.* handlerwindow.* histdata.* можно поместить в папку sources,
+	   там уже лежат qcustoomplot.* и colormap.csv
+
+	   Далее эту папку уже переносить в другой проект.
+
+	2) В .pro файл нужно добавить Qt += printsupport concurrent
+
+	3) В новом проекте добавить все файлы из sources кроме colormap
+
+
+	Думаю что использовать примерно так:
+
+	HandlerWindow w;
+	w.addChannelRange("1-4");
+	w.show();
+	
+	w.addEvent(...);
+
+	// QTimer -> w.updateScreen()
+	connect(timer,&QTimer::timeout,&w,&HandlerWindow::updateScreen);
+
+	* QtConcurent использовал в функции updateScreen(), потому как для отрисовки цветовой гистограммы и
+	расчета статистики надо перечитывать все накопленные данные

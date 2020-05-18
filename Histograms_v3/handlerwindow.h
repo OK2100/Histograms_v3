@@ -13,9 +13,9 @@
 #include <QtGui>
 #include <QRegExp>
 #include <QStringList>
+#include <QtConcurrent>
 
 #include "channelhistwidget.h"
-
 
 struct EventData	{
     quint16 time:12;
@@ -34,9 +34,6 @@ union DataConversion {
 QT_BEGIN_NAMESPACE
 namespace Ui { class HandlerWindow; }
 QT_END_NAMESPACE
-
-
-
 
 class HandlerWindow : public QMainWindow
 {
@@ -72,6 +69,7 @@ public slots:
     void updateScreen();
 
     void chooseADC(quint8 chID,quint8 adcID);           // [0,1,2]  2 mean both ADC0 and ADC1
+    void sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qint16 time);
 
 
 private slots:
@@ -100,6 +98,7 @@ private:
 
     QHBoxLayout* grid;
     ChannelHistWidget* channel[4];
+    QVector<dataContainer*> mDataContainer;
     QString filePath;
     QString fileType;
 
@@ -116,7 +115,6 @@ private:
     void PlotHistograms();
 //    void ReadBinaryFile();
     void ReadTxtFile();
-    void sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qint16 time);
 
     void LoadSettings(QString file_ini);
 //    void SaveSettings();

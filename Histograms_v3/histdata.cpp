@@ -42,7 +42,7 @@ quint16 HistData::addEvent(qint16 _event)
         sumSquares+=(_event*_event*1.0)/1000;
         Nev++;
     }
-    else    nLosts++;
+    else {   nLosts++; return 0xffff;}
 
     return idx;
 }

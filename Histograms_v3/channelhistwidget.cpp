@@ -111,14 +111,23 @@ void ChannelHistWidget::auto_rescale(const QCPRange &newRange){
     if(sender() == chargeHist->xAxis){
         upper=chargeBars->data().data()->valueRange(fr,QCP::sdBoth,newRange).upper;
         upper1=chargeBars1->data().data()->valueRange(fr,QCP::sdBoth,newRange).upper;
-        if(ADC_ID==2)       chargeHist->yAxis->setRange(0,(upper+upper1)*1.1);
+        if(ADC_ID==2){
+            if((upper+upper1) > chargeHist->yAxis->range().upper){
+                chargeHist->yAxis->rescale();
+                chargeHist->yAxis->setRange(0,chargeHist->yAxis->range().upper*1.1);
+            } else chargeHist->yAxis->setRange(0,(upper+upper1)*1.1);
+        }
         else if(ADC_ID==1)  chargeHist->yAxis->setRange(0,upper1*1.1);
         else if(ADC_ID==0)  chargeHist->yAxis->setRange(0,upper*1.1);
     }
     else if(sender() == timeHist->xAxis){
         upper=timeBars->data().data()->valueRange(fr,QCP::sdBoth,newRange).upper;
         upper1=timeBars1->data().data()->valueRange(fr,QCP::sdBoth,newRange).upper;
-        if(ADC_ID==2)       timeHist->yAxis->setRange(0,(upper+upper1)*1.1);
+        if(ADC_ID==2)
+            if((upper+upper1) > timeHist->yAxis->range().upper){
+                timeHist->yAxis->rescale();
+                timeHist->yAxis->setRange(0,timeHist->yAxis->range().upper*1.1);
+            } else timeHist->yAxis->setRange(0,(upper+upper1)*1.1);
         else if(ADC_ID==1)  timeHist->yAxis->setRange(0,upper1*1.1);
         else if(ADC_ID==0)  timeHist->yAxis->setRange(0,upper*1.1);
     }
@@ -308,7 +317,7 @@ void ChannelHistWidget::ADC0_choosed()
     chargeBars1->setVisible(0);
     timeBars->setVisible(1);
     timeBars1->setVisible(0);
-    UpdateScreen();
+//    UpdateScreen();
 }
 void ChannelHistWidget::ADC1_choosed()
 {
@@ -321,7 +330,7 @@ void ChannelHistWidget::ADC1_choosed()
     timeBars1->moveAbove(0);
     timeBars->setVisible(0);
     timeBars1->setVisible(1);
-    UpdateScreen();
+//    UpdateScreen();
 }
 void ChannelHistWidget::ADC01_choosed()
 {
@@ -333,7 +342,7 @@ void ChannelHistWidget::ADC01_choosed()
     timeBars->setVisible(1);
     timeBars1->setVisible(1);
     timeBars1->moveAbove(timeBars);
-    UpdateScreen();
+//    UpdateScreen();
 }
 
 void ChannelHistWidget::LoadSettings(QString file_ini)
@@ -509,13 +518,18 @@ dataContainer::dataContainer(ChannelHistWidget * _ui):
     connect(ui->setupWindow,&SetupChannelWindow::binWidth_time_changed,this,&dataContainer::rebinY);
     connect(ui->setupWindow,&SetupChannelWindow::end_of_apply,this,&dataContainer::updateUiScreen);
 
-    connect(ui->ui->rb_0,&QRadioButton::clicked,this,&dataContainer::set2Data);
-    connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::set2Data);
-    connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::set2Data);
+    connect(ui->ui->rb_0,&QRadioButton::clicked,this,&dataContainer::updateUiScreen);
+    connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::updateUiScreen);
+    connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::updateUiScreen);
 
-    connect(ui->ui->rb_0,&QRadioButton::clicked,this,&dataContainer::setLabels);
-    connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::setLabels);
-    connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::setLabels);
+
+//    connect(ui->ui->rb_0,&QRadioButton::clicked,this,&dataContainer::set2Data);
+//    connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::set2Data);
+//    connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::set2Data);
+
+//    connect(ui->ui->rb_0,&QRadioButton::clicked,this,&dataContainer::setLabels);
+//    connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::setLabels);
+//    connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::setLabels);
 
 
 }

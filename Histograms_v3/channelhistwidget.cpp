@@ -310,6 +310,14 @@ void ChannelHistWidget::SetupView(){
     chargeTimeHist->yAxis->setRange(-2048,2047);
 }
 
+void ChannelHistWidget::SaveHistograms(QString dest_dir)
+{
+    QPixmap chargePix(chargeHist->size()); chargeHist->render(&chargePix); chargePix.save(dest_dir+"/Ch"+chID+"_charge.png","PNG");
+    QPixmap timePix(timeHist->size()); timeHist->render(&timePix); timePix.save(dest_dir+"/Ch"+chID+"_time.png","PNG");
+    QPixmap chargeTimePix(chargeTimeHist->size()); chargeTimeHist->render(&chargeTimePix); chargeTimePix.save(dest_dir+"/Ch"+chID+"_charge_time.png","PNG");
+}
+
+
 void ChannelHistWidget::ADC0_choosed()
 {
     ADC_ID = 0;
@@ -522,14 +530,13 @@ dataContainer::dataContainer(ChannelHistWidget * _ui):
     connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::updateUiScreen);
     connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::updateUiScreen);
 
-
 //    connect(ui->ui->rb_0,&QRadioButton::clicked,this,&dataContainer::set2Data);
 //    connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::set2Data);
 //    connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::set2Data);
 
-//    connect(ui->ui->rb_0,&QRadioButton::clicked,this,&dataContainer::setLabels);
-//    connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::setLabels);
-//    connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::setLabels);
+    connect(ui->ui->rb_0,&QRadioButton::clicked,this,&dataContainer::setLabels);
+    connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::setLabels);
+    connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::setLabels);
 
 
 }
@@ -546,6 +553,10 @@ dataContainer::~dataContainer()
     delete hist1;
 }
 
+
+void dataContainer::saveHistogramsData(QString dest_dir)
+{
+}
 
 void dataContainer::Clear()
 {

@@ -14,6 +14,7 @@
 #include <QRegExp>
 #include <QStringList>
 #include <QtConcurrent>
+#include <QDir>
 
 #include "channelhistwidget.h"
 
@@ -81,6 +82,7 @@ private slots:
     void reset();                   // with input
     void resetAll();                // with input
     void doAddChannelRange();
+    void save_Histograms();
 
 signals:
     void showNewWindow(QVector<quint8>& channelsToAdd);
@@ -101,6 +103,8 @@ private:
     QVector<dataContainer*> mDataContainer;
     QString filePath;
     QString fileType;
+
+    QString savefilePath;
 
     QStack<quint8> addedChannelsID;
     quint8 nAddedChannels = 0;
@@ -140,6 +144,7 @@ private:
     QAction* resetAction;
     QAction* resetAllAction;
     QAction* hideZeroBarsAction;
+    QAction* saveHistogramsAction;
 
     QLabel lbl;                     //  Opening label
 //----------------------------------------------------

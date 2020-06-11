@@ -13,7 +13,7 @@
 #include <QMouseEvent>
 #include <QSettings>
 #include <QVariant>
-
+#include <QDir>
 
 class dataContainer;
 
@@ -33,6 +33,7 @@ public:
     void UpdateScreen();
     void HideZeroBars();                                        // hide empty bars from left and right
     void ShowFullRange();
+    void SaveHistograms(QString dest_dir);
 
     quint8 ADC_ID = 2;                                          // 0 -> ADC0; 1->ADC1; 2->ADC0+ADC1
 
@@ -100,6 +101,7 @@ public:
     void Clear();                                               // Clear all data containers
     void setLabels();
 
+    void saveHistogramsData(QString dest_dir);
 
     static const quint16 Ncols=256;
     double threshold[Ncols];              // for color map

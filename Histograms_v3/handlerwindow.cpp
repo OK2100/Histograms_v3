@@ -101,6 +101,10 @@ void HandlerWindow::SetUp()
     fileBar->addAction(openSourceFileAction);
     connect(openSourceFileAction, SIGNAL(triggered()),this,SLOT(openSourceFile()));
 
+    saveHistogramsAction=new QAction("&Save histograms...",this);
+    fileBar->addAction(saveHistogramsAction);
+    connect(saveHistogramsAction, SIGNAL(triggered()),this,SLOT(save_Histograms()));
+
     optionsBar=menuBar()->addMenu("&Options");              //  #Options field
 
     addChannelAction=new QAction("&Add channel...",this);
@@ -171,6 +175,33 @@ void HandlerWindow::SetUp()
 
 //--------------------------------------------------------------------------
 }
+
+void HandlerWindow::save_Histograms()
+{
+    this->statusBar()->showMessage("Saving histograms file...");
+
+    if(savefilePath.isEmpty()){
+        QString enteredFilePath = QFileDialog::getExistingDirectory(this,
+                                                    QString::fromUtf8("Save histograms"),
+                                                    QDir::homePath());
+
+        if(enteredFilePath.isEmpty()) return;
+        else savefilePath = enteredFilePath;
+    }
+
+    QLocale l(QLocale::English);
+    QString dir(savefilePath+"/Saved_histograms"+QString("_%1").arg(l.toString(QDateTime::currentDateTime(),"dd_MM_yyyy_hh_mm")));
+    if(!QDir(dir).exists()){QDir().mkdir(dir);}
+
+    for(quint8 i=0;i<4;i++){
+        if(channel[i]!=nullptr){
+            channel[i]->SaveHistograms(dir);
+        }
+    }
+
+    this->statusBar()->showMessage("Histograms saved into "+dir,1500);
+}
+
 
 void HandlerWindow::LoadSettings(QString file_ini)
 {

@@ -31,10 +31,10 @@ public:
     void    setHistName(QString _name);
     bool    rebin(quint16 newBinWidth);
 
-    quint32 getTotalEvents();
-    double getMean();
-    double getVariance();
-    double getRMS();
+    quint32 getTotalEvents(qint16 left=0, qint16 right = 0);
+    double getMean(qint16 left=0, qint16 right = 0);
+    double getVariance(qint16 left=0, qint16 right = 0);
+    double getRMS(qint16 left=0, qint16 right = 0);
     double getSumSquares(){ return sumSquares; }
 
     void printInfo( bool doPrintStat = 0, QFile* pFile=nullptr);

@@ -165,38 +165,85 @@ QString HistData::getHistName()
     else { return name;}
 }
 
-quint32 HistData::getTotalEvents()
+quint32 HistData::getTotalEvents(qint16 left, qint16 right)
 {
-    if(nEvents != nullptr){
-        quint32 sum=0;
-        for(quint16 i=0;i<nBins;i++){ sum+=nEvents[i]; }
-        return sum;
+    if(left==right && left==0){
+        return Nev;
     }
-    else return 0;
+    else{
+        if(nEvents != nullptr){
+            quint32 sum=0;
+            quint16 il=(left < leftLimit)?0:(left-leftLimit)/binWidth;
+            quint16 ir=(right > rightLimit)?nBins-1:(right-leftLimit)/binWidth;
+
+            for(quint16 i=il;i<=ir;i++){
+                sum+=nEvents[i];
+            }
+            return sum;
+        }
+        else return 0;
+
+    }
 }
+
+double HistData::getMean(qint16 left, qint16 right)
+{
+    quint32 N = getTotalEvents(left,right);
+    if(left==right && left==0){
+        if(N!=0) return sumValues*1.0/getTotalEvents();
+        else return 0;
+    }
+    else{
+//        qDebug() << "Start calculating mean value" << N << nBins;
+        double mean=0;
+        if(N!=0){
+            quint16 il=(left < leftLimit)?0:(left-leftLimit)/binWidth;
+            quint16 ir=(right > rightLimit)?nBins-1:(right-leftLimit)/binWidth;
+
+            for(quint16 i=il;i<=ir;i++){
+                mean+=(nEvents[i]*(left+binWidth*(i-il))*1.0)/N;
+//                qDebug() << i << mean;
+            }
+            return mean;
+        }
+        else return 0;
+    }
+}
+
+double HistData::getVariance(qint16 left, qint16 right)
+{
+    quint32 N = getTotalEvents(left,right);
+    if(left==right && left==0){
+        if(N!=0) {return (1000*sumSquares)/getTotalEvents()-pow(getMean(),2);}
+        else {return 0;}
+    }
+    else{
+        double mean2=0;
+        double mean = getMean(left,right);
+        if(N!=0){
+            quint16 il=(left < leftLimit)?0:(left-leftLimit)/binWidth;
+            quint16 ir=(right > rightLimit)?nBins-1:(right-leftLimit)/binWidth;
+
+            for(quint16 i=il;i<=ir;i++){
+                mean2+=(nEvents[i]*(left+binWidth*(i-il)-mean)*(left+binWidth*(i-il)-mean)*1.0)/N;
+            }
+            return mean2;
+        }
+        else return 0;
+    }
+}
+
+double HistData::getRMS(qint16 left, qint16 right)
+{
+    return pow(getVariance(left,right),0.5);
+}
+
 
 quint16& HistData::operator[] (const quint16 index)
 {
     if(index<nBins) return nEvents[index];
     else {qDebug() << "Index out of range"; exit(1);}
 };
-
-double HistData::getMean()
-{
-    if(getTotalEvents()!=0) return sumValues*1.0/getTotalEvents();
-    else return 0;
-}
-
-double HistData::getVariance()
-{
-    if(getTotalEvents()!=0) {return (1000*sumSquares)/getTotalEvents()-pow(getMean(),2);}
-    else {return 0;}
-}
-
-double HistData::getRMS()
-{
-    return pow(getVariance(),0.5);
-}
 
 
 // ################################################################################

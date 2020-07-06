@@ -446,7 +446,7 @@ void HandlerWindow::sendEventToChannel(quint8 chID,bool adc_id,qint16 charge,qin
 void handler(dataContainer*& container)
 {
     container->set2Data();
-    container->setLabels();
+//    container->setLabels();
 }
 
 void HandlerWindow::updateScreen()
@@ -540,7 +540,7 @@ bool HandlerWindow::addSingleChannel(quint8 chID)
         grid->addWidget(channel[addedChannelsID.size()]);
 //        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         this->resize(Width+Width*addedChannelsID.size(),Height);
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
         addedChannelsID.push(chID);
 
@@ -554,6 +554,9 @@ bool HandlerWindow::addSingleChannel(quint8 chID)
             ui->b_6->setVisible(true);
         }
     }
+
+    this->repaint();
+
     return 1;
 
 }

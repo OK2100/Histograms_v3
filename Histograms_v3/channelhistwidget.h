@@ -119,6 +119,10 @@ public:
 
     void updateUiScreen(){set2Data();ui->UpdateScreen();}
 
+private:
+    QTimer chargeTimer;
+    QTimer timeTimer;
+
 public slots:
     void rebinX(quint16);
     void rebinY(quint16);

@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>229</width>
+    <width>231</width>
     <height>467</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>HandlerWindow</string>
@@ -315,8 +321,8 @@ file</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>229</width>
-     <height>22</height>
+     <width>231</width>
+     <height>20</height>
     </rect>
    </property>
   </widget>

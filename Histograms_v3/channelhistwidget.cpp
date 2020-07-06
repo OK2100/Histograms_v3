@@ -15,7 +15,7 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
     ui->setupUi(this);
 
     QRect rec = QApplication::desktop()->screenGeometry();
-    this->setMaximumWidth(rec.width() / 4-18);
+//    this->setMinimumWidth(rec.width() / 4-18);
 
     chID = _chID;
     chargeHist = ui->chargeHist;
@@ -28,6 +28,7 @@ ChannelHistWidget::ChannelHistWidget(QWidget *parent,QString _chID):
     connect(channelIDButton,SIGNAL(clicked()),this,SLOT(channelIDButton_clicked()));
 
     //---------------------------------------------
+
 
     InitHistograms();
 
@@ -109,6 +110,9 @@ void ChannelHistWidget::auto_rescale(const QCPRange &newRange){
     quint16 upper = 0;
     quint16 upper1 = 0;
     if(sender() == chargeHist->xAxis){
+        if(newRange.upper > 4095) chargeHist->xAxis->setRangeUpper(4095);
+        if(newRange.lower < -100) chargeHist->xAxis->setRangeLower(-100);
+
         upper=chargeBars->data().data()->valueRange(fr,QCP::sdBoth,newRange).upper;
         upper1=chargeBars1->data().data()->valueRange(fr,QCP::sdBoth,newRange).upper;
         if(ADC_ID==2){
@@ -121,6 +125,9 @@ void ChannelHistWidget::auto_rescale(const QCPRange &newRange){
         else if(ADC_ID==0)  chargeHist->yAxis->setRange(0,upper*1.1);
     }
     else if(sender() == timeHist->xAxis){
+        if(newRange.upper > 2047) timeHist->xAxis->setRangeUpper(2047);
+        if(newRange.lower < -2048) timeHist->xAxis->setRangeLower(-2048);
+
         upper=timeBars->data().data()->valueRange(fr,QCP::sdBoth,newRange).upper;
         upper1=timeBars1->data().data()->valueRange(fr,QCP::sdBoth,newRange).upper;
         if(ADC_ID==2)
@@ -169,6 +176,8 @@ void ChannelHistWidget::InitHistograms()
 
 void ChannelHistWidget::SetupView(){
 
+    ui->frame_3->setStyleSheet("background-color: rgba(255, 255, 255,150);");
+    ui->frame_4->setStyleSheet("background-color: rgba(255, 255, 255,150);");
     QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);
     fixedTicker->setTickStep(1.0);
     fixedTicker->setScaleStrategy(QCPAxisTickerFixed::ssMultiples);
@@ -534,9 +543,120 @@ dataContainer::dataContainer(ChannelHistWidget * _ui):
 //    connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::set2Data);
 //    connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::set2Data);
 
-    connect(ui->ui->rb_0,&QRadioButton::clicked,this,&dataContainer::setLabels);
-    connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::setLabels);
-    connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::setLabels);
+//    connect(ui->ui->rb_0,&QRadioButton::clicked,this,&dataContainer::setLabels);
+//    connect(ui->ui->rb_1,&QRadioButton::clicked,this,&dataContainer::setLabels);
+//    connect(ui->ui->rb_01,&QRadioButton::clicked,this,&dataContainer::setLabels);
+
+
+    chargeTimer.setSingleShot(1);
+    chargeTimer.setInterval(1000);
+    chargeTimer.callOnTimeout([=](){
+        qint16 leftCh = qCeil(ui->chargeHist->xAxis->range().lower);
+        qint16 rightCh = qFloor(ui->chargeHist->xAxis->range().upper);
+
+        if(ui->ADC_ID==0){
+           ui->ui->lbl_Nev->setText("Sum:  "+QString::number(chargeData->getTotalEvents(leftCh,rightCh)));
+           ui->ui->lbl_Mean->setText("Mean: "+QString::number(chargeData->getMean(leftCh,rightCh),'g',5));
+           ui->ui->lbl_StdDev->setText("RMS:  "+QString::number( chargeData->getRMS(leftCh,rightCh),'g',4 ));
+       }
+
+       if(ui->ADC_ID==1){
+           ui->ui->lbl_Nev->setText("Sum:  "+QString::number(chargeData1->getTotalEvents(leftCh,rightCh)));
+           ui->ui->lbl_Mean->setText("Mean: "+QString::number(chargeData1->getMean(leftCh,rightCh),'g',5));
+           ui->ui->lbl_StdDev->setText("RMS:  "+QString::number( chargeData1->getRMS(leftCh,rightCh),'g',4 ));
+       }
+
+       if(ui->ADC_ID==2){
+            quint32 N = chargeData->getTotalEvents(leftCh,rightCh)+ chargeData1->getTotalEvents(leftCh,rightCh);
+
+            double mean2=0;
+            double mean = (N!=0)?
+                        (chargeData->getMean(leftCh,rightCh)*chargeData->getTotalEvents(leftCh,rightCh)+
+                        chargeData1->getMean(leftCh,rightCh)*chargeData1->getTotalEvents(leftCh,rightCh))*1.0/N
+                                                             :0;
+            ui->ui->lbl_Nev->setText(QString::asprintf("Sum:  %d",N));
+            ui->ui->lbl_Mean->setText(QString::asprintf("Mean: %.3f",mean));
+
+            if(N!=0){
+                quint16 il=(leftCh < chargeData->getLeftLimit())?0:(leftCh-chargeData->getLeftLimit())/chargeData->getbinWidth();
+                quint16 ir=(rightCh > chargeData->getRightLimit())?chargeData->getnBins()-1:(rightCh-chargeData->getLeftLimit())/chargeData->getbinWidth();
+                quint16 il1=(leftCh < chargeData1->getLeftLimit())?0:(leftCh-chargeData1->getLeftLimit())/chargeData1->getbinWidth();
+                quint16 ir1=(rightCh > chargeData1->getRightLimit())?chargeData1->getnBins()-1:(rightCh-chargeData1->getLeftLimit())/chargeData1->getbinWidth();
+
+                quint16 min_idx = (il<il1)?il:il1;
+                quint16 max_idx = (ir>ir1)?ir:ir1;
+
+
+                for(quint16 i=min_idx;i<=max_idx;i++){
+                    mean2+=( ((*chargeData)[i]+(*chargeData1)[i])*(leftCh+chargeData->getbinWidth()*(i-min_idx)-mean)*(leftCh+chargeData->getbinWidth()*(i-min_idx)-mean)*1.0)/N;
+                }
+                ui->ui->lbl_StdDev->setText(QString::asprintf("RMS:  %.3f", pow(mean2,0.5)));
+
+            }
+            else ui->ui->lbl_StdDev->setText(QString::asprintf("RMS:  %.3f", double(0) ));
+
+
+
+       }
+
+    });
+
+    timeTimer.setSingleShot(1);
+    timeTimer.setInterval(1000);
+    timeTimer.callOnTimeout([=](){
+        qint16 leftT = qCeil(ui->timeHist->xAxis->range().lower);
+        qint16 rightT = qFloor(ui->timeHist->xAxis->range().upper);
+        if(ui->ADC_ID==0){
+            ui->ui->lbl_Nev1->setText("Sum: "+QString::number(timeData->getTotalEvents(leftT,rightT)));
+            ui->ui->lbl_Mean1->setText("Mean: "+QString::number(timeData->getMean(leftT,rightT),'g',5));
+            ui->ui->lbl_StdDev1->setText("RMS: "+QString::number( timeData->getRMS(leftT,rightT),'g',4 ));
+        }
+
+        if(ui->ADC_ID==1){
+            ui->ui->lbl_Nev1->setText("Sum:  "+QString::number(timeData1->getTotalEvents(leftT,rightT)));
+            ui->ui->lbl_Mean1->setText("Mean: "+QString::number(timeData1->getMean(leftT,rightT),'g',5));
+            ui->ui->lbl_StdDev1->setText("RMS:  "+QString::number( timeData1->getRMS(leftT,rightT),'g',4 ));
+        }
+
+        if(ui->ADC_ID==2){
+             quint32 N = timeData->getTotalEvents(leftT,rightT)+ timeData1->getTotalEvents(leftT,rightT);
+
+             double mean2=0;
+             double mean = (N!=0)?
+                         (timeData->getMean(leftT,rightT)*timeData->getTotalEvents(leftT,rightT)+
+                         timeData1->getMean(leftT,rightT)*timeData1->getTotalEvents(leftT,rightT))*1.0/N
+                                                              :0;
+             ui->ui->lbl_Nev1->setText(QString::asprintf("Sum:  %d",N));
+             ui->ui->lbl_Mean1->setText(QString::asprintf("Mean: %.3f",mean));
+
+             if(N!=0){
+                 quint16 il=(leftT < timeData->getLeftLimit())?0:(leftT-timeData->getLeftLimit())/timeData->getbinWidth();
+                 quint16 ir=(rightT > timeData->getRightLimit())?timeData->getnBins()-1:(rightT-timeData->getLeftLimit())/timeData->getbinWidth();
+                 quint16 il1=(leftT < timeData1->getLeftLimit())?0:(leftT-timeData1->getLeftLimit())/timeData1->getbinWidth();
+                 quint16 ir1=(rightT > timeData1->getRightLimit())?timeData1->getnBins()-1:(rightT-timeData1->getLeftLimit())/timeData1->getbinWidth();
+
+                 quint16 min_idx = (il<il1)?il:il1;
+                 quint16 max_idx = (ir>ir1)?ir:ir1;
+
+
+                 for(quint16 i=min_idx;i<=max_idx;i++){
+                     mean2+=( ((*timeData)[i]+(*timeData1)[i])*(leftT+timeData->getbinWidth()*(i-min_idx)-mean)*(leftT+timeData->getbinWidth()*(i-min_idx)-mean)*1.0)/N;
+                 }
+                 ui->ui->lbl_StdDev1->setText(QString::asprintf("RMS:  %.3f", pow(mean2,0.5)));
+
+             }
+             else ui->ui->lbl_StdDev1->setText(QString::asprintf("RMS:  %.3f", double(0) ));
+
+        }
+    });
+
+    connect(ui->chargeHist,&QCustomPlot::afterReplot,this,[=](){
+        chargeTimer.start();
+    });
+
+    connect(ui->timeHist,&QCustomPlot::afterReplot,this,[=](){
+        timeTimer.start();
+    });
 
 
 }
@@ -647,7 +767,7 @@ void dataContainer::add2data(double _charge,double _time,quint8 graph_id)
 void dataContainer::fillColorMap()
 {
 //    QFile file("../sources/black-body-table-byte-0256.csv");
-    QFile file("../sources/colormap.csv");
+    QFile file("./sources/colormap.csv");
     if ( !file.open(QFile::ReadOnly | QFile::Text) ) {
         qDebug() << "File not exists";
     }
@@ -753,22 +873,58 @@ void dataContainer::set2Data()
 void dataContainer::setLabels()
 {
     if(ui->ADC_ID==0){
-        ui->ui->lbl_Nev->setText("Sum: "+QString::number(chargeData->getTotalEvents()));
-        ui->ui->lbl_Mean->setText("Mean: "+QString::number(chargeData->getMean(),'g',5));
-        ui->ui->lbl_StdDev->setText("RMS: "+QString::number( chargeData->getRMS(),'g',4 ));
-        ui->ui->lbl_Nev1->setText("Sum: "+QString::number(timeData->getTotalEvents()));
-        ui->ui->lbl_Mean1->setText("Mean: "+QString::number(timeData->getMean(),'g',5));
-        ui->ui->lbl_StdDev1->setText("RMS: "+QString::number( timeData->getRMS(),'g',4 ));
+        ui->ui->lbl_Nev->setText("Sum: "+QString::number(chargeData->getTotalEvents(
+                                                             ui->chargeHist->xAxis->range().lower
+                                                             ,ui->chargeHist->xAxis->range().upper
+                                                             )));
+        ui->ui->lbl_Mean->setText("Mean: "+QString::number(chargeData->getMean(
+                                                               ui->chargeHist->xAxis->range().lower
+                                                               ,ui->chargeHist->xAxis->range().upper
+                                                               ),'g',5));
+        ui->ui->lbl_StdDev->setText("RMS: "+QString::number( chargeData->getRMS(
+                                                                 ui->chargeHist->xAxis->range().lower
+                                                                 ,ui->chargeHist->xAxis->range().upper
+                                                                 ),'g',4 ));
+        ui->ui->lbl_Nev1->setText("Sum: "+QString::number(timeData->getTotalEvents(
+                                                              ui->timeHist->xAxis->range().lower
+                                                              ,ui->timeHist->xAxis->range().upper
+                                                              )));
+        ui->ui->lbl_Mean1->setText("Mean: "+QString::number(timeData->getMean(
+                                                                ui->timeHist->xAxis->range().lower
+                                                                ,ui->timeHist->xAxis->range().upper
+                                                                ),'g',5));
+        ui->ui->lbl_StdDev1->setText("RMS: "+QString::number( timeData->getRMS(
+                                                                  ui->timeHist->xAxis->range().lower
+                                                                  ,ui->timeHist->xAxis->range().upper
+                                                                  ),'g',4 ));
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
     if(ui->ADC_ID==1){
-        ui->ui->lbl_Nev->setText("Sum: "+QString::number(chargeData1->getTotalEvents()));
-        ui->ui->lbl_Mean->setText("Mean: "+QString::number(chargeData1->getMean(),'g',5));
-        ui->ui->lbl_StdDev->setText("RMS: "+QString::number( chargeData1->getRMS(),'g',4 ));
-        ui->ui->lbl_Nev1->setText("Sum: "+QString::number(timeData1->getTotalEvents()));
-        ui->ui->lbl_Mean1->setText("Mean: "+QString::number(timeData1->getMean(),'g',5));
-        ui->ui->lbl_StdDev1->setText("RMS: "+QString::number( timeData1->getRMS(),'g',4 ));
+        ui->ui->lbl_Nev->setText("Sum: "+QString::number(chargeData1->getTotalEvents(
+                                                             ui->chargeHist->xAxis->range().lower
+                                                             ,ui->chargeHist->xAxis->range().upper
+                                                             )));
+        ui->ui->lbl_Mean->setText("Mean: "+QString::number(chargeData1->getMean(
+                                                               ui->chargeHist->xAxis->range().lower
+                                                               ,ui->chargeHist->xAxis->range().upper
+                                                               ),'g',5));
+        ui->ui->lbl_StdDev->setText("RMS: "+QString::number( chargeData1->getRMS(
+                                                                 ui->chargeHist->xAxis->range().lower
+                                                                 ,ui->chargeHist->xAxis->range().upper
+                                                                 ),'g',4 ));
+        ui->ui->lbl_Nev1->setText("Sum: "+QString::number(timeData1->getTotalEvents(
+                                                              ui->timeHist->xAxis->range().lower
+                                                              ,ui->timeHist->xAxis->range().upper
+                                                              )));
+        ui->ui->lbl_Mean1->setText("Mean: "+QString::number(timeData1->getMean(
+                                                                ui->timeHist->xAxis->range().lower
+                                                                ,ui->timeHist->xAxis->range().upper
+                                                                ),'g',5));
+        ui->ui->lbl_StdDev1->setText("RMS: "+QString::number( timeData1->getRMS(
+                                                                  ui->timeHist->xAxis->range().lower
+                                                                  ,ui->timeHist->xAxis->range().upper
+                                                                  ),'g',4 ));
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
